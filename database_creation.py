@@ -15,7 +15,7 @@ create_users_table = """
 CREATE TABLE users (
     id INTEGER PRIMARY KEY autoincrement,
     name TEXT NOT NULL,
-    subject_id INTEGER,
+    subject_id TEXT,
     category_id INTEGER NOT NULL)"""
 
 create_conversations_table = """
