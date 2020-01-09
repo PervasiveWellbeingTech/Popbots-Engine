@@ -34,19 +34,16 @@ def add(table, values, connection):
     return last_row_id
 
 
-def get_by(field, table, value, connection):
-    query = f"SELECT * from {table} WHERE {field}={value}"
+def get_by(connection, table, *where):
+    """
+    *where is an undefined number of tuples.
+    Each tuple (a, b) will be used to make the condition WHERE a=b in the query
+    (we could use a list, but it is maybe less convenient when there is only 
+    one tuple)
+    """
     
-    cursor = connection.cursor()
-    cursor.execute(query)
-    
-    rows = cursor.fetchall()
-    return rows
-
-
-# TODO: improve this
-def get_by_and(field_1, field_2, table, value_1, value_2, connection):
-    query = f"SELECT * from {table} WHERE {field_1}={value_1} AND {field_2}={value_2}"
+    conditions = " AND ".join(f"{field}={value}" for field, value in where)
+    query = f"SELECT * from {table} WHERE {conditions}"
     
     cursor = connection.cursor()
     cursor.execute(query)
