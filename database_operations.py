@@ -11,12 +11,13 @@ import sqlite3
 INSERT_QUERIES = {
     "users": "INSERT INTO users (name, subject_id, category_id) VALUES (?, ?, ?)",
     "conversations": "INSERT INTO conversations (user_id) VALUES (?)",
-    "contents": "INSERT INTO contents (text, user_id) VALUES (?, ?)",
+    "contents": "INSERT INTO contents (text, user_id, keyboard) VALUES (?, ?, ?)",
     "messages": "INSERT INTO messages (sender_id, receiver_id, content_id, \
         conversation_id, message_index, stressor, variant) \
         VALUES (?, ?, ?, ?, ?, ?, ?)",
     "content_finders": "INSERT INTO content_finders (message_index, variant, \
-        user_id, content_id, next_message_index) VALUES (?, ?, ?, ?, ?)"
+        user_id, content_id, next_message_index, next_bot_id, next_content_type) \
+        VALUES (?, ?, ?, ?, ?, ?, ?)"
 }
 
 

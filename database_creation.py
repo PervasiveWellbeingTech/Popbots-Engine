@@ -49,8 +49,11 @@ CREATE TABLE content_finders (
     user_id INTEGER NOT NULL,
     content_id INTEGER NOT NULL,
     next_message_index INTEGER NOT NULL,
+    next_bot_id INTEGER NOT NULL,
+    next_content_type TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (content_id) REFERENCES contents (id))
+    FOREIGN KEY (content_id) REFERENCES contents (id),
+    FOREIGN KEY (next_bot_id) REFERENCES users (id))
 """
 
 create_contents_table = """
@@ -58,6 +61,7 @@ CREATE TABLE contents (
     id INTEGER PRIMARY KEY autoincrement,
     text TEXT NOT NULL,
     user_id INTEGER NOT NULL,
+    keyboard TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id))"""
 
 create_message_content_links_table = """
@@ -80,57 +84,48 @@ cursor.close()
 # Fixtures
 dbop.add("users", ("Bob", "A123", 1), connection)
 
+next_content_type = "text"
+
 # First bot with fake messages (just to check some functions)
 bot_id = dbop.add("users", ("TestBot", None, 2), connection)
 
 bot_messages = [
-    ("Message 1 (variant 1)", 1, 1, 2, bot_id),
-    ("Message 2 (variant 1)", 2, 1, 3, bot_id),
-    ("Message 3 (variant 1)", 3, 1, 5, bot_id),
-    ("Message 5 (variant 1)", 5, 1, 6, bot_id),
-    ("Message 2 (variant 2)", 2, 2, 4, bot_id),
-    ("Message 4 (variant 1)", 4, 1, 5, bot_id),
-    ("Message 5 (variant 1)", 5, 1, 6, bot_id)
+    ("Message 1 (variant 1)", 1, 1, bot_id, 2, bot_id, next_content_type),
+    ("Message 2 (variant 1)", 2, 1, bot_id, 3, bot_id, next_content_type),
+    ("Message 3 (variant 1)", 3, 1, bot_id, 5, bot_id, next_content_type),
+    ("Message 5 (variant 1)", 5, 1, bot_id, 6, bot_id, next_content_type),
+    ("Message 2 (variant 2)", 2, 2, bot_id, 4, bot_id, next_content_type),
+    ("Message 4 (variant 1)", 4, 1, bot_id, 5, bot_id, next_content_type),
+    ("Message 5 (variant 1)", 5, 1, bot_id, 6, bot_id, next_content_type)
 ]
 
-for content, index, variant, next_index, bot_id in bot_messages:
-    bot.add_bot_message(content, index, variant, next_index, bot_id, connection)
+for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
+    bot.add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection)
     
 # Second bot, introduction bot (before the conversation)
 bot_id = dbop.add("users", ("IntroBot", None, 2), connection)
 
 bot_messages = [
-    ("Hi {}, what is stressing you out ?", 1, 1, 2, bot_id)
+    ("Hi {}, what is stressing you out ?", 1, 1, bot_id, 2, bot_id, next_content_type)
 ]
 
-for content, index, variant, next_index, bot_id in bot_messages:
-    bot.add_bot_message(content, index, variant, next_index, bot_id, connection)
+for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
+    bot.add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection)
 
 # Third bot, standard bot
 bot_id = dbop.add("users", ("HungryBot", None, 2), connection)
 
 bot_messages = [
-    ("Hello, do you want to eat ?", 1, 1, 2, bot_id),
-    ("You should take rice", 2, 1, 3, bot_id),
-    ("You should take french fries", 2, 2, 3, bot_id),
-    ("No problem, bon appétit!", 3, 1, 4, bot_id)
+    ("Hello, do you want to eat ?", 1, 1, bot_id, 2, bot_id, next_content_type),
+    ("You should take rice", 2, 1, bot_id, 3, bot_id, next_content_type),
+    ("You should take french fries", 2, 2, bot_id, 3, bot_id, next_content_type),
+    ("No problem, bon appétit!", 3, 1, bot_id, 4, bot_id, next_content_type)
 ]
 
-for content, index, variant, next_index, bot_id in bot_messages:
-    bot.add_bot_message(content, index, variant, next_index, bot_id, connection)
+for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
+    bot.add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection)
     
 connection.commit()
 connection.close()
-
-
-
-
-
-
-
-
-
-
-
 
 

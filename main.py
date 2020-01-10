@@ -49,7 +49,7 @@ def new_conversation(user, bot=default_bot):
         if content == "q":
             break
         else:
-            content_id = dbop.add("contents", (content, user_id), connection)
+            content_id = dbop.add("contents", (content, user_id, None), connection)
             dbop.add("messages", (
                         user_id, bot_id, content_id, conversation_id,
                         index, is_stressor(content), 0),

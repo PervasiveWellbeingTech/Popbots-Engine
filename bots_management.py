@@ -19,9 +19,9 @@ def new_bot():
     print(f"{bot_name} added")    
 
 
-def add_bot_message(content, index, variant, next_index, bot_id, connection=connection):
-    content_id = dbop.add("contents", (content, bot_id), connection)
-    dbop.add("content_finders", (index, variant, bot_id, content_id, next_index), connection)
+def add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection=connection):
+    content_id = dbop.add("contents", (content, bot_id, None), connection)
+    dbop.add("content_finders", (index, variant, bot_id, content_id, next_index, next_bot_id, next_content_type), connection)
     print("Message added")
 
 
@@ -58,7 +58,7 @@ def manage_bot(bot):
             index = input("Index: ")
             variant = input("Variant: ")
             next_index = input("Next index: ")
-            add_bot_message(content, index, variant, next_index, bot_id)
+            add_bot_message(content, index, variant, bot_id, next_index, bot_id, "text")
         elif command == "t":
             display_messages_tree(bot_id)
         else:
