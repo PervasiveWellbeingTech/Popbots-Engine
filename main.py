@@ -26,10 +26,34 @@ def is_stressor(message):
 
 def get_variant(message, index):
     # Some process
+    if "french" in message:
+        return 2
+    elif "hungry" in message:
+        return 1
+    elif "sport" in message:
+        return 2
     return 1
 
 
-def new_conversation(user, bot=default_bot):
+def new_message(user_name, user_id, bot_id, content, conversation_id, index):
+    content_id = dbop.add("contents", (content, user_id, None), connection)
+    dbop.add("messages", (
+                user_id, bot_id, content_id, conversation_id,
+                index, is_stressor(content), 0),
+             connection)
+    print(f"{user_name}: {content}")
+    
+
+def new_bot_message(bot_name, bot_id, user_id, content_id, conversation_id, index, variant):
+    dbop.add("messages", (
+                bot_id, user_id, content_id, conversation_id,
+                index, 0, variant),
+             connection)
+    content = dbop.get_by(connection, "contents", ("id", content_id))[0][1]
+    print(f"{bot_name}: {content}")
+
+
+def new_conversation(user, is_new_user, bot=default_bot):
     print(f"\n##### New conversation #####")
     user_id, user_name, user_subject_id, user_category_id = user
     bot_id, bot_name, bot_subject_id, bot_category_id = bot
@@ -49,13 +73,7 @@ def new_conversation(user, bot=default_bot):
         if content == "q":
             break
         else:
-            content_id = dbop.add("contents", (content, user_id, None), connection)
-            dbop.add("messages", (
-                        user_id, bot_id, content_id, conversation_id,
-                        index, is_stressor(content), 0),
-                     connection)
-            print(f"{user_name}: {content}")
-            
+            new_message(user_name, user_id, bot_id, content, conversation_id, index)
             variant = get_variant(content, index)
             bot_reply = dbop.get_by(connection, "content_finders",
                                     ("message_index", index),
@@ -63,20 +81,31 @@ def new_conversation(user, bot=default_bot):
                                     ("user_id", bot_id))
             if bot_reply:
                 bot_reply = bot_reply[0]
-                _, _, _, _, content_id, next_index = bot_reply
+                _, _, _, _, content_id, next_index, next_bot_id, next_content_type = bot_reply
                 
-                dbop.add("messages", (
-                            bot_id, user_id, content_id, conversation_id,
-                            index, 0, variant),
-                         connection)
-                content = dbop.get_by(connection, "contents", ("id", content_id))[0][1]
-                print(f"{bot_name}: {content}")
-                index = next_index
+                if bot_id == next_bot_id:
+                    new_bot_message(bot_name, bot_id, user_id, content_id, conversation_id, index, variant)
+                    index = next_index
+                else:
+                    index = next_index
+                    bot_id, bot_name, bot_subject_id, bot_category_id = dbop.get_by(connection, "users", ("id", next_bot_id))[0]
+                    variant = 1
+                    bot_reply = dbop.get_by(connection, "content_finders",
+                        ("message_index", index),
+                        ("variant", variant),
+                        ("user_id", bot_id))
+                    if bot_reply:
+                        bot_reply = bot_reply[0]
+                        _, _, _, _, content_id, next_index, next_bot_id, next_content_type = bot_reply
+                        
+                        new_bot_message(bot_name, bot_id, user_id, content_id, conversation_id, index, variant)
+                        index = next_index
             else:
                 print("END OF CONVERSATION")
                 break
             
 user_id = 1
+is_new_user = True
 user = dbop.get_by(connection, "users", ("id", user_id))[0]
 
 if user:
@@ -86,11 +115,13 @@ if user:
     while True:
         conversations = dbop.get_by(connection, "conversations", ("user_id", user_id))
         if conversations:
+            is_new_user = False
             print()
             for conversation in conversations:
                 print(f"  - conv. n°{conversation[0]}")
         else:
             print("No conversation yet")
+            
         print("\n- To see a conversation, type the conversation number")
         print("- To add a conversation, type +")
         print("- To quit, type q")
@@ -99,7 +130,7 @@ if user:
         if command == "q":
             break
         elif command == "+":
-            new_conversation(user)
+            new_conversation(user, is_new_user)
         else:
             conversation_id = command
             messages = dbop.get_by(connection, "messages", ("conversation_id", conversation_id))

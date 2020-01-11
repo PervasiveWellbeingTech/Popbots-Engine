@@ -106,7 +106,10 @@ for content, index, variant, bot_id, next_index, next_bot_id, next_content_type 
 bot_id = dbop.add("users", ("IntroBot", None, 2), connection)
 
 bot_messages = [
-    ("Hi {}, what is stressing you out ?", 1, 1, bot_id, 2, bot_id, next_content_type)
+    ("Hi {}, what is stressing you out ?", 1, 1, bot_id, 2, bot_id, next_content_type),
+    ("Change for HungryBot", 2, 1, bot_id, 1, 4, next_content_type),
+    ("Change for SportBot", 2, 2, bot_id, 1, 5, next_content_type),
+    ("To which bot do you want to talk ?", 2, 1, bot_id, 3, bot_id, next_content_type)
 ]
 
 for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
@@ -124,7 +127,21 @@ bot_messages = [
 
 for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
     bot.add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection)
+
+# Fourth bot, standard bot
+bot_id = dbop.add("users", ("SportBot", None, 2), connection)
+
+bot_messages = [
+    ("Hello, do you want to play sport ?", 1, 1, bot_id, 2, bot_id, next_content_type),
+    ("You should play rugby", 2, 1, bot_id, 3, bot_id, next_content_type),
+    ("You should play football", 2, 2, bot_id, 3, bot_id, next_content_type),
+    ("No problem, good practice!", 3, 1, bot_id, 4, bot_id, next_content_type)
+]
+
+for content, index, variant, bot_id, next_index, next_bot_id, next_content_type in bot_messages:
+    bot.add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection)
     
+   
 connection.commit()
 connection.close()
 

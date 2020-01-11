@@ -29,12 +29,13 @@ def display_messages(bot_id, index, depth):
     messages = dbop.get_by(connection, "content_finders", ("user_id", bot_id), ("message_index", index))
 
     for message in messages:
-        message_id, message_index, variant, user_id, content_id, next_message_index = message
+        message_id, message_index, variant, user_id, content_id, next_message_index, next_bot_id, next_content_typ = message
         content = dbop.get_by(connection, "contents", ("id", content_id))[0][1]
 #        print(f"{2*(depth-1)*' '}|__ {content}")
         print(f"{depth*' |'}__({message_index}-{variant}) {content}")
         print(f"{(depth+1)*' |'}")
-        display_messages(user_id, next_message_index, depth + 1)
+        if user_id == next_bot_id:
+            display_messages(user_id, next_message_index, depth + 1)
 
 
 def display_messages_tree(bot_id):
@@ -58,7 +59,9 @@ def manage_bot(bot):
             index = input("Index: ")
             variant = input("Variant: ")
             next_index = input("Next index: ")
-            add_bot_message(content, index, variant, bot_id, next_index, bot_id, "text")
+            next_bot_id = input("Next bot id: ")
+            next_content_type = input("Next content type: ")
+            add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type)
         elif command == "t":
             display_messages_tree(bot_id)
         else:
