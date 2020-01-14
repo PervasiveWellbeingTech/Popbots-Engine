@@ -64,20 +64,11 @@ CREATE TABLE contents (
     keyboard TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id))"""
 
-create_message_content_links_table = """
-CREATE TABLE message_content_links (
-    id INTEGER PRIMARY KEY autoincrement,
-    message_id INTEGER NOT NULL,
-    content_id INTEGER NOT NULL,
-    FOREIGN KEY (message_id) REFERENCES messages (id),
-    FOREIGN KEY (content_id) REFERENCES contents (id))"""
-
 cursor.execute(create_users_table)
 cursor.execute(create_conversations_table)
 cursor.execute(create_messages_table)
 cursor.execute(create_content_finders_table)
 cursor.execute(create_contents_table)
-cursor.execute(create_message_content_links_table)
 cursor.close()
 
 
