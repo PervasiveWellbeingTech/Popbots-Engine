@@ -52,7 +52,7 @@ var svg = d3.select("body").append("svg")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // load the external data
-d3.csv("messages.csv", function(error, data) {
+d3.csv("tree_sample_messages.csv", function(error, data) {
 
 // *********** Convert flat data into a nice tree ***************
 
@@ -61,8 +61,7 @@ console.log("Data:", data);
 
 // create a name: node map
 var dataMap = data.reduce(function(map, node) {
-	node_id = node.message_index + "-" + node.variant + "-" + node.next_bot_id;
-	map[node_id] = node;
+	map[node.name] = node;
 	return map;
 }, {});
 

@@ -1,0 +1,11 @@
+name,parent
+"Hi {name} I'm {bot_name}.\nGive me more details about {problem}.",null
+"Hey {name} I'm {bot_name}. 👋\nTell me more about {problem}.",null
+"Have you ever dealt with this problem or something similar before?","Hmm let's think about this together\nDo you feel this problem is significantly affecting your life?"
+"Have you've dealt with something like this before?","Hmm let's think about this together\nDo you feel this problem is significantly affecting your life?"
+"Have you ever dealt with this problem or something similar before?","Alright let's think about this together 🤔\nDo you feel this is has affected your life?"
+"Have you've dealt with something like this before?","Alright let's think about this together 🤔\nDo you feel this is has affected your life?"
+"Perhaps breaking down the problem would be helpful\nTry to describe for me a piece of the problem and a simple solution for it?","Have you ever dealt with this problem or something similar before?"
+"Maybe breaking it down would be helpful 🤷\nWhat's a small part of the problem and a simple solution?","Have you ever dealt with this problem or something similar before?"
+"Perhaps breaking down the problem would be helpful\nTry to describe for me a piece of the problem and a simple solution for it?","Have you've dealt with something like this before?"
+"Maybe breaking it down would be helpful 🤷\nWhat's a small part of the problem and a simple solution?","Have you've dealt with something like this before?"
