@@ -11,7 +11,8 @@ from config import config
  
  
 def create_tables():
-    """ create tables in the PostgreSQL database"""
+    """Create tables in the PostgreSQL database"""
+    
     commands = (
         """
         CREATE TABLE user_categories (
@@ -32,14 +33,20 @@ def create_tables():
         CREATE TABLE users (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            subject_id VARCHAR(255),
             category_id INTEGER NOT NULL,
+            FOREIGN KEY (category_id) REFERENCES user_categories (id))
+        """,
+        """
+        CREATE TABLE human_users (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            subject_id VARCHAR(255) NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
-            FOREIGN KEY (category_id) REFERENCES user_categories (id),
+            FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
-        """,
+        """,        
         """
         CREATE TABLE conversations (
             id SERIAL PRIMARY KEY,
@@ -49,13 +56,18 @@ def create_tables():
         """
         CREATE TABLE contents (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
             text TEXT NOT NULL,
             user_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id))
+        """,
+        """
+        CREATE TABLE bot_contents (
+            id SERIAL PRIMARY KEY,
+            index INTEGER NOT NULL,
+            content_id INTEGER NOT NULL,
             keyboard_id TEXT NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
         """,
@@ -79,7 +91,7 @@ def create_tables():
             name VARCHAR(255) NOT NULL)
         """,
         """
-        CREATE TABLE features_finder (
+        CREATE TABLE feature_finders (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             feature_id INTEGER NOT NULL,
@@ -91,7 +103,7 @@ def create_tables():
             name VARCHAR(255) NOT NULL)
         """,
         """
-        CREATE TABLE selectors_finder (
+        CREATE TABLE selector_finders (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             selector_id INTEGER NOT NULL,
@@ -107,11 +119,11 @@ def create_tables():
             features_index INTEGER NOT NULL,
             selectors_index INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (features_index) REFERENCES features_finder (id),
-            FOREIGN KEY (selectors_index) REFERENCES selectors_finder (id))
+            FOREIGN KEY (features_index) REFERENCES feature_finders (id),
+            FOREIGN KEY (selectors_index) REFERENCES selector_finders (id))
         """,
         """
-        CREATE TABLE next_message_finder (
+        CREATE TABLE next_message_finders (
             id SERIAL PRIMARY KEY,
             source_message_index INTEGER NOT NULL,
             next_message_index INTEGER NOT NULL)
@@ -130,6 +142,7 @@ def create_tables():
                
         cur.close()    # close communication with the PostgreSQL database server
         conn.commit()  # commit the changes
+        print("Tables created")
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
