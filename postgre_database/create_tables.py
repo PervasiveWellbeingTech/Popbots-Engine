@@ -61,13 +61,19 @@ def create_tables():
             FOREIGN KEY (user_id) REFERENCES users (id))
         """,
         """
+        CREATE TABLE keyboards (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL)
+        """,
+        """
         CREATE TABLE bot_contents (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             content_id INTEGER NOT NULL,
-            keyboard_id TEXT NOT NULL,
+            keyboard_id INTEGER NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
+            FOREIGN KEY (keyboard_id) REFERENCES keyboards (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
         """,

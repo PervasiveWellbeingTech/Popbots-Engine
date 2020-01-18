@@ -17,7 +17,8 @@ INSERT_QUERIES = {
         language_id) VALUES (%s, %s, %s, %s) RETURNING id;",
     "conversations": "INSERT INTO conversations (user_id) VALUES (%s) RETURNING id;",
     "contents": "INSERT INTO contents (text, user_id) VALUES (%s, %s) RETURNING id;",
-    "bot_contents": "INSERT INTO contents (index, content_id, keyboard_id, \
+    "keyboards": "INSERT INTO keyboards (name) VALUES (%s) RETURNING id;",
+    "bot_contents": "INSERT INTO bot_contents (index, content_id, keyboard_id, \
         language_type_id, language_id) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
     "messages": "INSERT INTO messages (index, sender_id, receiver_id, content_id, \
         conversation_id, stressor) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
@@ -33,7 +34,7 @@ INSERT_QUERIES = {
 }
 
 
-def insert_into(table, values, conn):
+def insert_into(conn, table, values):
     """
     values is a tuple containing all values that we want to save in the given
     table. Order of values is important
@@ -52,4 +53,34 @@ def insert_into(table, values, conn):
         print(error)
  
     return last_id
+
+
+def select_from(conn, table, *where):
+    """
+    *where is an undefined number of tuples.
+    Each tuple (a, b) will be used to make the condition WHERE a=b in the query
+    (we could use a list, but it is maybe less convenient when there is only 
+    one tuple)
+    """
+    
+    conditions = " AND ".join(f"{field}='{value}'" for field, value in where)
+    sql_query = f"SELECT * FROM {table} WHERE {conditions};"
+    rows = None
+    try:
+        cur = conn.cursor()
+        cur.execute(sql_query)
+        
+        rows = cur.fetchall()
+        cur.close()  # close communication with the database
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+ 
+    return rows
+
+
+
+
+
+
+
 

@@ -27,7 +27,8 @@ DATA_FIXTURES = {
     ],
     "human_users": [(1, "A123", 1, 1)],
     "features": [("yes",), ("no",), ("else",), ("none",), ("random",)],
-    "selectors": [("yes?",), ("no?",), ("none",), ("random",)]
+    "selectors": [("yes?",), ("no?",), ("none",), ("random",)],
+    "keyboards": [("default",)]
 }
 
 conn = None
@@ -41,7 +42,7 @@ try:
     
     for table, data in DATA_FIXTURES.items():
         for values in data:
-            dbo.insert_into(table, values, conn)
+            dbo.insert_into(conn, table, values)
     
     conn.commit()  # commit the changes
 except (Exception, psycopg2.DatabaseError) as error:
