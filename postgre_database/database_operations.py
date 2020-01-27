@@ -7,6 +7,7 @@ Created on Fri Jan 17 02:11:10 2020
 """
 
 import psycopg2
+from config import config
 
 INSERT_QUERIES = {
     "user_categories": "INSERT INTO user_categories (name) VALUES (%s) RETURNING id;",
@@ -30,7 +31,11 @@ INSERT_QUERIES = {
         VALUES (%s, %s) RETURNING id;",
     "content_finders": "INSERT INTO content_finders (user_id, source_message_index, \
         message_index, bot_content_index, features_index, selectors_index) \
-        VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;"
+        VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
+    "next_message_finders":"INSERT INTO next_message_finders (source_message_index, \
+        next_message_index,user_id) VALUES (%s,%s,%s) RETURNING id;"
+
+    
 }
 
 
@@ -55,7 +60,7 @@ def insert_into(conn, table, values):
     return last_id
 
 
-def select_from(conn, table, *where):
+def select_from(conn, table,column, *where):
     """
     *where is an undefined number of tuples.
     Each tuple (a, b) will be used to make the condition WHERE a=b in the query
@@ -64,7 +69,8 @@ def select_from(conn, table, *where):
     """
     
     conditions = " AND ".join(f"{field}='{value}'" for field, value in where)
-    sql_query = f"SELECT * FROM {table} WHERE {conditions};"
+    sql_query = f"SELECT {column} FROM {table} WHERE {conditions};"
+    
     rows = None
     try:
         cur = conn.cursor()
@@ -78,9 +84,52 @@ def select_from(conn, table, *where):
     return rows
 
 
+def select_from_join(conn,table,column,joins,wheres):
+    """
+    *where is an undefined number of tuples.
+    Each tuple (a, b) will be used to make the condition WHERE a=b in the query
+    (we could use a list, but it is maybe less convenient when there is only 
+    one tuple)
+    """
 
+    conditions = " AND ".join(f"{field}={value}" for field, value in wheres)
+ 
+    joins = " ".join(f"JOIN {join} ON {field}={value}" for join,field,value in joins)
+    sql_query = f"SELECT {column} FROM {table} {joins} WHERE {conditions};"
+    print(f"""This is the SQL QUERY:\n{sql_query}""")
+    rows = None
+    try:
+        cur = conn.cursor()
+        cur.execute(sql_query)
+        
+        rows = cur.fetchall()
+        cur.close()  # close communication with the database
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+ 
+    return rows
 
+def connection_wrapper(func,*fparams):
+        """
+        dbfunc is either insert_into or select_from from the database operation function
+        values needs to be unified for both insert and select from
+        """
 
+        conn = None
+        
+        try:
+            #print(f"""Params are\n{fparams}\n with params lengh {len(fparams)}""")
+            params = config()                  # read the connection parameters
+            conn = psycopg2.connect(**params)  # connect to the PostgreSQL server
+            query_result = func(conn,*fparams)
 
+            conn.commit()  # commit the changes
 
+            return query_result
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
 

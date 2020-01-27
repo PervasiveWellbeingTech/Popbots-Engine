@@ -15,7 +15,6 @@ DATA_FIXTURES = {
     "language_types": [("formal",), ("informal",)],
     "languages": [("english",)],
     "users": [
-        ("Bob Dibub", 1),
         ("Checkin Bot", 2),
         ("Dunno Bot", 2),
         ("Sir Laughs-A-Bot", 2),
@@ -23,12 +22,13 @@ DATA_FIXTURES = {
         ("Glass Half Full Bot", 2),
         ("Doom Bot", 2),
         ("Chill Bot", 2),
-        ("Sherlock Bot", 2)        
+        ("Sherlock Bot", 2),
+        ("Bob Dibub", 1)        
     ],
     "human_users": [(1, "A123", 1, 1)],
-    "features": [("yes",), ("no",), ("else",), ("none",), ("random",)],
-    "selectors": [("yes?",), ("no?",), ("none",), ("random",)],
-    "keyboards": [("default",)]
+    "features": [("none",),("random",),("yes",), ("no",), ("else",) ],
+    "selectors": [("none",), ("random",),("yes?",), ("no?",)],
+    "keyboards": [("default",),("1,2,3,4,5,6,7,8,9,10",)]
 }
 
 conn = None

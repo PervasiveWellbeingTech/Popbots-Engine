@@ -10,18 +10,19 @@ import psycopg2
 from config import config
 import database_operations as dbo
 
+def add_bot_content(conn,content, index,bot_id, next_index, next_bot_id, next_content_type,keyboard_id,language_id,language_type_id,features_index,selectors_index,source_message_index):
+    content_id = dbo.insert_into(conn,"contents", (content, bot_id))
+    bot_contents_id = dbo.insert_into(conn,"bot_contents",(index,content_id,keyboard_id,language_type_id,language_id))
+    dbo.insert_into(conn,"content_finders", (bot_id, source_message_index,index, index, features_index, selectors_index)) # here  bot_content_index and content_index are the same
+    print("bot content added")
 
 """
+
+
 def new_bot():
     bot_name = input("Bot name: ")
     dbop.add("users", (bot_name, None, 2), connection)
     print(f"{bot_name} added")    
-
-
-def add_bot_message(content, index, variant, bot_id, next_index, next_bot_id, next_content_type, connection=connection):
-    content_id = dbop.add("contents", (content, bot_id, None), connection)
-    dbop.add("content_finders", (index, variant, bot_id, content_id, next_index, next_bot_id, next_content_type), connection)
-    print("Message added")
 
 
 def display_messages(bot_id, index, depth):
@@ -100,6 +101,19 @@ def manage_bot(bot):
             break
         elif command == "+":
             print("Add a bot message")
+            content = input("Content: ")
+            index = input("Index: ")
+            next_index = input("Next index, separated by commas(eg: 1,2,3): ")
+            next_bot_id = input("Next bot id: ")
+            next_content_type = input("Next content type: ")
+            language_type_id = input("Language type, formal(1), informal(2): ")
+            language_id = 1 # we are still in english here
+            keyboard_id = input("Keyboard id: ")
+            features_index =input("Features index: ")
+            selectors_index =input("Selectors_index: ")
+            source_message_index =input("Source message index: ")
+
+            add_bot_content(conn,content, index,bot_id, next_index, next_bot_id, next_content_type,keyboard_id,language_id,language_type_id,features_index,selectors_index,source_message_index)
         elif command == "t":
             #display_messages_tree(bot_id)
             print("Not implemented yet")
@@ -157,3 +171,6 @@ if __name__ == "__main__":
     finally:
         if conn is not None:
             conn.close()
+
+
+

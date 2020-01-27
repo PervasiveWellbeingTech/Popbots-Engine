@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/Users/thierrylincoln/Desktop/popbots_refactor/venv_popbots/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan 16 23:04:18 2020
-
+#!/usr/bin/env python3
 @author: hugo
 """
 
@@ -132,7 +132,10 @@ def create_tables():
         CREATE TABLE next_message_finders (
             id SERIAL PRIMARY KEY,
             source_message_index INTEGER NOT NULL,
-            next_message_index INTEGER NOT NULL)
+            next_message_index INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+            )
         """
         )
         
