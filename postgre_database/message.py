@@ -2,6 +2,8 @@ from database_operations import connection_wrapper,insert_into,select_from_join,
 import psycopg2
 from functools import partial
 import string
+import random
+import json
 
 
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
@@ -36,6 +38,8 @@ def validate_feature(input_string,selector):
             return selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
     elif(selector == "random"):
         return "random"
+    elif(selector == "else"):
+        return "else"
     else:
         return "none"
     
@@ -44,53 +48,110 @@ def validate_feature(input_string,selector):
 
 
 
-class Message:
-    def __init__(self):
-        self.index = 1
-        self.bot_id = 6
-        self.selector_index = 1
-        self.feature = 1
-        self.language = 1 # 1 is for english
-        self.language_type = 1 # 1 is for formal
-        self.keyboard = None
+
     
-    def fetch_selectors_name(self):
-        #we need to actualize the selectors to the lastest state
-        selectors = connection_wrapper(select_from_join,"selector_finders","selectors.name",
-            (("selectors","selector_finders.selector_id","selectors.id"),),
-            (("selector_finders.index",self.selector_index),))
-        return [selector[0] for selector in selectors]
+
     
-    def selector_to_feature(self,input_string):
-        selectors = self.fetch_selectors_name()
-        feature_list = [validate_feature(input_string,selector) for selector in selectors]
-        return feature_list
+def fetch_selectors_name(selector_index):
+    #we need to actualize the selectors to the lastest state
+    selectors = connection_wrapper(select_from_join,False,"selector_finders","selectors.name",
+        (("selectors","selector_finders.selector_id","selectors.id"),),
+        (("selector_finders.index",selector_index),))
+    return [selector[0] for selector in selectors]
 
-    def features_to_indexes(self,input_string):
-        features = self.selector_to_feature(input_string)
+def fetch_feature_name(feature_index):
+    #we need to actualize the selectors to the lastest state
+    features = connection_wrapper(select_from_join,False,"feature_finders","features.name",
+        (("features","feature_finders.feature_id","features.id"),),
+        (("feature_finders.index",feature_index),))
+    return [feature[0] for feature in features]
+
+def selector_to_feature(input_string,selector_index):
+    selectors = fetch_selectors_name(selector_index)
+    feature_list = [validate_feature(input_string,selector) for selector in selectors]
+    return feature_list
+
+def features_to_indexes(input_string,selector_index):
+    features = selector_to_feature(input_string,selector_index)
+    return features
 
 
-    def fetch_next_indexes(self):
-        next_indexes = [index[0] for index in connection_wrapper(select_from,"next_message_finders","next_message_index",("user_id",self.bot_id),("source_message_index",self.index))]
-        return next_indexes
+def fetch_next_indexes(bot_id,index):
+    next_indexes = [index[0] for index in connection_wrapper(select_from,False,"next_message_finders","next_message_index",("user_id",bot_id),("source_message_index",index))]
+    return next_indexes
+
+def fetch_next_contents(bot_id,next_indexes):
+
+    """
+    Based on all the parameters this function queries the DB to get the current messages 
+    Params that should not be forgotten include : language_id,language_type_id,
+
+    """
+    content_list = [connection_wrapper(select_from_join,True,"content_finders","contents.text,content_finders.selectors_index,content_finders.features_index",
+        (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
+        (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0] # removed that ,("content_finders.features_index",feature)
+        for next_index in next_indexes]
     
-    def fetch_next_contents(self,next_indexes):
+   
+    return content_list
+    
+def get_bot_response(bot_id,index,user_response,selector_index):
 
-        """
-        Based on all the parameters this function queries the DB to get the current messages 
-        Params that should not be forgotten include : language_id,language_type_id,
 
-        """
-        content_list = [connection_wrapper(select_from_join,"content_finders","contents.text,content_finders.selectors_index,content_finders.features_index",
-            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
-            (("content_finders.user_id",self.bot_id),("contents.user_id",self.bot_id),("bot_content_index",next_index),("content_finders.features_index",self.feature)))
-            for next_index in next_indexes]
-        return [{"text":text,"features_index":features_index,"selectors_index":selectors_index} for text,selectors_index,features_index in content_list]
+
+
+    next_indexes = fetch_next_indexes(bot_id,index) #1 fetching all the possible next index of the message for the given bot
+    next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
+
+    features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
+    features_name = [fetch_feature_name(feature_index) for feature_index in features] # 3.1.1 getting all the possible feature names
+    print(features_name)
+    selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
+
+    possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature] #4 matching the content index with the correct feature
+    
+    possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
+    print(possible_answers)
+
+
+    if 'random' not in selected_feature and len(possible_answers)>1:
+        print("Random is not in the feature space and there is mutiple responses") # add some variable to the log
+
+
+    if len(possible_answers)>0:
+        final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
         
-    
+    else:
+        final_answers = {'text': "", 'selectors_index': 1, 'features_index': 1}
+        print("No available answer")
+
+
+        
+    #text = '"' + next_contents[0]['text'].strip() + '"'
+
+
+    return final_answers
+
+
+
+
+
+
 if __name__ == "__main__":
 
-    a = Message()
-    b = a.fetch_next_indexes()
-    c = a.fetch_next_contents(b) #[0][0][0].strip().format(name="Thierry",bot_name="Johnny",problem="Not able to make it"))
-    #print(a.selector_to_feature(input_string="no i don't want to do this"))
+    name="Thierry"
+    bot_name="Johnny"
+    problem="Not able to make it"
+
+
+    user_response="Hi"
+    selector_index = 1
+    bot_id = 6
+    for i in range (6):
+        response = get_bot_response(bot_id=bot_id,index=i+1,user_response=user_response,selector_index=selector_index)
+        print(response['text'])
+        selector_index = response['selectors_index']
+        user_response = input()
+
+        
+

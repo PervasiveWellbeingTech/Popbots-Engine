@@ -7,7 +7,9 @@ Created on Fri Jan 17 02:11:10 2020
 """
 
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from config import config
+import json
 
 INSERT_QUERIES = {
     "user_categories": "INSERT INTO user_categories (name) VALUES (%s) RETURNING id;",
@@ -39,7 +41,7 @@ INSERT_QUERIES = {
 }
 
 
-def insert_into(conn, table, values):
+def insert_into(cur, table, values):
     """
     values is a tuple containing all values that we want to save in the given
     table. Order of values is important
@@ -47,7 +49,6 @@ def insert_into(conn, table, values):
     sql_query = INSERT_QUERIES[table]
     last_id = None
     try:
-        cur = conn.cursor()
         cur.execute(sql_query, values)
         
         last_id = cur.fetchone()[0]  # get the generated id back
@@ -60,7 +61,7 @@ def insert_into(conn, table, values):
     return last_id
 
 
-def select_from(conn, table,column, *where):
+def select_from(cur, table,column, *where):
     """
     *where is an undefined number of tuples.
     Each tuple (a, b) will be used to make the condition WHERE a=b in the query
@@ -73,7 +74,7 @@ def select_from(conn, table,column, *where):
     
     rows = None
     try:
-        cur = conn.cursor()
+        
         cur.execute(sql_query)
         
         rows = cur.fetchall()
@@ -84,7 +85,7 @@ def select_from(conn, table,column, *where):
     return rows
 
 
-def select_from_join(conn,table,column,joins,wheres):
+def select_from_join(cur,table,column,joins,wheres):
     """
     *where is an undefined number of tuples.
     Each tuple (a, b) will be used to make the condition WHERE a=b in the query
@@ -99,7 +100,7 @@ def select_from_join(conn,table,column,joins,wheres):
     print(f"""This is the SQL QUERY:\n{sql_query}""")
     rows = None
     try:
-        cur = conn.cursor()
+      
         cur.execute(sql_query)
         
         rows = cur.fetchall()
@@ -109,7 +110,7 @@ def select_from_join(conn,table,column,joins,wheres):
  
     return rows
 
-def connection_wrapper(func,*fparams):
+def connection_wrapper(func,bool_json,*fparams):
         """
         dbfunc is either insert_into or select_from from the database operation function
         values needs to be unified for both insert and select from
@@ -117,11 +118,19 @@ def connection_wrapper(func,*fparams):
 
         conn = None
         
+        
         try:
             #print(f"""Params are\n{fparams}\n with params lengh {len(fparams)}""")
             params = config()                  # read the connection parameters
             conn = psycopg2.connect(**params)  # connect to the PostgreSQL server
-            query_result = func(conn,*fparams)
+
+            if bool_json:
+                cur= conn.cursor(cursor_factory=RealDictCursor) 
+                query_result = func(cur,*fparams)
+            else:
+                cur=conn.cursor()
+                query_result = func(cur,*fparams)
+           
 
             conn.commit()  # commit the changes
 
