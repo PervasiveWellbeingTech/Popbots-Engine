@@ -35,7 +35,8 @@ def validate_feature(input_string,selector):
     if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         word_list = FEATURES_DICT_VOCAB[selector]
         if (find_keyword(input_string,word_list) or len(input_string.split(" ")) <= 5 and len(input_string) <= 25): # the second condition is to make sure that the no is not contained in a long sentence
-            return selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
+            feature = selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
+            return feature
     elif(selector == "random"):
         return "random"
     elif(selector == "else"):
@@ -61,10 +62,10 @@ def fetch_selectors_name(selector_index):
 
 def fetch_feature_name(feature_index):
     #we need to actualize the selectors to the lastest state
-    features = connection_wrapper(select_from_join,False,"feature_finders","features.name",
+    features = connection_wrapper(select_from_join,True,"feature_finders","ALL features.name",
         (("features","feature_finders.feature_id","features.id"),),
         (("feature_finders.index",feature_index),))
-    return [feature[0] for feature in features]
+    return features[0]
 
 def selector_to_feature(input_string,selector_index):
     selectors = fetch_selectors_name(selector_index)
@@ -104,14 +105,13 @@ def get_bot_response(bot_id,index,user_response,selector_index):
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
 
     features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
-    features_name = [fetch_feature_name(feature_index) for feature_index in features] # 3.1.1 getting all the possible feature names
-    print(features_name)
+    features_name = [fetch_feature_name(feature_index)['name'] for feature_index in features] # 3.1.1 getting all the possible feature names
+    print(f'Feature name is: {features_name}')
     selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
-
-    possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature] #4 matching the content index with the correct feature
+    print(f'Selected features are : {selected_feature}')
+    possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature[0]] #4 matching the content index with the correct feature
     
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
-    print(possible_answers)
 
 
     if 'random' not in selected_feature and len(possible_answers)>1:
@@ -152,6 +152,8 @@ if __name__ == "__main__":
         print(response['text'])
         selector_index = response['selectors_index']
         user_response = input()
+
+        print(f"\n \n Next Message with index {i+1}")
 
         
 
