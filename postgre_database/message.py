@@ -14,6 +14,9 @@ DEFAULT_OTHERS = "__OTHERS__"
 
 FEATURES_DICT_VOCAB = {"no?":DEFAULT_NO,"yes?":DEFAULT_YES,"idk?":DEFAULT_DK}
 
+def flatten(a):
+    return [item for sublist in a for item in sublist]
+
 def find_keyword(input_str, word_list):
     """
     Loops through each word in the input string.
@@ -82,7 +85,6 @@ def fetch_next_indexes(bot_id,index):
     return next_indexes
 
 def fetch_next_contents(bot_id,next_indexes):
-
     """
     Based on all the parameters this function queries the DB to get the current messages 
     Params that should not be forgotten include : language_id,language_type_id,
@@ -92,27 +94,24 @@ def fetch_next_contents(bot_id,next_indexes):
         (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
         (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0] # removed that ,("content_finders.features_index",feature)
         for next_index in next_indexes]
-    
-   
     return content_list
     
-def get_bot_response(bot_id,index,user_response,selector_index):
+def get_bot_response(bot_id,next_indexes,user_response,selector_index):
 
-
-
-
-    next_indexes = fetch_next_indexes(bot_id,index) #1 fetching all the possible next index of the message for the given bot
+    next_indexes_list = [fetch_next_indexes(bot_id,index) for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
+    next_indexes = list(set(flatten(next_indexes_list)))
+    print(f'Possible indexes are : {next_indexes} \n')
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
-
+    print(f'Possible contents are : {next_contents} \n')
     features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
     features_name = [fetch_feature_name(feature_index)['name'] for feature_index in features] # 3.1.1 getting all the possible feature names
-    print(f'Feature name is: {features_name}')
+    print(f'Feature name is: {features_name}\n')
     selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
-    print(f'Selected features are : {selected_feature}')
+    print(f'Selected features are : {selected_feature}\n')
     possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature[0]] #4 matching the content index with the correct feature
     
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
-
+    print(f'Possible answers are : {possible_answers}\n')
 
     if 'random' not in selected_feature and len(possible_answers)>1:
         print("Random is not in the feature space and there is mutiple responses") # add some variable to the log
@@ -120,10 +119,12 @@ def get_bot_response(bot_id,index,user_response,selector_index):
 
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
+        final_answers['next_indexes'] = next_indexes
         
     else:
-        final_answers = {'text': "", 'selectors_index': 1, 'features_index': 1}
+        final_answers = {'text': "", 'selectors_index': 1, 'features_index': 1,'next_indexes':next_indexes}
         print("No available answer")
+
 
 
         
@@ -147,13 +148,14 @@ if __name__ == "__main__":
     user_response="Hi"
     selector_index = 1
     bot_id = 6
-    for i in range (6):
-        response = get_bot_response(bot_id=bot_id,index=i+1,user_response=user_response,selector_index=selector_index)
+    response = {'text': "", 'selectors_index': None, 'features_index': None,"next_indexes":[0]}
+    while response['text'] != "<CONVERSATION_END>":
+        response = get_bot_response(bot_id=bot_id,next_indexes=response["next_indexes"],user_response=user_response,selector_index=selector_index)
         print(response['text'])
         selector_index = response['selectors_index']
         user_response = input()
 
-        print(f"\n \n Next Message with index {i+1}")
+        
 
         
 

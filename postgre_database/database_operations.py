@@ -52,7 +52,6 @@ def insert_into(cur, table, values):
         cur.execute(sql_query, values)
         
         last_id = cur.fetchone()[0]  # get the generated id back
-        conn.commit()                # commit the changes to the database
         cur.close()                  # close communication with the database
         print(f"Insertion (table {table}) successful")
     except (Exception, psycopg2.DatabaseError) as error:
@@ -97,7 +96,7 @@ def select_from_join(cur,table,column,joins,wheres):
  
     joins = " ".join(f"JOIN {join} ON {field}={value}" for join,field,value in joins)
     sql_query = f"SELECT {column} FROM {table} {joins} WHERE {conditions};"
-    print(f"""This is the SQL QUERY:\n{sql_query}""")
+    #print(f"""This is the SQL QUERY:\n{sql_query}""")
     rows = None
     try:
       
