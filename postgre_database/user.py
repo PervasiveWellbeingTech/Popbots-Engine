@@ -65,14 +65,8 @@ class HumanUser(Base):
     language_type_id = HumanUsers.language_type_id
 
 
-dicte = {}
-for user in session.query(HumanUser):
-    print(user)
-    dicte[user.user_id] = user
 
-user_id = 1 
 
-dicte[user_id].name = 'Bob DiBub'
 
 #session.add(HumanUser(name="Thierry",language_id=1,language_type_id=1,subject_id="A234",category_id=1))
-session.commit()
+#session.commit()
