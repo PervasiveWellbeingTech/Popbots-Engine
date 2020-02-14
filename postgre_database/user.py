@@ -60,13 +60,10 @@ class HumanUser(Base):
     user_id = column_property(Users.id, HumanUsers.user_id)
     human_users_id = HumanUsers.id
     name = Users.name
+
     subject_id = HumanUsers.subject_id
     language_id= HumanUsers.language_id
     language_type_id = HumanUsers.language_type_id
 
 
 
-
-
-#session.add(HumanUser(name="Thierry",language_id=1,language_type_id=1,subject_id="A234",category_id=1))
-#session.commit()

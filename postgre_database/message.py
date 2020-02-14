@@ -37,9 +37,10 @@ def find_keyword(input_str, word_list):
 def validate_feature(input_string,selector):
     if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         word_list = FEATURES_DICT_VOCAB[selector]
-        if (find_keyword(input_string,word_list) or len(input_string.split(" ")) <= 5 and len(input_string) <= 25): # the second condition is to make sure that the no is not contained in a long sentence
+        if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
             feature = selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
             return feature
+        else: return "else"
     elif(selector == "random"):
         return "random"
     elif(selector == "else"):
@@ -48,14 +49,6 @@ def validate_feature(input_string,selector):
         return "none"
     
 
-
-
-
-
-
-    
-
-    
 def fetch_selectors_name(selector_index):
     #we need to actualize the selectors to the lastest state
     selectors = connection_wrapper(select_from_join,False,"selector_finders","selectors.name",
@@ -90,28 +83,34 @@ def fetch_next_contents(bot_id,next_indexes):
     Params that should not be forgotten include : language_id,language_type_id,
 
     """
-    content_list = [connection_wrapper(select_from_join,True,"content_finders","contents.text,content_finders.selectors_index,content_finders.features_index",
-        (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
-        (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0] # removed that ,("content_finders.features_index",feature)
-        for next_index in next_indexes]
+    content_list=[]
+    print(next_indexes)
+    for next_index in next_indexes:
+        content_list.append(connection_wrapper(select_from_join,True,"content_finders","contents.text,content_finders.selectors_index,content_finders.features_index",
+            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
+            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0]) # removed that ,("content_finders.features_index",feature)
+        print(content_list)
+        content_list[len(content_list)-1]['index'] = next_index
     return content_list
     
-def get_bot_response(bot_id,next_indexes,user_response,selector_index):
+def get_bot_response(bot_id,next_index,user_response,selector_index):
 
-    next_indexes_list = [fetch_next_indexes(bot_id,index) for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
-    next_indexes = list(set(flatten(next_indexes_list)))
-    #print(f'Possible indexes are : {next_indexes} \n')
+    
+    next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
+    #next_indexes = list(set(flatten(next_indexes_list)))
+    print(f'Possible indexes are : {next_indexes} \n')
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
-    #print(f'Possible contents are : {next_contents} \n')
+    print(f'Possible contents are : {next_contents} \n')
     features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
     features_name = [fetch_feature_name(feature_index)['name'] for feature_index in features] # 3.1.1 getting all the possible feature names
     #print(f'Feature name is: {features_name}\n')
     selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
-    #print(f'Selected features are : {selected_feature}\n')
+    print(f'Selected features are : {selected_feature}\n')
     
     possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature[0]] #4 matching the content index with the correct feature
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
-    #print(f'Possible answers are : {possible_answers}\n')
+    
+    print(f'Possible answers are : {possible_answers}\n')
 
     if 'random' not in selected_feature and len(possible_answers)>1:
         print("Random is not in the feature space and there is mutiple responses") # add some variable to the log
@@ -119,8 +118,8 @@ def get_bot_response(bot_id,next_indexes,user_response,selector_index):
 
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
-        final_answers['next_indexes'] = next_indexes
-        
+        final_answers['next_indexes'] = final_answers['index']
+         
     else:
         final_answers = {'text': "", 'selectors_index': 1, 'features_index': 1,'next_indexes':next_indexes}
         print("No available answer")
@@ -131,7 +130,22 @@ def get_bot_response(bot_id,next_indexes,user_response,selector_index):
 
 
 
+if __name__ == "__main__":
+    
 
+    bot_text = ""
+    bot_id = 6
+    next_index = 0
+    selectors_index = 1 
+    next_selector_index = 1 # default is always one
+    conversation_index = 0
+    conversation_id = 0
+
+    while bot_text != "<CONVERSATION_END>":
+        user_response = input("My  input: ")
+        bot_text,next_index,features_index,selectors_index = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response,selector_index=selectors_index)
+        print("Bot reply: " + bot_text)
+        print(" Next index is "+str(next_index))
 
 
 
