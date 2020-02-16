@@ -69,7 +69,7 @@ def create_tables():
         CREATE TABLE bot_contents (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
-            content_id INTEGER NOT NULL,
+            content_id INTEGER NOT NULL REFERENCES contents (id),
             keyboard_id INTEGER NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,

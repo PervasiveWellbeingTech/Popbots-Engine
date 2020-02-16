@@ -47,6 +47,12 @@ class Content(Base):
     user_id = Column(Integer,ForeignKey(Users.id))
     text = Column(String)
 
+class NextMessageFinders(Base):
+    __tablename__=  'next_message_finders'
+    id = Column(Integer,primary_key=True)
+    user_id = Column(Integer,ForeignKey(Users.id))
+    source_message_index = Column(Integer)
+    next_message_index = Column(Integer)
 
 class ContentFinders(Base):
     __tablename__='content_finders'
@@ -67,10 +73,12 @@ class BotContents(Base):
     language_type_id = Column(Integer)
     language_id = Column(Integer)
     keyboard_id = Column(Integer)
+    user_id = Column(Integer,ForeignKey(Users.id))
    
 
 
 bot_contents_join = join(ContentFinders,BotContents,ContentFinders.bot_content_index == BotContents.index)
+# join(BotContents,Content,BotContents.content_id == Content.id).
 
 class ContentFinderJoin(Base):
     __table__ = bot_contents_join
@@ -78,8 +86,9 @@ class ContentFinderJoin(Base):
     #content finders
     content_finders_id = column_property(ContentFinders.id)
     bot_content_id = column_property(BotContents.id)
+
     
-    user_id = ContentFinders.user_id
+    user_id = column_property(ContentFinders.user_id,BotContents.user_id)
     source_message_index = ContentFinders.source_message_index
     message_index = ContentFinders.message_index
     bot_content_index = column_property(ContentFinders.bot_content_index,BotContents.index)    
@@ -88,9 +97,13 @@ class ContentFinderJoin(Base):
     
     #Bot contents
     content_id = BotContents.content_id
+    
     language_type_id = BotContents.language_type_id
     language_id = BotContents.language_id
     keyboard_id = BotContents.keyboard_id
+
+    #content
+    
 
 
 
@@ -98,11 +111,12 @@ if __name__ == "__main__":
     engine = create_engine('postgresql+psycopg2://popbots:popbotspostgres7@localhost/popbots')
     Session = sessionmaker(bind=engine)
     session = Session()
-    a = Content(user_id = 50,text="test")
 
+    a  = Content(text="something",user_id = 50)
     session.add(a)
     session.commit()
-    
+
+   
     b = ContentFinderJoin(
 
         user_id = 50,

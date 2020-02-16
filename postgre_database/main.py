@@ -94,10 +94,12 @@ def response_engine(user_id,user_message):
             #bot_id = 6
             pass
 
-    elif message and initialized:
-        bot_id = 6 # this is where it will need to be smart
+    elif initialized:
+        print("Entered in the in initized Here")
+        bot_id = 20 # this is where it will need to be smart
         next_index = 14
     else: # there is no message
+        print("Should not have entered here but did")
         next_index=0
         bot_id = bot_id
 
@@ -154,14 +156,21 @@ def response_engine(user_id,user_message):
     return response_dict
 
 def dialog_flow_engine(user_id,user_message):
-    command = "skip"
-    while command == "skip":
 
-        response_dict  = response_engine(user_id,user_message)
-        command  = response_dict['command']
-        print("The command is "+str(command))
-        
-    return response_dict
+    try:
+        command = "skip"
+        while command == "skip":
+
+            response_dict  = response_engine(user_id,user_message)
+            command  = response_dict['command']
+            print("The command is "+str(command))
+            
+        return response_dict
+    except BaseException as error:
+        reply_markup = {'type':'normal','resize_keyboard':True,'text':""}
+        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup}
+        return response_dict
+        print('An exception occurred: {}'.format(error))
     
 
 if __name__ == "__main__":
