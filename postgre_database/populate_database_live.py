@@ -18,7 +18,7 @@ RANGE_NAME = "Users"
 
 try:
     user_table = fetch_csv(SPREADSHEET_ID,RANGE_NAME)
-    active_bots = [user['name'] for index,user in user_table[user_table['active'] == '1'].iterrows() ]
+    active_bots = [user['name'] for index,user in user_table[(user_table['active'] == '1') & (user_table['updated'] == '1')].iterrows() ]
     print(f'Actives Bot are: {active_bots}')
     for bot in active_bots:
 
@@ -62,6 +62,8 @@ try:
             session.add(new_content)
             session.commit()
         
+        print(f'Added new contents for bot {user.name}')
+
         bot_nmf = fetch_csv(SPREADSHEET_ID,"nmf_"+bot.split(" ")[0].lower())
 
         for index,nmf in bot_nmf.iterrows():
@@ -73,8 +75,11 @@ try:
             )
             session.add(new_nmf)
             session.commit()
+            print(f"Committed {nmf}")
+        print(f'Added nmf contents for bot {user.name}')
 
 
 
-except (Exception, psycopg2.DatabaseError) as error:
+
+except (BaseException, psycopg2.DatabaseError) as error:
     print(error)
