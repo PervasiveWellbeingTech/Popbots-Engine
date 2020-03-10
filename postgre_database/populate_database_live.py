@@ -65,17 +65,10 @@ try:
             session.add(content)
             session.commit()
 
-            if normal:
-                 # we give the actual indexes
-                features_index = script.features_finder_index,
-                selectors_index = script.next_selectors,
-                language_type_id = script.language_type_id,
-                language_id = script.language_id,
-                keyboard_id = script.keyboard_id
-            else:
-                language_id = push_element(Language,script.language)
-                language_type_id = push_element(LanguageTypes,script.language_type)
-                keyboard_id = push_element(Keyboards,script.keyboard)
+            
+            language_id = push_element(Language,script.language)
+            language_type_id = push_element(LanguageTypes,script.language_type)
+            keyboard_id = push_element(Keyboards,script.keyboard)
                 
 
             new_content = ContentFinderJoin(
@@ -92,14 +85,17 @@ try:
                 keyboard_id = keyboard_id
                 
 
-                )
+            )
             
             session.add(new_content)
             session.commit()
 
+
+            print(f"Added new content {new_content.content_finders_id}")
+
             ## adding features and selectors
-            push_feature_list(session,features=script.features.split(","),content_finder_id=new_content.content_id)
-            push_selector_list(session,selectors=script.selectors.split(","),content_finder_id=new_content.content_id)
+            push_feature_list(session,features=script.features.split(","),content_finder_id=new_content.content_finders_id)
+            push_selector_list(session,selectors=script.selectors.split(","),content_finder_id=new_content.content_finders_id)
 
 
         print(f'Added all new contents for bot {user.name}')
@@ -115,7 +111,6 @@ try:
             )
             session.add(new_nmf)
             session.commit()
-            print(f"Committed {nmf}")
         print(f'Added nmf contents for bot {user.name}')
 
 

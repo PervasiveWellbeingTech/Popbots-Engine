@@ -15,7 +15,7 @@ DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
 DEFAULT_OTHERS = "__OTHERS__"
 
-FEATURES_DICT_VOCAB = {"no?":DEFAULT_NO,"no?else":DEFAULT_NO,"no":DEFAULT_NO,"yes?":DEFAULT_YES,"yes":DEFAULT_YES,"dk?":DEFAULT_DK}
+FEATURES_DICT_VOCAB = {"no?else":DEFAULT_NO,"yes?else":DEFAULT_YES,"dk?else":DEFAULT_DK}
 
 def flatten(a):
     return [item for sublist in a for item in sublist]
@@ -57,7 +57,7 @@ def feature_selector_split(input_string,selector):
     try:
         if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
             # these condition are formatted as ?keyword,alternative
-            selector = selector.replace("?","")
+            selector = selector.replace("?",",")
             condition,alternative  = selector.split(",")
             word_list = FEATURES_DICT_VOCAB[condition]
 
@@ -78,14 +78,12 @@ def feature_selector_split(input_string,selector):
     except BaseException as error:
             log('ERROR','BAD SELECTOR')
 
-def selector_to_feature_or_trigger(input_string,selector_index):
+def selector_to_feature_or_trigger(selectors,input_string):
 
-    selectors = fetch_selectors_name(selector_index)
     features = []
     triggers = []
 
     for selector in selectors:
-        log('DEBUG',f"Features are {features}")
         selector,boolfeature = feature_selector_split(input_string,selector)
         if boolfeature:
             features.append(selector)
@@ -99,31 +97,25 @@ def selector_to_feature_or_trigger(input_string,selector_index):
 
 def fetch_selectors_name(message_index,bot_id):
     #we need to actualize the selectors to the lastest state
-    selectors = connection_wrapper(select_from_join,False,"selector_finders","selectors.name",
+    selectors = connection_wrapper(select_from_join,True,"selector_finders","ALL selectors.name",
         (("selectors","selector_finders.selector_id","selectors.id"),),
-        (("selector_finders.index",message_index),("selector_finders.user_id",bot_id),))
-    return [selector[0] for selector in selectors]
+        (("selector_finders.index",message_index),))
+    return selectors
 
 def fetch_feature_name(message_index,bot_id):
     #we need to actualize the selectors to the lastest state
     features = connection_wrapper(select_from_join,True,"feature_finders","ALL features.name",
         (("features","feature_finders.feature_id","features.id"),),
-        (("feature_finders.index",message_index),("selector_finders.user_id",bot_id),))
+        (("feature_finders.index",message_index),))
     return features[0]
 
-def selector_to_feature(input_string,message_index,bot_id):
-    selectors = fetch_selectors_name(message_index,bot_id)
-    feature_list = [validate_feature(input_string,selector) for selector in selectors]
-    log('DEBUG',f"Feature list is : {feature_list}")
-    if len(feature_list) < 1: feature_list.append(['none']) # sanity check to make sure that each index has a none
-    
-    return feature_list
-
-
-def features_to_indexes(input_string,selector_index):
-    features = selector_to_feature(input_string,selector_index)
-    return features
-
+def find_index_in_feature_list(features,selectors):
+    possible_indexes = set()
+    for index,feature in enumerate(features):
+        for selectors in selectors:
+            if set(feature)==set(selectors):
+                possible_indexes.add(index)
+    return list(possible_indexes)
 
 def fetch_next_indexes(bot_id,index):
     next_indexes = [index[0] for index in connection_wrapper(select_from,False,"next_message_finders","next_message_index",("user_id",bot_id),("source_message_index",index))]
@@ -137,13 +129,15 @@ def fetch_next_contents(bot_id,next_indexes):
     """
     content_list=[]
     for next_index in next_indexes:
-        content_list.append(connection_wrapper(select_from_join,True,"content_finders","contents.text,content_finders.selectors_index,content_finders.features_index",
+        content_list.append(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text",
             (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
             (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0]) # removed that ,("content_finders.features_index",feature)
-        content_list[len(content_list)-1]['index'] = next_index
+        
+        content_list[len(content_list)-1]['index']=next_index
+
     return content_list
     
-def get_bot_response(bot_id,next_index,user_response,selector_index):
+def get_bot_response(bot_id,next_index,user_response,content_index):
     triggers = []
     
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
@@ -151,33 +145,28 @@ def get_bot_response(bot_id,next_index,user_response,selector_index):
     print(f'[DEBUG] Possible indexes are : {next_indexes}')
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
     print(f'[DEBUG] Possible contents are : {next_contents}')
-    features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
-    features_name = [fetch_feature_name(feature_index)['name'] for feature_index in features] # 3.1.1 getting all the possible feature names
+    content_indexes = [content['id'] for content in next_contents] #3.1 getting all the possible feature from the current messages
     
-    selectors_name = fetch_selectors_name(selector_index)
-    selectors_name = [x.replace("?","") for x in selectors_name]
-    log('DEBUG',f'The originally send selector is {selector_index}')
+    features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] # 3.1.1 getting all the possible feature names
+    selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)]
+    #selectors_name = [x.replace("?","") for x in selectors_name]
+    log('DEBUG',f'Possible features are: {features_name}')
+    log('DEBUG',f'Selectors are {selectors_name}')
 
-    if bot_id == 20: # test for onboarding bot
+    selected_feature,triggers = selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+    log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
 
-        selected_feature,triggers = selector_to_feature_or_trigger(user_response,selector_index)
-        print(f'[DEBUG] Selected features and triggers are : {selected_feature}, {triggers}')
-
-    else:
-        selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
-        selected_feature = flatten(selected_feature)
-        print(f'[DEBUG] Possible features are: {features_name}')
-        print(f'[DEBUG] Selected features are : {selected_feature}')
-        
-        
-    possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature] #4 matching the content index with the correct feature
+    #selectors_name = [x.replace("?","").replace("!","").replace("#","") for x in selectors_name]
+    
+    possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
     
+    #selectors_name = [x.replace("?","").replace("!","").replace("#","").replace("@","") for x in selectors_name]
     
-    if not bool(set(selectors_name).intersection(features_name)):
-        log('ERROR','FATAL ERROR, script is wrong')
+    #if not bool(set(selectors_name).intersection(features_name)):
+    #    log('ERROR','FATAL ERROR, script is wrong')
 
-    elif not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
+    if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
         raise BadKeywordInputError(features_name)
     elif len(possible_answers) < 1:
         raise BaseException
@@ -194,12 +183,12 @@ def get_bot_response(bot_id,next_index,user_response,selector_index):
         final_answers['next_indexes'] = final_answers['index']
          
     else:
-        final_answers = {'text': "", 'selectors_index': 1, 'features_index': 1,'next_indexes':next_indexes}
+        final_answers = {'text': "", 'next_indexes':next_indexes}
         print("[INFO] No available answer")
 
 
 
-    return final_answers['text'],final_answers['next_indexes'],final_answers['features_index'],final_answers['selectors_index'],triggers
+    return final_answers['text'],final_answers['next_indexes'],triggers
 
 
 
@@ -207,16 +196,13 @@ if __name__ == "__main__":
     
 
     bot_text = ""
-    bot_id = 6
+    bot_id = 1
     next_index = 0
-    selectors_index = 1 
-    next_selector_index = 1 # default is always one
-    conversation_index = 0
-    conversation_id = 0
+    
 
     while bot_text != "<CONVERSATION_END>":
         user_response = input("My  input: ")
-        bot_text,next_index,features_index,selectors_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response,selector_index=selectors_index)
+        bot_text,next_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response)
         print("Bot reply: " + bot_text)
         print(" Next index is "+str(next_index))
 

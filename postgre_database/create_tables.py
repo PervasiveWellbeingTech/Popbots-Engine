@@ -52,6 +52,7 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
             datetime timestamp not null default CURRENT_TIMESTAMP,
+            closed BOOLEAN,
             FOREIGN KEY (user_id) REFERENCES users (id))
         """,
         """
@@ -126,16 +127,16 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             selector_id INTEGER NOT NULL,
-            FOREIGN KEY (index) REFERENCES content_finders (id),
-            FOREIGN KEY (selector_id) REFERENCES selectors (id))
+            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (selector_id) REFERENCES selectors (id) on delete cascade)
         """,
         """
         CREATE TABLE feature_finders (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             feature_id INTEGER NOT NULL,
-            FOREIGN KEY (index) REFERENCES content_finders (id),
-            FOREIGN KEY (feature_id) REFERENCES features (id))
+            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (feature_id) REFERENCES features (id) on delete cascade)
         """,
         """
         CREATE TABLE next_message_finders (

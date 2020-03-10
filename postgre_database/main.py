@@ -53,13 +53,13 @@ def response_engine(user_id,user_message):
     next_index = None
     bot_id = None
     
-    conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.start_time.desc()).first()
+    conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
     
     if conversation:
         log('INFO',f"Conversation detected with the id {conversation.id}") 
 
         conversation_id = conversation.id
-        if (datetime.now() - conversation.start_time).seconds > 3600 : #Time out
+        if (datetime.now() - conversation.datetime).seconds > 3600 : #Time out
             conversation.closed = True
             conversation_id = None
             session.commit()
@@ -98,10 +98,10 @@ def response_engine(user_id,user_message):
             session.commit()
 
         dt = datetime.now()
-        conversation = Conversation(user_id=user_id,start_time=dt,closed=False)
+        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
 
-        bot_id = 20 # this is the onboarding bot, serve multiple purposes
+        bot_id = 1 # this is the onboarding bot, serve multiple purposes
         next_index = 0 
 
     
@@ -113,14 +113,14 @@ def response_engine(user_id,user_message):
         
         initialized = True
         dt = datetime.now()
-        conversation = Conversation(user_id=user_id,start_time=dt,closed=False)
+        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
-        bot_id = 20 # for the moment 
+        bot_id = 1 # for the moment 
 
     if conversation is None:
         print("[WARNING] There is no active conversation and the user did not type 'start' or 'Hi' force creating a new one ")
         dt = datetime.now()
-        conversation = Conversation(user_id=user_id,start_time=dt,closed=False)
+        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
     
     else:
@@ -133,7 +133,7 @@ def response_engine(user_id,user_message):
 
     elif initialized and next_index is None: # in this case it is normal to have no message
         print("[WARNING] Entered in the in initized Here")
-        bot_id = 20 # this is where it will need to be smart
+        bot_id = 1 # this is where it will need to be smart
         next_index = 14
         print(f"[INFO] Initialized with next_index =  {next_index} and was send to bot_id {bot_id}")
     elif message is None and next_index is None: # there is no message 
@@ -144,23 +144,26 @@ def response_engine(user_id,user_message):
 
     if next_index != 0 and next_index is not None:
 
-        selector_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().selectors_index
+        content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
         print(f"[INFO] Finding selector for message_index =  {next_index} and was send by bot_id {bot_id}")
+    else:
+        content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
 
-    else: 
-        selector_index = 1
+
     
     if re.match(r'/switch', user_message): #switch
         
         next_index=0
         possible_bot = get_bot_ids(bot_id)
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
+        content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
+
 
 
     problem = "that "
 
     
-    bot_text,next_index,features_index,selectors_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,selector_index=selector_index)
+    bot_text,next_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
     try:
 
@@ -168,9 +171,14 @@ def response_engine(user_id,user_message):
             for trigger in triggers:
                 if "#" in trigger:
                     trigger = trigger.replace("#","")
-                    class_name,class_variable = trigger.split(".")
-                    #exec(trigger+"="+str(user_message) )
-                    setattr(locals()[class_name],class_variable,user_message)
+                    if len(trigger.split(".")) ==2:
+                        class_name,class_variable = trigger.split(".")
+                        #exec(trigger+"="+str(user_message) )
+                        setattr(locals()[class_name],class_variable,user_message)
+                    else: # we assume that it is one
+                    
+                        locals()[trigger]=user_message
+
 
     except Exception as error:
         log('ERROR',error)
@@ -260,7 +268,7 @@ def dialog_flow_engine(user_id,user_message):
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
-        
+        print(error)
         tb = traceback.TracebackException.from_exception(error)
         print(''.join(tb.stack.format()))
         session.rollback()

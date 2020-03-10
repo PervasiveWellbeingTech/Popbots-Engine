@@ -17,11 +17,9 @@ class Conversation(Base):
     __tablename__ = 'conversations'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
-    start_time = Column(DateTime)
+    datetime = Column(DateTime)
     closed = Column(Boolean)
     
-#last_selector = Column(Integer)
-
 
 
 class Message(Base):
@@ -59,8 +57,7 @@ class ContentFinders(Base):
     source_message_index = Column(Integer)
     message_index = Column(Integer)
     bot_content_index = Column(Integer)
-    #features_index = Column(Integer)
-    #selectors_index = Column(Integer)
+
 
 class BotContents(Base):
     __tablename__ = 'bot_contents'
