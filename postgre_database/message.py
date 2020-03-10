@@ -37,28 +37,13 @@ def find_keyword(input_str, word_list):
     return any([str(each) in str(input_str) for each in word_list])
 
 
-def validate_feature(input_string,selector):
-    if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
-        word_list = FEATURES_DICT_VOCAB[selector]
-        if (find_keyword(input_string,word_list)):# and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
-            print (find_keyword(input_string,word_list))
-            feature = selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
-            return feature
-        else: return "none"
-    elif(selector == "random"):
-        return "random"
-    elif(selector == "else"):
-        return "else"
-    else:
-        return "none"
-
 def feature_selector_split(input_string,selector):
     log("[DEBUG]",f"Analysed selector is {selector}")
     try:
         if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
             # these condition are formatted as ?keyword,alternative
-            selector = selector.replace("?",",")
-            condition,alternative  = selector.split(",")
+            
+            condition,alternative  = selector.split("?")
             word_list = FEATURES_DICT_VOCAB[condition]
 
             if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
