@@ -1,19 +1,36 @@
 from live_google_sheet import fetch_csv
 from bot_management import add_bot_content
-from conversation import ContentFinderJoin,Content,BotContents,ContentFinders,NextMessageFinders
+from conversation import ContentFinderJoin,Content,BotContents,NextMessageFinders
 from user import Users
+from pushModels import push_feature_list,push_selector_list,Keyboards,Language,LanguageTypes,SelectorFinders,FeatureFinders,ContentFinders
 import psycopg2
+
+import traceback
+
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from config import config_string
 
-engine = create_engine('postgresql+psycopg2://popbots:popbotspostgres7@localhost/popbots')
+engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
 
 SPREADSHEET_ID = "1mlegVF0CFDVVRgrfe08J53j6eNfHRThQitIuUEA5pwU"
 RANGE_NAME = "Users"
 
+normal = False 
+
+def push_element(Element,name):
+
+    element = session.query(Element).filter_by(name=name).first()
+
+    if element is None:
+        element = Element(name=name)
+        session.add(element)
+        session.commit()
+
+    return element.id
 
 
 try:
@@ -29,7 +46,11 @@ try:
             session.commit()
             print(f'Succesfully added bot {user.name} ')
         elif user:
+            #session.query(SelectorFinders).filter_by(index=user.id).delete()
+            #session.query(FeatureFinders).filter_by(user_id=user.id).delete()
+
             session.query(ContentFinders).filter_by(user_id=user.id).delete()
+            
             session.query(BotContents).filter_by(user_id=user.id).delete()
             session.query(NextMessageFinders).filter_by(user_id=user.id).delete()
 
@@ -44,25 +65,44 @@ try:
             session.add(content)
             session.commit()
 
+            if normal:
+                 # we give the actual indexes
+                features_index = script.features_finder_index,
+                selectors_index = script.next_selectors,
+                language_type_id = script.language_type_id,
+                language_id = script.language_id,
+                keyboard_id = script.keyboard_id
+            else:
+                language_id = push_element(Language,script.language)
+                language_type_id = push_element(LanguageTypes,script.language_type)
+                keyboard_id = push_element(Keyboards,script.keyboard)
+                
+
             new_content = ContentFinderJoin(
 
                 user_id = user.id,
                 source_message_index = None,
                 message_index = script.msg_index,
                 bot_content_index = script.msg_index,    
-                features_index = script.features_finder_index,
-                selectors_index = script.next_selectors,
+                content_id = content.id,            
+                #features_index = features_index,
+                #selectors_index = selectors_index,
+                language_type_id = language_type_id,
+                language_id = language_id,
+                keyboard_id = keyboard_id
                 
-                
-                content_id = content.id,
-                language_type_id = script.language_type_id,
-                language_id = script.language_id,
-                keyboard_id = script.keyboard_id )
+
+                )
             
             session.add(new_content)
             session.commit()
-        
-        print(f'Added new contents for bot {user.name}')
+
+            ## adding features and selectors
+            push_feature_list(session,features=script.features.split(","),content_finder_id=new_content.content_id)
+            push_selector_list(session,selectors=script.selectors.split(","),content_finder_id=new_content.content_id)
+
+
+        print(f'Added all new contents for bot {user.name}')
 
         bot_nmf = fetch_csv(SPREADSHEET_ID,"nmf_"+bot.split(" ")[0].lower())
 
@@ -83,3 +123,7 @@ try:
 
 except (BaseException, psycopg2.DatabaseError) as error:
     print(error)
+    tb = traceback.TracebackException.from_exception(error)
+    print(''.join(tb.stack.format()))
+
+

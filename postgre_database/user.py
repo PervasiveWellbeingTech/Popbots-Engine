@@ -4,12 +4,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import column_property,sessionmaker
 
 from sqlalchemy import create_engine
+from config import config_string
+
+
 
 metadata = MetaData()
 Base = declarative_base()
-engine = create_engine('postgresql+psycopg2://popbots:popbotspostgres7@localhost/popbots')
+engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
+
 
 
 class Users(Base):

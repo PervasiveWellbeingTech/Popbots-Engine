@@ -1,18 +1,20 @@
 import re
 
-
+from exceptions.badinput import BadKeywordInputError
 from user import HumanUser,Users
 from message import get_bot_response
 from conversation import Conversation,Message,Content,ContentFinders
 from utils import log
 import random
+import sys
+import traceback
 
 from datetime import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-engine = create_engine('postgresql+psycopg2://popbots:popbotspostgres7@localhost/popbots')
+from config import config_string
+engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -29,7 +31,17 @@ def push_message(text,user_id,index,receiver_id,sender_id,conversation_id,stress
 
 def get_bot_ids(exclude):
     return [x.id for x in session.query(Users).filter_by(category_id=2) if (x.name not in {'Onboarding Bot'} and x.id not in {exclude})]
+def image_fetcher(bot_text):
+    
+    start = bot_text.find("$img$") + len("$img$")
+    end = bot_text.find("$img$",start)
+    substring = bot_text[start:end]
+    
+    bot_text = bot_text.replace("$img$"+substring+"$img$","")
 
+    img = open('img/{}.png'.format(substring), 'rb')
+    
+    return bot_text,img
 
 def response_engine(user_id,user_message):
     log('DEBUG',f"Incoming message is: "+str(user_message))
@@ -92,11 +104,7 @@ def response_engine(user_id,user_message):
         bot_id = 20 # this is the onboarding bot, serve multiple purposes
         next_index = 0 
 
-    elif re.match(r'/switch', user_message): #switch
-        pass
-        #conversation.closed = True
-        #session.commit() 
-        #bot_id = 6 # to do random selection
+    
     elif re.match(r'Hi',user_message):
 
         if conversation: # closing the previous conversation
@@ -134,7 +142,7 @@ def response_engine(user_id,user_message):
         possible_bot = get_bot_ids(bot_id)
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
 
-    if next_index != 0:
+    if next_index != 0 and next_index is not None:
 
         selector_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().selectors_index
         print(f"[INFO] Finding selector for message_index =  {next_index} and was send by bot_id {bot_id}")
@@ -142,9 +150,14 @@ def response_engine(user_id,user_message):
     else: 
         selector_index = 1
     
-    
+    if re.match(r'/switch', user_message): #switch
+        
+        next_index=0
+        possible_bot = get_bot_ids(bot_id)
+        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
 
-    problem = " that "
+
+    problem = "that "
 
     
     bot_text,next_index,features_index,selectors_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,selector_index=selector_index)
@@ -162,26 +175,12 @@ def response_engine(user_id,user_message):
     except Exception as error:
         log('ERROR',error)
 
-    
-
-
-
-        
-
     if "$img$" in bot_text:
-        start = bot_text.find("$img$") + len("$img$")
-        end = bot_text.find("$img$",start)
-        substring = bot_text[start:end]
-        log('DEBUG',f"SUBSTRING IS {substring}")
-        bot_text = bot_text.replace("$img$"+substring+"$img$","")
-
-        img = open('img/{}.png'.format(substring), 'rb')
+        bot_text,img = image_fetcher(bot_text)
         response_dict['img'] = img
         
 
-   
-
-    print(f'Bot text would be: {bot_text}')
+    log('DEBUG',f'Bot text would be: {bot_text}')
 
     if "<SWITCH>" in bot_text:
         response_dict['command'] = "skip"
@@ -189,7 +188,7 @@ def response_engine(user_id,user_message):
         possible_bot = get_bot_ids(bot_id)
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
 
-        print(f"[INFO] Switching to a new bot with bot_id = {bot_id} ")
+        log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} ")
     
     if bot_text == "" or bot_text is None:
         print(f"[WARNING] bot_text was empty or None, forcing jump to a new bot")
@@ -236,6 +235,7 @@ def response_engine(user_id,user_message):
 
 
     response_dict['reply_markup'] = reply_markup
+    response_dict['bot_name'] = bot_user.name
     
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
@@ -251,11 +251,18 @@ def dialog_flow_engine(user_id,user_message):
             command = response_dict['command']
                 
         return response_dict
+    except BadKeywordInputError as error:
+        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':None,'bot_name':"Onboarding Bot"}
+        return response_dict
+
+
 
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup}
-        print('An exception occurred: {}'.format(error))
+        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        
+        tb = traceback.TracebackException.from_exception(error)
+        print(''.join(tb.stack.format()))
         session.rollback()
         return response_dict
         

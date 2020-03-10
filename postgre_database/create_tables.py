@@ -51,6 +51,7 @@ def create_tables():
         CREATE TABLE conversations (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
+            datetime timestamp not null default CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id))
         """,
         """
@@ -73,6 +74,8 @@ def create_tables():
             keyboard_id INTEGER NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (keyboard_id) REFERENCES keyboards (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
@@ -80,12 +83,13 @@ def create_tables():
         """
         CREATE TABLE messages (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
+            index INTEGER,
             sender_id INTEGER NOT NULL,
             receiver_id INTEGER NOT NULL,
             content_id INTEGER NOT NULL,
             conversation_id INTEGER NOT NULL,
-            stressor BOOLEAN NOT NULL,
+            stressor TEXT,
+            datetime timestamp not null default CURRENT_TIMESTAMP,
             FOREIGN KEY (sender_id) REFERENCES users (id),
             FOREIGN KEY (receiver_id) REFERENCES users (id),
             FOREIGN KEY (content_id) REFERENCES contents (id),
@@ -96,25 +100,13 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL)
         """,
-        """
-        CREATE TABLE feature_finders (
-            id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
-            feature_id INTEGER NOT NULL,
-            FOREIGN KEY (feature_id) REFERENCES features (id))
-        """,
+        
         """
         CREATE TABLE selectors (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL)
         """,
-        """
-        CREATE TABLE selector_finders (
-            id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
-            selector_id INTEGER NOT NULL,
-            FOREIGN KEY (selector_id) REFERENCES selectors (id))
-        """,
+        
         """
         CREATE TABLE content_finders (
             id SERIAL PRIMARY KEY,
@@ -122,11 +114,28 @@ def create_tables():
             source_message_index INTEGER,
             message_index INTEGER NOT NULL,
             bot_content_index INTEGER NOT NULL,
-            features_index INTEGER NOT NULL,
-            selectors_index INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (features_index) REFERENCES feature_finders (id),
-            FOREIGN KEY (selectors_index) REFERENCES selector_finders (id))
+            FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        """,
+        #features_index INTEGER NOT NULL,
+        #selectors_index INTEGER NOT NULL,
+        #FOREIGN KEY (features_index) REFERENCES feature_finders (id),
+        #FOREIGN KEY (selectors_index) REFERENCES selector_finders (id)
+        """
+        CREATE TABLE selector_finders (
+            id SERIAL PRIMARY KEY,
+            index INTEGER NOT NULL,
+            selector_id INTEGER NOT NULL,
+            FOREIGN KEY (index) REFERENCES content_finders (id),
+            FOREIGN KEY (selector_id) REFERENCES selectors (id))
+        """,
+        """
+        CREATE TABLE feature_finders (
+            id SERIAL PRIMARY KEY,
+            index INTEGER NOT NULL,
+            feature_id INTEGER NOT NULL,
+            FOREIGN KEY (index) REFERENCES content_finders (id),
+            FOREIGN KEY (feature_id) REFERENCES features (id))
         """,
         """
         CREATE TABLE next_message_finders (
@@ -136,7 +145,12 @@ def create_tables():
             user_id INTEGER NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users (id)
             )
+        """,
         """
+            INSERT INTO "public"."user_categories" ("id", "name") VALUES ('1', 'Human');
+            INSERT INTO "public"."user_categories" ("id", "name") VALUES ('2', 'Bot');
+        """
+
         )
         
     conn = None

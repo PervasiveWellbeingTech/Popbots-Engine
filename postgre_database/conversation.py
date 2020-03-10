@@ -4,14 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,column_property
 from sqlalchemy.ext.declarative import declarative_base
 
-from user import Users
 
 
-
-
+from config import config_string
 
 Base = declarative_base()
-
+from user import Users
 from sqlalchemy import Column, Integer,Boolean, String,DateTime,ForeignKey
 
 class Conversation(Base):
@@ -61,8 +59,8 @@ class ContentFinders(Base):
     source_message_index = Column(Integer)
     message_index = Column(Integer)
     bot_content_index = Column(Integer)
-    features_index = Column(Integer)
-    selectors_index = Column(Integer)
+    #features_index = Column(Integer)
+    #selectors_index = Column(Integer)
 
 class BotContents(Base):
     __tablename__ = 'bot_contents'
@@ -92,8 +90,8 @@ class ContentFinderJoin(Base):
     source_message_index = ContentFinders.source_message_index
     message_index = ContentFinders.message_index
     bot_content_index = column_property(ContentFinders.bot_content_index,BotContents.index)    
-    features_index = ContentFinders.features_index
-    selectors_index = ContentFinders.selectors_index
+    #features_index = ContentFinders.features_index
+    #selectors_index = ContentFinders.selectors_index
     
     #Bot contents
     content_id = BotContents.content_id
@@ -108,7 +106,7 @@ class ContentFinderJoin(Base):
 
 
 if __name__ == "__main__":
-    engine = create_engine('postgresql+psycopg2://popbots:popbotspostgres7@localhost/popbots')
+    engine = create_engine(config_string())
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -116,7 +114,9 @@ if __name__ == "__main__":
     session.add(a)
     session.commit()
 
-   
+    print(a.id)
+
+    """
     b = ContentFinderJoin(
 
         user_id = 50,
@@ -134,5 +134,7 @@ if __name__ == "__main__":
     session.add(b)
     session.commit()
     print(b)
+    """
+
 
 

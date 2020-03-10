@@ -6,13 +6,16 @@ import random
 import json
 from utils import log
 
+from exceptions.badinput import BadKeywordInputError
+
+
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
 DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'dont', '\'t', 'nothing', 'nah', 'na']
 DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
 DEFAULT_OTHERS = "__OTHERS__"
 
-FEATURES_DICT_VOCAB = {"no?":DEFAULT_NO,"yes?":DEFAULT_YES,"idk?":DEFAULT_DK}
+FEATURES_DICT_VOCAB = {"no?":DEFAULT_NO,"no?else":DEFAULT_NO,"no":DEFAULT_NO,"yes?":DEFAULT_YES,"yes":DEFAULT_YES,"dk?":DEFAULT_DK}
 
 def flatten(a):
     return [item for sublist in a for item in sublist]
@@ -37,10 +40,11 @@ def find_keyword(input_str, word_list):
 def validate_feature(input_string,selector):
     if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         word_list = FEATURES_DICT_VOCAB[selector]
-        if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+        if (find_keyword(input_string,word_list)):# and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+            print (find_keyword(input_string,word_list))
             feature = selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
             return feature
-        else: return "else"
+        else: return "none"
     elif(selector == "random"):
         return "random"
     elif(selector == "else"):
@@ -93,24 +97,24 @@ def selector_to_feature_or_trigger(input_string,selector_index):
     if len(features) < 1: features.append('none') # sanity check to make sure that each index has a none
     return features,triggers
 
-def fetch_selectors_name(selector_index):
+def fetch_selectors_name(message_index,bot_id):
     #we need to actualize the selectors to the lastest state
     selectors = connection_wrapper(select_from_join,False,"selector_finders","selectors.name",
         (("selectors","selector_finders.selector_id","selectors.id"),),
-        (("selector_finders.index",selector_index),))
+        (("selector_finders.index",message_index),("selector_finders.user_id",bot_id),))
     return [selector[0] for selector in selectors]
 
-def fetch_feature_name(feature_index):
+def fetch_feature_name(message_index,bot_id):
     #we need to actualize the selectors to the lastest state
     features = connection_wrapper(select_from_join,True,"feature_finders","ALL features.name",
         (("features","feature_finders.feature_id","features.id"),),
-        (("feature_finders.index",feature_index),))
+        (("feature_finders.index",message_index),("selector_finders.user_id",bot_id),))
     return features[0]
 
-def selector_to_feature(input_string,selector_index):
-    selectors = fetch_selectors_name(selector_index)
+def selector_to_feature(input_string,message_index,bot_id):
+    selectors = fetch_selectors_name(message_index,bot_id)
     feature_list = [validate_feature(input_string,selector) for selector in selectors]
-    
+    log('DEBUG',f"Feature list is : {feature_list}")
     if len(feature_list) < 1: feature_list.append(['none']) # sanity check to make sure that each index has a none
     
     return feature_list
@@ -150,6 +154,8 @@ def get_bot_response(bot_id,next_index,user_response,selector_index):
     features = [content['features_index'] for content in next_contents] #3.1 getting all the possible feature from the current messages
     features_name = [fetch_feature_name(feature_index)['name'] for feature_index in features] # 3.1.1 getting all the possible feature names
     
+    selectors_name = fetch_selectors_name(selector_index)
+    selectors_name = [x.replace("?","") for x in selectors_name]
     log('DEBUG',f'The originally send selector is {selector_index}')
 
     if bot_id == 20: # test for onboarding bot
@@ -159,17 +165,22 @@ def get_bot_response(bot_id,next_index,user_response,selector_index):
 
     else:
         selected_feature =[selector_to_feature(input_string=user_response,selector_index=selector_index)] #3.2 processing the message with the correct selector STILL Needs to iterate on features here
+        selected_feature = flatten(selected_feature)
         print(f'[DEBUG] Possible features are: {features_name}')
         print(f'[DEBUG] Selected features are : {selected_feature}')
-        selected_feature = selected_feature[0]
+        
         
     possible_answers_index = [index for index,value in enumerate(features_name) if value in selected_feature] #4 matching the content index with the correct feature
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
     
     
+    if not bool(set(selectors_name).intersection(features_name)):
+        log('ERROR','FATAL ERROR, script is wrong')
 
-                
-
+    elif not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
+        raise BadKeywordInputError(features_name)
+    elif len(possible_answers) < 1:
+        raise BaseException
 
 
     print(f'[DEBUG] Possible answers are : {possible_answers}')

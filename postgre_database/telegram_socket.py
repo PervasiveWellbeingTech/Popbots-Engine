@@ -6,22 +6,18 @@ import telegram
 #from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from telegram.error import NetworkError, Unauthorized
-from main import response_engine
+from main import dialog_flow_engine
 import time
 import datetime
 import random
 import string
-#import sys, getopt
-#import os, nltk
+
 import re
 
 #!popbotsenv/bin/python
 from collections import defaultdict
-#from os import system
 from telegrame.utils import Params, Config, Modes, find_keyword, find_name, find_id, find_problem
-#from get_response import get_response_dict
-#from get_response_informal import get_response_dict_informal
-#from pymongo import MongoClient
+
 import telegram
 from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
@@ -100,7 +96,7 @@ class TelegramBot():
     
     def process_message(self, user_id, query):
         
-        response  = response_engine(user_id,user_message=query)
+        response  = dialog_flow_engine(user_id,user_message=query)
         keyboard = telegram.ReplyKeyboardRemove() #self.get_keyboard(response['reply_markup'])
         
         log(response['img'])
