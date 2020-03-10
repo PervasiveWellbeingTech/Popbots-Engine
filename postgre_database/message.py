@@ -15,7 +15,7 @@ DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
 DEFAULT_OTHERS = "__OTHERS__"
 
-FEATURES_DICT_VOCAB = {"no?else":DEFAULT_NO,"yes?else":DEFAULT_YES,"dk?else":DEFAULT_DK}
+FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK}
 
 def flatten(a):
     return [item for sublist in a for item in sublist]
@@ -44,6 +44,7 @@ def feature_selector_split(input_string,selector):
             # these condition are formatted as ?keyword,alternative
             
             condition,alternative  = selector.split("?")
+            
             word_list = FEATURES_DICT_VOCAB[condition]
 
             if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
