@@ -6,7 +6,7 @@ import telegram
 #from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from telegram.error import NetworkError, Unauthorized
-from main import dialog_flow_engine
+from controllers.main import dialog_flow_engine
 import time
 import datetime
 import random
@@ -33,24 +33,6 @@ def log(msg):
     print(msg)
 
 class TelegramBot():
-    """
-    Implementation of the bot.
-
-    Initialization parameter:
-        token (string) -- Telegram bot token
-
-    Class parameters:
-        self.bot (telegram.bot) -- telegram bot object
-        self.reply_dict (dict) -- dictionary containing all responses
-        self.params (utils.Params) -- fixed parameters
-        self.config (utils.Config) -- bot configuration
-
-        self.user_history(defaultdict) -- temporary dictionary of user to user history
-        self.user_name_dict(defaultdict) -- user_id to name dictionary
-        self.user_bot_state_dict (defaultdict) -- user_id to bot state dict (defaults to a random bot)
-        self.user_problem_dict(dict) -- user_id to problem dictionary
-        self.user_parameters_dict(defaultdict) -- dictionary that stores all parameters used by the bots.
-    """
 
     def __init__(self, token): #, reply_dict, **kwargs):
         print("Bot initialization.")
@@ -149,10 +131,7 @@ class TelegramBot():
             finally:
                 traceback.print_exception(*exc_info)
                 del exc_info
-            #print(sys.exc_info()[0])
-            # traceback.print_stack()
-
-            #self.process_updates(update)
+           
 
     def error_callback(self,bot, update, error):
         raise error
