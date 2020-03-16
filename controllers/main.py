@@ -41,7 +41,7 @@ def image_fetcher(bot_text):
     
     bot_text = bot_text.replace("$img$"+substring+"$img$","")
 
-    img = open('img/{}.png'.format(substring), 'rb')
+    img = open('../img/{}.png'.format(substring), 'rb')
     
     return bot_text,img
 
