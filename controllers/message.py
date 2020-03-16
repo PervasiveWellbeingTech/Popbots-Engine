@@ -98,8 +98,8 @@ def fetch_feature_name(message_index,bot_id):
 def find_index_in_feature_list(features,selectors):
     possible_indexes = set()
     for index,feature in enumerate(features):
-        for selectors in selectors:
-            if set(feature)==set(selectors):
+        for selector in selectors:
+            if set(feature)==set(selector):
                 possible_indexes.add(index)
     return list(possible_indexes)
 
@@ -145,6 +145,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
     #selectors_name = [x.replace("?","").replace("!","").replace("#","") for x in selectors_name]
     
     possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
+    log('DEBUG',f'Possible indexes are { possible_answers_index}')
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
     
     #selectors_name = [x.replace("?","").replace("!","").replace("#","").replace("@","") for x in selectors_name]
