@@ -41,7 +41,7 @@ def image_fetcher(bot_text):
     
     bot_text = bot_text.replace("$img$"+substring+"$img$","")
 
-    img = open('../img/{}.png'.format(substring), 'rb')
+    img = open('./img/{}.png'.format(substring), 'rb')
     
     return bot_text,img
 
@@ -78,6 +78,7 @@ def response_engine(user_id,user_message):
         log('DEBUG',f'User is known as: {user.name}')
     else:
         log('DEBUG',f"User is None, with class {user}")
+        user_message = 'start' #temporary fix
         
     
     
