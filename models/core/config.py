@@ -5,8 +5,18 @@ Created on Thu Jan 16 23:10:25 2020
 
 @author: hugo & thierry
 """
-
+import os
+import configparser
 from configparser import ConfigParser
+
+class EnvInterpolation(configparser.BasicInterpolation):
+    """Interpolation which expands environment variables in values."""
+
+    def before_get(self, parser, section, option, value, defaults):
+        return os.path.expandvars(value)
+
+
+
 
 from pathlib import Path
 HERE = Path(__file__).parent.resolve()
@@ -14,7 +24,7 @@ HERE = Path(__file__).parent.resolve()
  
  
 def config(filename=str(HERE)+"/database.ini", section="postgresql"):
-    parser = ConfigParser()  # create a parser
+    parser = configparser.ConfigParser(interpolation=EnvInterpolation()) # create a parser
     parser.read(filename)    # read config file
  
     # get section, default to postgresql
@@ -29,7 +39,7 @@ def config(filename=str(HERE)+"/database.ini", section="postgresql"):
     return db
 
 def config_string(filename=str(HERE)+"/database.ini", section="postgresql+psycopg2"):
-    parser = ConfigParser()  # create a parser
+    parser = configparser.ConfigParser(interpolation=EnvInterpolation())# create a parser
     parser.read(filename)    # read config file 
     # get section, default to postgresql
     db = {}

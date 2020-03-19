@@ -8,6 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from exceptions.badinput import BadKeywordInputError
+from exceptions.nopossibleanswer import NoPossibleAnswer
+
 from models.user import HumanUser,Users
 from controllers.message import get_bot_response
 from models.conversation import Conversation,Message,Content,ContentFinders
@@ -262,9 +264,16 @@ def dialog_flow_engine(user_id,user_message):
             command = response_dict['command']
                 
         return response_dict
+    
     except BadKeywordInputError as error:
+        log('ERROR',error)
         response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':None,'bot_name':"Onboarding Bot"}
         return response_dict
+    except NoPossibleAnswer as error:
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
+        log('ERROR',error)
+        return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+
 
 
 

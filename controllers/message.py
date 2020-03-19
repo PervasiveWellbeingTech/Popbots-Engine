@@ -7,6 +7,7 @@ import json
 from utils import log
 
 from exceptions.badinput import BadKeywordInputError
+from exceptions.nopossibleanswer import NoPossibleAnswer
 
 
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
@@ -17,8 +18,14 @@ DEFAULT_OTHERS = "__OTHERS__"
 
 FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK}
 
-def flatten(a):
-    return [item for sublist in a for item in sublist]
+def flatten(l):
+    """
+    Parameters:
+        l (list) -- input list
+    Returns:
+        (list) -- output list flatten
+    """
+    return [item for sublist in l for item in sublist]
 
 def find_keyword(input_str, word_list):
     """
@@ -38,6 +45,19 @@ def find_keyword(input_str, word_list):
 
 
 def feature_selector_split(input_string,selector):
+    """
+    
+    Take an input selector and parse it and 
+
+    Parameters:
+        input_str (string) -- input string by the user
+        selector (string) -- an individual selector that will be parsed base on documentation rules see section selector.
+
+    Returns:
+        seletor (string) -- parsed selector 
+        (boolean) -- if keyword is found.
+    """
+
     log("[DEBUG]",f"Analysed selector is {selector}")
     try:
         if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
@@ -62,7 +82,7 @@ def feature_selector_split(input_string,selector):
             return selector,False # we will process this selector after
 
     except BaseException as error:
-            log('ERROR','BAD SELECTOR')
+            log('ERROR',f'Bad selector error due to {error}')
 
 def selector_to_feature_or_trigger(selectors,input_string):
 
@@ -82,6 +102,16 @@ def selector_to_feature_or_trigger(selectors,input_string):
     return features,triggers
 
 def fetch_selectors_name(message_index,bot_id):
+    """
+    Query the SQL database and return the features list associated with a particular bot_id 
+
+    Parameters:
+        msg_index (string) -- index of the particular message 
+        bot_id (int) -- id of the current bot
+
+    Returns:
+        selectors (list/dict) --  
+    """
     #we need to actualize the selectors to the lastest state
     selectors = connection_wrapper(select_from_join,True,"selector_finders","ALL selectors.name",
         (("selectors","selector_finders.selector_id","selectors.id"),),
@@ -170,6 +200,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
         final_answers['next_indexes'] = final_answers['index']
          
     else:
+        raise NoPossibleAnswer(bot_id,next_indexes)
         final_answers = {'text': "", 'next_indexes':next_indexes}
         print("[INFO] No available answer")
 
