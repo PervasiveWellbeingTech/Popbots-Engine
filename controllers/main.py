@@ -171,6 +171,7 @@ def response_engine(user_id,user_message):
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
     if not str(keyboard)=="default":
+
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}
     else:
         reply_markup = {'type':'default','resize_keyboard':True,'text':""}
@@ -246,7 +247,7 @@ def response_engine(user_id,user_message):
         
         conversation.closed = True
         session.commit()
-        response_dict['command'] = "pass"
+        response_dict['command'] = "skip"
 
     if bot_text == "<START>":
         response_dict['command'] = "skip"

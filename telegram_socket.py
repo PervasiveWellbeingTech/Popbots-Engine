@@ -89,7 +89,7 @@ class TelegramBot():
         """
         
         response  = dialog_flow_engine(user_id,user_message=query)
-        keyboard = telegram.ReplyKeyboardRemove() #self.get_keyboard(response['reply_markup'])
+        keyboard = self.get_keyboard(response['reply_markup'])
         
         log(response['img'])
         if not response['img']:
