@@ -145,13 +145,19 @@ def fetch_next_contents(bot_id,next_indexes):
     """
     content_list=[]
     for next_index in next_indexes:
-        content_list.append(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text",
-            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id")),
+        content_list.append(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text,keyboards.name",
+            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
             (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0]) # removed that ,("content_finders.features_index",feature)
         
         content_list[len(content_list)-1]['index']=next_index
 
     return content_list
+
+def fetch_keyboard(bot_id,content_index):
+    """
+    Fetch the 
+    """
+    pass
     
 def get_bot_response(bot_id,next_index,user_response,content_index):
     triggers = []
@@ -186,13 +192,13 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
     if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
         raise BadKeywordInputError(features_name)
     elif len(possible_answers) < 1:
-        raise BaseException
+        raise NoPossibleAnswer
 
 
     print(f'[DEBUG] Possible answers are : {possible_answers}')
 
     if 'random' not in selected_feature and len(possible_answers)>1:
-        print("Random is not in the feature space and there is mutiple responses") # add some variable to the log
+        log('ERROR',"Random is not in the feature space and there is mutiple responses") # add some variable to the log
 
 
     if len(possible_answers)>0:
@@ -206,7 +212,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
 
 
 
-    return final_answers['text'],final_answers['next_indexes'],triggers
+    return final_answers['text'],final_answers['next_indexes'],final_answers['name'],triggers
 
 
 
@@ -220,7 +226,7 @@ if __name__ == "__main__":
 
     while bot_text != "<CONVERSATION_END>":
         user_response = input("My  input: ")
-        bot_text,next_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response)
+        bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response,content_index=59)
         print("Bot reply: " + bot_text)
         print(" Next index is "+str(next_index))
 

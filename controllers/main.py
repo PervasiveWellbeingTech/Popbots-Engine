@@ -168,8 +168,13 @@ def response_engine(user_id,user_message):
     problem = "that "
 
     
-    bot_text,next_index,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
+    bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
+    if not str(keyboard)=="default":
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}
+    else:
+        reply_markup = {'type':'default','resize_keyboard':True,'text':""}
+
     try:
 
         if len(triggers)>0:

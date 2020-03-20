@@ -68,8 +68,16 @@ class TelegramBot():
         if(reply_markup['type'] == 'choice'):
             return telegram.ReplyKeyboardMarkup(self.bots_keyboard, resize_keyboard=reply_markup['resize_keyboard'])
         elif(reply_markup['type']=='inlineButton'):
-            return telegram.ReplyKeyboardMarkup([[telegram.InlineKeyboardButton(reply_markup['text'])]], resize_keyboard= reply_markup['resize_keyboard'])
-        elif(reply_markup['type']=='normal'):
+            buttons = reply_markup['text'].split(",")
+
+            keyboards =[telegram.InlineKeyboardButton(name) for name in buttons]
+            keyboards_formatted = [ [x,y] for x,y in zip(keyboards[0::2], keyboards[1::2]) ] #cut the list to make sure two by two buttons appears
+            
+            if len(keyboards)%2 ==1:
+                keyboards_formatted.append([keyboards[-1]]) # add the first button in one line
+
+            return telegram.ReplyKeyboardMarkup(keyboards_formatted, resize_keyboard= reply_markup['resize_keyboard'])
+        elif(reply_markup['type']=='default'):
             return telegram.ReplyKeyboardRemove()
         else:
             return telegram.ReplyKeyboardRemove()
@@ -162,4 +170,5 @@ if __name__ == '__main__':
         raise ValueError
 
     bot = TelegramBot(token)
+    print(bot.bots_keyboard)
     bot.run()
