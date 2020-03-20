@@ -1,7 +1,6 @@
 
 
-
-
+import os
 import telegram
 #from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
@@ -77,6 +76,8 @@ class TelegramBot():
 
     
     def process_message(self, user_id, query):
+        """
+        """
         
         response  = dialog_flow_engine(user_id,user_message=query)
         keyboard = telegram.ReplyKeyboardRemove() #self.get_keyboard(response['reply_markup'])
@@ -152,9 +153,13 @@ class TelegramBot():
 
 
 if __name__ == '__main__':
-    # Telegram Bot Authorization Token
-    f = open('telegrame/token.txt')
-    token = f.read()
-    print(token)
+    # Telegram Bot Authorization Token Must be set in env variables 
+
+    
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    if token is None:
+        print("No Token found")
+        raise ValueError
+
     bot = TelegramBot(token)
     bot.run()

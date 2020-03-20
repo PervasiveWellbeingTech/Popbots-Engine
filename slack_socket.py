@@ -1,5 +1,5 @@
 #! ../../venv_popbots/bin/ python3
-SLACK_API_TOKEN = "xoxb-212808347746-949315748167-WjsWGkRygsQGTUQIwEB80L70"
+
 
 import os
 from slack import RTMClient
@@ -58,10 +58,16 @@ def slack_socket(**payload):
         channel_id = data['channel']
         print(data)
 
-ssl_context = ssl.create_default_context(cafile=certifi.where())
-slack_token = SLACK_API_TOKEN
-rtm_client = RTMClient(token=slack_token,ssl=ssl_context)
-rtm_client.start()
+
+if __name__ == "__main__":
+    SLACK_API_TOKEN = os.getenv("SLACK_API_TOKEN")
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    slack_token = SLACK_API_TOKEN
+    if slack_token is None:
+        print("[ERROR] Slack Token not found")
+        raise ValueError
+    rtm_client = RTMClient(token=slack_token,ssl=ssl_context)
+    rtm_client.start()
 
 
 """,

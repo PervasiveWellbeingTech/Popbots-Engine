@@ -1,13 +1,48 @@
-1. To deploy:
+# Popbots UNIVERSAL REST API  
 
-- Create a python venv
-- Activate the venv by doing 
-> source venv_name/bin/activate
+# 1. To deploy:
+
+## 1.1 Deploying given the database has been configured
+- Create a python3 venv (see online tutorials) recommended name popbots_venv
+- Activate the venv by doing: 
+    > source "venv_name"/bin/activate
 - install all the required packages by navigating into the popbots-refactor folder and running 
-> pip3 install -r requirements.txt
+    > pip3 install -r requirements.txt
+
+- Several environment variables are mandatory in order for the code to communicate with slack, telegram and the Postgres database (Contact the Administrator to obtain a file with all the neccessary env variables). Once you have the file:
+
+    1. Copy all the environment variables in the ~/.bash_profile (they look like export VARNAME="something"), the bash_profile might not exist, just create it. 
+        > sudo nano ~/.bash_profile 
+    
+    2. Source the newly created env variables 
+        > source ~/.bash_profile 
+
+## 1.2 Deploying the Postgres Database on your local machine (not mandatory)
+
+- Install Postgres on your machine
+- Create a Database user and password 
+- Create a database with a corresponding name and password
+- Edit the .ini file (in models/core/database.ini) and complete all fiels accordingly (if you are working on your local machine, host will be localhost) 
+- Create the tables with the file models/core/create_tables.py
+- I recommend using DBEAVER to view and monitor database (https://dbeaver.io/download/)
+
+# 1.3 Running the code/telegram/slack sockets
+
+If you are just testing you can just run the python or telegram script like so:
+- Activate the venv by doing: 
+    > source "venv_name"/bin/activate
+- Run the code
+    > python3 telegram_socket.py
+    or
+    > python3 slack_socket.py
+
+In deployment we will use PM2 as a process manager, for logs and also restarting the APP in case it crashes
+
+- For installation (see instructions here : https://blog.pm2.io/2018-09-19/Manage-Python-Processes/)
 
 
 
+# REST API structure
 
 ```
 popbots-refactor

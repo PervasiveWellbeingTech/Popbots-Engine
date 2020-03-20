@@ -14,7 +14,6 @@ DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
 DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'dont', '\'t', 'nothing', 'nah', 'na']
 DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
-DEFAULT_OTHERS = "__OTHERS__"
 
 FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK}
 
@@ -134,7 +133,8 @@ def find_index_in_feature_list(features,selectors):
     return list(possible_indexes)
 
 def fetch_next_indexes(bot_id,index):
-    next_indexes = [index[0] for index in connection_wrapper(select_from,False,"next_message_finders","next_message_index",("user_id",bot_id),("source_message_index",index))]
+    next_indexes = [index[0] for index in connection_wrapper(select_from,False,"next_message_finders","next_message_index",
+        ("user_id",bot_id),("source_message_index",index))]
     return next_indexes
 
 def fetch_next_contents(bot_id,next_indexes):
