@@ -261,7 +261,7 @@ def response_engine(user_id,user_message):
     return response_dict
 
 def dialog_flow_engine(user_id,user_message):
-
+    reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
     try:
         command = "skip"
         while command == "skip":
@@ -273,7 +273,7 @@ def dialog_flow_engine(user_id,user_message):
     
     except BadKeywordInputError as error:
         log('ERROR',error)
-        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':None,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         return response_dict
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
