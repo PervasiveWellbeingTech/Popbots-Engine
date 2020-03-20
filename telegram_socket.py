@@ -68,6 +68,7 @@ class TelegramBot():
         if(reply_markup['type'] == 'choice'):
             return telegram.ReplyKeyboardMarkup(self.bots_keyboard, resize_keyboard=reply_markup['resize_keyboard'])
         elif(reply_markup['type']=='inlineButton'):
+            print('Inline button')
             buttons = reply_markup['text'].split(",")
 
             keyboards =[telegram.InlineKeyboardButton(name) for name in buttons]
