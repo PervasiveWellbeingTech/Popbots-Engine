@@ -79,7 +79,8 @@ def feature_selector_split(input_string,selector):
         
         elif "#" in selector or "@" in selector:
             return selector,False # we will process this selector after
-
+        else:
+            return "none",True
     except BaseException as error:
             log('ERROR',f'Bad selector error due to {error}')
 

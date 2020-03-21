@@ -1,4 +1,3 @@
-#!/Users/thierrylincoln/Desktop/popbots_refactor/venv_popbots/bin/python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan 16 23:04:18 2020
@@ -7,7 +6,7 @@ Created on Thu Jan 16 23:04:18 2020
 """
 
 import psycopg2
-from config import config
+from core.config import config
  
  
 def create_tables():

@@ -16,6 +16,7 @@ from models.conversation import Conversation,Message,Content,ContentFinders
 from models.core.config import config_string
 
 from utils import log
+from models.utils import get_user_id_from_name
 
 
 engine = create_engine(config_string())
@@ -46,6 +47,8 @@ def image_fetcher(bot_text):
     img = open('./img/{}.png'.format(substring), 'rb')
     
     return bot_text,img
+
+
 
 def response_engine(user_id,user_message):
     log('DEBUG',f"Incoming message is: "+str(user_message))
@@ -106,7 +109,8 @@ def response_engine(user_id,user_message):
         conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
 
-        bot_id = 1 # this is the onboarding bot, serve multiple purposes
+       
+        bot_id = get_user_id_from_name("Onboarding Bot") # this is the onboarding bot, serve multiple purposes
         next_index = 0 
 
     
@@ -120,7 +124,7 @@ def response_engine(user_id,user_message):
         dt = datetime.now()
         conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
-        bot_id = 1 # for the moment 
+        bot_id = get_user_id_from_name("Onboarding Bot")
 
     if conversation is None:
         print("[WARNING] There is no active conversation and the user did not type 'start' or 'Hi' force creating a new one ")
@@ -138,7 +142,7 @@ def response_engine(user_id,user_message):
 
     elif initialized and next_index is None: # in this case it is normal to have no message
         print("[WARNING] Entered in the in initized Here")
-        bot_id = 1 # this is where it will need to be smart
+        bot_id = get_user_id_from_name("Onboarding Bot") # this is where it will need to be smart
         next_index = 14
         print(f"[INFO] Initialized with next_index =  {next_index} and was send to bot_id {bot_id}")
     elif message is None and next_index is None: # there is no message 
@@ -170,11 +174,11 @@ def response_engine(user_id,user_message):
     
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
-    if not str(keyboard)=="default":
-
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}
-    else:
+    if str(keyboard)=="default":
         reply_markup = {'type':'default','resize_keyboard':True,'text':""}
+    else:
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}
+        
 
     try:
 

@@ -15,7 +15,7 @@ import re
 
 #!popbotsenv/bin/python
 from collections import defaultdict
-from telegrame.utils import Params, Config, Modes, find_keyword, find_name, find_id, find_problem
+from telegrame.utils import Params,  Modes, find_keyword, find_name, find_id, find_problem
 
 import telegram
 from telegram.ext.dispatcher import run_async
@@ -44,7 +44,6 @@ class TelegramBot():
             self.update_id = None
 
         self.params = Params()
-        self.config = Config()
         self.message_queues = {}
 
 
@@ -171,5 +170,4 @@ if __name__ == '__main__':
         raise ValueError
 
     bot = TelegramBot(token)
-    print(bot.bots_keyboard)
     bot.run()
