@@ -40,9 +40,59 @@ In deployment we will use PM2 as a process manager, for logs and also restarting
 
 - For installation (see instructions here : https://blog.pm2.io/2018-09-19/Manage-Python-Processes/)
 
+# 2. Code documentation
+
+## 2.1. Project structure 
+
+### 2.1.1. (REST API)
+
+Popbots API is structured as follow (see image below). As much as possible it follow the REST API guidelines (here routers are controllers) 
+![Schema Project Structure](./documentation/images/PopbotsAPI_structure.png)
+
+### 2.1.2. Database Structure (as of 03/22/2020)
 
 
-# REST API structure
+### ER (Entity Relation) Diagram
+![Schema Database](./documentation/images/database_schematics.png)
+
+## 2.2. Functionnality description
+
+### 2.2.1. Feature/Selector process 
+
+Features and selectors solves a major problem when trying to build a chatbot with user's freedom in the response and branching tree. 
+
+A typical bot script may look like this :
+
+```
+Hi {user}, are you happy ? (bot expect yes or no)
+
+if: user say yes --> Good, it is nice to feel happy.
+
+else: user say no --> Sorry to hear that, I am here to help.
+```
+In this given scenario, the bot script table look like this:
+
+
+|index|bot_message|feature|selector|
+|---|---|---|---|
+|0|Hi {user}, are you happy ?|none|yes?no|
+|1|Good, it is nice to feel happy.|yes|none|
+|2|Sorry to hear that, I am here to help|no|none|
+
+To this table we need a one to many correspondance table
+
+|index|next_index|
+|---|---|
+|1|2|
+|1|3|
+
+Here for message index (1) there is two next possible indexes (2,3).
+
+Given the selector of yes?no for message (1) we will parse the user message and look for a positive or negative answer we will extract one feature (Extracted Feature)
+
+Base on the **Extracted feature** we will select the good response between (2,3)
+
+![Selector Feature Schematics](./documentation/images/selector_feature_process.png)
 
 ```
 popbots-refactor
