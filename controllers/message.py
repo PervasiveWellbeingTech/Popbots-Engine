@@ -169,7 +169,9 @@ def fetch_next_contents(bot_id,next_indexes):
             (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
             (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))) # removed that ,("content_finders.features_index",feature)
         
-        content_list[len(content_list)-1]['index']=next_index
+        #content_list[-1]['index']=next_index
+        for index in range(len(content_list[-1])):
+            content_list[-1][index]['index']=next_index
     content_list = flatten(content_list)
     return content_list
     
@@ -218,7 +220,8 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
     print(f'[DEBUG] Possible answers are : {possible_answers}')
 
     if 'random' not in selected_feature and len(possible_answers)>1:
-        raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
+        #raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
+        pass
 
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]

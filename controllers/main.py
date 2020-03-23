@@ -297,7 +297,7 @@ def dialog_flow_engine(user_id,user_message):
         
 
         tb = traceback.TracebackException.from_exception(error)
-        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" +str(''.join(tb.stack.format())))
+        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
         print(str(''.join(tb.stack.format())))
         session.rollback()
         return response_dict
