@@ -36,6 +36,33 @@ def slack_socket(**payload):
                     title="Test upload",
                     
                 )"""
+            reply_markup = response['reply_markup']
+            attachments = None
+            if reply_markup is not None:
+
+                if reply_markup['type'] == 'inlineButton':
+
+                    buttons = reply_markup['text'].split(",")
+                    actions = []
+                    for button in buttons:
+                        actions.append({
+                                "name": f"{button}",
+                                "text": f"{button}",
+                                "type": "button",
+                                "value": f"{button}"
+                                })
+
+                    attachments= [{
+
+                                            "text" : "Choose or type an answer",
+                                            "fallback" : "You can still type an answer",
+                                            "callback_id" : "popbots",
+                                            "color" : "#3AA3E3",
+                                            "attachment_type" : "default",
+                                            "actions" : actions
+                                        }
+                                    ] 
+
             emoji_name = response['bot_name'].split(" ")[0].lower()
             for res in response['response_list']:
                 try:
@@ -46,7 +73,8 @@ def slack_socket(**payload):
                         #icon_url='https://ibb.co/HhVt0cc',
                         icon_emoji  = ":{}:".format(emoji_name),
                         username  = response['bot_name'],
-                        as_user = False
+                        as_user = False,
+                        attachments = attachments
                         
                     )
                 except BaseException as error:
@@ -77,9 +105,9 @@ attachments= [
 
     {
 
-        "text" : "Choose a game to play",
-        "fallback" : "You are unable to choose a game",
-        "callback_id" : "wopr_game",
+        "text" : "An answer",
+        "fallback" : "You can still type an answer",
+        "callback_id" : "",
         "color" : "#3AA3E3",
         "attachment_type" : "default",
         "actions" : [

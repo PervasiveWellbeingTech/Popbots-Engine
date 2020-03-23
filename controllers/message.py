@@ -8,6 +8,7 @@ from utils import log
 
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
+from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
 
 
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
@@ -43,6 +44,7 @@ def find_keyword(input_str, word_list):
     return any([str(each) in str(input_str) for each in word_list])
 
 
+
 def feature_selector_split(input_string,selector):
     """
     
@@ -58,48 +60,65 @@ def feature_selector_split(input_string,selector):
     """
 
     log("[DEBUG]",f"Analysed selector is {selector}")
-    try:
-        if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
-            # these condition are formatted as ?keyword,alternative
-            
-            condition,alternative  = selector.split("?")
-            
-            word_list = FEATURES_DICT_VOCAB[condition]
 
-            if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
-                #feature = selector.translate(str.maketrans('', '', string.punctuation)) # removing the punctuation from the selector that transforms it into a feature..,
-                return condition,True
-            else: 
-                return alternative,True
-        elif "!" in selector:
-            selector = selector.replace("!","")
-            return selector,True
-        elif "none" in selector:
-            return "none",True 
+    parsed_features = []
+    feature = None
+    trigger = None
+
+    if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
+        # these condition are formatted as ?keyword,alternative
         
-        elif "#" in selector or "@" in selector:
-            return selector,False # we will process this selector after
-        else:
-            return "none",True
-    except BaseException as error:
-            log('ERROR',f'Bad selector error due to {error}')
+        condition,alternative  = selector.split("?")
+        parsed_features.append(condition)
+        parsed_features.append(alternative)
+        word_list = FEATURES_DICT_VOCAB[condition]
+
+        if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+            feature = condition
+        else: 
+            feature = alternative
+
+    elif "!" in selector:
+        feature = selector.replace("!","")
+        parsed_features.append(feature)
+
+    elif "none" in selector:
+        feature = "none"
+        parsed_features.append(feature)
+    elif "#" in selector or "@" in selector: ### these are triggers
+        trigger = selector
+    else:
+        log('FATAL ERROR','SELECTOR does not match any pattern error will be raised')
+        raise NoMatchingSelectorPattern(selector)
+    
+    return feature,trigger,parsed_features
+
+
 
 def selector_to_feature_or_trigger(selectors,input_string):
 
+    """
+
+    Parameters:
+
+    Returns:
+    """
+
     features = []
     triggers = []
+    possible_features = []
 
     for selector in selectors:
-        selector,boolfeature = feature_selector_split(input_string,selector)
-        if boolfeature:
-            features.append(selector)
-        elif not boolfeature:
-            triggers.append(selector)
+        feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+        
+        if feature is not None: features.append(feature)
+        elif trigger is not None: triggers.append(trigger)
         else:
-            pass
+            log('ERROR','No feature nor trigger has been extracted, the error should have happened before')
 
-    if len(features) < 1: features.append('none') # sanity check to make sure that each index has a none
-    return features,triggers
+        possible_features += parsed_features 
+
+    return features,triggers,possible_features
 
 def fetch_selectors_name(message_index,bot_id):
     """
@@ -148,59 +167,58 @@ def fetch_next_contents(bot_id,next_indexes):
     for next_index in next_indexes:
         content_list.append(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text,keyboards.name",
             (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
-            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))[0]) # removed that ,("content_finders.features_index",feature)
+            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))) # removed that ,("content_finders.features_index",feature)
         
         content_list[len(content_list)-1]['index']=next_index
-
+    content_list = flatten(content_list)
     return content_list
-
-def fetch_keyboard(bot_id,content_index):
-    """
-    Fetch the 
-    """
-    pass
     
 def get_bot_response(bot_id,next_index,user_response,content_index):
-    triggers = []
     
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
-    #next_indexes = list(set(flatten(next_indexes_list)))
-    print(f'[DEBUG] Possible indexes are : {next_indexes}')
+    
+    if len(next_indexes)<1:raise AuthoringError(bot_id,next_index,"no next index in next_message_finder")
+    log('DEBUG',f'Possible indexes are : {next_indexes}')
+    
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
-    print(f'[DEBUG] Possible contents are : {next_contents}')
+    
+    log('DEBUG',f'Possible contents are : {next_contents}')
     content_indexes = [content['id'] for content in next_contents] #3.1 getting all the possible feature from the current messages
     
-    features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] # 3.1.1 getting all the possible feature names
+    features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] #3.1.1 getting all the possible feature names
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)]
-    #selectors_name = [x.replace("?","") for x in selectors_name]
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_id,next_index,"bad selector pattern") from e
+    
     log('DEBUG',f'Possible features are: {features_name}')
+    log('DEBUG',f'All possible feature from selectors are {parsed_features}')
     log('DEBUG',f'Selectors are {selectors_name}')
-
-    selected_feature,triggers = selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
     log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
 
-    #selectors_name = [x.replace("?","").replace("!","").replace("#","") for x in selectors_name]
     
     possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
     log('DEBUG',f'Possible indexes are { possible_answers_index}')
+    
     possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
     
-    #selectors_name = [x.replace("?","").replace("!","").replace("#","").replace("@","") for x in selectors_name]
     
-    #if not bool(set(selectors_name).intersection(features_name)):
-    #    log('ERROR','FATAL ERROR, script is wrong')
+    if not bool(set(parsed_features).intersection(features_name)):
+        print()
+        raise AuthoringError(bot_id,next_index,"Selector to feature mismatch")
 
     if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
         raise BadKeywordInputError(features_name)
+    
+    # user error or script 
+
     elif len(possible_answers) < 1:
-        raise NoPossibleAnswer
+        raise NoPossibleAnswer(bot_id,next_indexes)
 
 
     print(f'[DEBUG] Possible answers are : {possible_answers}')
 
     if 'random' not in selected_feature and len(possible_answers)>1:
-        log('ERROR',"Random is not in the feature space and there is mutiple responses") # add some variable to the log
-
+        raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
 
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
@@ -208,18 +226,14 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
          
     else:
         raise NoPossibleAnswer(bot_id,next_indexes)
-        final_answers = {'text': "", 'next_indexes':next_indexes}
-        print("[INFO] No available answer")
-
-
-
+ 
     return final_answers['text'],final_answers['next_indexes'],final_answers['name'],triggers
 
 
 
 if __name__ == "__main__":
     
-
+    """
     bot_text = ""
     bot_id = 1
     next_index = 0
@@ -230,7 +244,8 @@ if __name__ == "__main__":
         bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response,content_index=59)
         print("Bot reply: " + bot_text)
         print(" Next index is "+str(next_index))
-
+    """
+    
 
 
 

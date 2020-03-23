@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
+from exceptions.authoringerror import AuthoringError
 
 from models.user import HumanUser,Users
 from controllers.message import get_bot_response
@@ -93,7 +94,7 @@ def response_engine(user_id,user_message):
         if user is None:
             user = HumanUser(user_id=user_id)
             user.subject_id = re.findall(' ([0-9]+)', user_message)
-            user.language_id = 1 # for english
+            user.language_id = 1 # for englishe
             user.language_type_id = 1 # for formal 
             user.category_id = 1
             
@@ -131,7 +132,7 @@ def response_engine(user_id,user_message):
         dt = datetime.now()
         conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
-    
+        message = None
     else:
         message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation_id).order_by(Message.id.desc()).first() # finding the lastest message
     
@@ -259,7 +260,6 @@ def response_engine(user_id,user_message):
 
     response_dict['reply_markup'] = reply_markup
     response_dict['bot_name'] = bot_user.name
-    
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
     return response_dict
@@ -279,20 +279,26 @@ def dialog_flow_engine(user_id,user_message):
         log('ERROR',error)
         response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         return response_dict
+    except AuthoringError as error:
+
+        log('AUTHORING ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
+
+        response_dict={'response_list':["My creators lest me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        return response_dict
+
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-        log('ERROR',error)
+        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
-
-
-
 
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
-        print(error)
+        
+
         tb = traceback.TracebackException.from_exception(error)
-        print(''.join(tb.stack.format()))
+        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" +str(''.join(tb.stack.format())))
+        print(str(''.join(tb.stack.format())))
         session.rollback()
         return response_dict
         

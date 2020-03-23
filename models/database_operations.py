@@ -142,3 +142,7 @@ def connection_wrapper(func,bool_json,*fparams):
             if conn is not None:
                 conn.close()
 
+if __name__ == "__main__":
+    print(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text,keyboards.name",
+            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
+            (("content_finders.user_id",3),("contents.user_id",3),("bot_content_index",3))))

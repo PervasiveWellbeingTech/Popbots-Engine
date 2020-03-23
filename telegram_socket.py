@@ -31,6 +31,8 @@ TIMEOUT_SECONDS = 3600
 def log(msg):
     print(msg)
 
+QUEUE_TIME_THRESHOLD = 1
+
 class TelegramBot():
 
     def __init__(self, token): #, reply_dict, **kwargs):
@@ -52,7 +54,7 @@ class TelegramBot():
         log(text_response)
         for res in text_response:
             self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-            sleep(min(len(res)/20,2.5))
+            #sleep(min(len(res)/20,2.5))
             self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
     
     def get_keyboard(self,reply_markup):
@@ -124,7 +126,7 @@ class TelegramBot():
                         break
                     self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
                     delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
-                    if delta.seconds > 2:
+                    if delta.seconds > QUEUE_TIME_THRESHOLD:
                         message_queue = []
                         self.process_message(message.chat_id, message.text)   
             

@@ -7,4 +7,4 @@ class NoPossibleAnswer(Exception):
         super(NoPossibleAnswer,self).__init__(bot_id,message_index)
 
     def __str__(self):
-        return f"[ERROR] No possible answer for bot_id: {self.bot_id} at message index: {self.message_index}"
+        return f"No possible answer for bot_id: {self.bot_id} at message index: {self.message_index}"
