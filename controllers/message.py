@@ -59,7 +59,7 @@ def feature_selector_split(input_string,selector):
         (boolean) -- if keyword is found.
     """
 
-    log("[DEBUG]",f"Analysed selector is {selector}")
+    log("DEBUG",f"Analysed selector is {selector}")
 
     parsed_features = []
     feature = None
@@ -77,18 +77,13 @@ def feature_selector_split(input_string,selector):
             feature = condition
         else: 
             feature = alternative
-
-    elif "!" in selector:
-        feature = selector.replace("!","")
-        parsed_features.append(feature)
-
     elif "none" in selector:
         feature = "none"
         parsed_features.append(feature)
-    elif "#" in selector or "@" in selector: ### these are triggers
+    elif "#" in selector or "@" in selector or "!" in selector: ### these are triggers
         trigger = selector
     else:
-        log('FATAL ERROR','SELECTOR does not match any pattern error will be raised')
+        log('ERROR','SELECTOR does not match any pattern error will be raised')
         raise NoMatchingSelectorPattern(selector)
     
     return feature,trigger,parsed_features
@@ -165,7 +160,7 @@ def fetch_next_contents(bot_id,next_indexes):
     """
     content_list=[]
     for next_index in next_indexes:
-        content_list.append(connection_wrapper(select_from_join,True,"content_finders","content_finders.id,contents.text,keyboards.name",
+        content_list.append(connection_wrapper(select_from_join,True,"content_finders","distinct on (content_finders.id) content_finders.id,contents.text,keyboards.name",
             (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
             (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))) # removed that ,("content_finders.features_index",feature)
         
@@ -189,6 +184,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
     
     features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] #3.1.1 getting all the possible feature names
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)]
+    
     try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
     except NoMatchingSelectorPattern as e:raise AuthoringError(bot_id,next_index,"bad selector pattern") from e
     
@@ -205,7 +201,6 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
     
     
     if not bool(set(parsed_features).intersection(features_name)):
-        print()
         raise AuthoringError(bot_id,next_index,"Selector to feature mismatch")
 
     if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
@@ -217,12 +212,11 @@ def get_bot_response(bot_id,next_index,user_response,content_index):
         raise NoPossibleAnswer(bot_id,next_indexes)
 
 
-    print(f'[DEBUG] Possible answers are : {possible_answers}')
+    log('DEBUG',f'Possible answers are : {possible_answers}')
 
-    if 'random' not in selected_feature and len(possible_answers)>1:
-        #raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
-        pass
-
+    if 'random!' not in triggers and len(possible_answers)>1:
+        raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
+        
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
         final_answers['next_indexes'] = final_answers['index']

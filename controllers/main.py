@@ -1,5 +1,6 @@
 import re
 import random
+import time
 import sys
 import traceback
 
@@ -11,13 +12,14 @@ from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError
 
-from models.user import HumanUser,Users
 from controllers.message import get_bot_response
-from models.conversation import Conversation,Message,Content,ContentFinders
+
+from models.user import HumanUser,Users
+from models.utils import get_user_id_from_name
 from models.core.config import config_string
+from models.conversation import Conversation,Message,Content,ContentFinders
 
 from utils import log
-from models.utils import get_user_id_from_name
 
 
 engine = create_engine(config_string())
@@ -52,6 +54,7 @@ def image_fetcher(bot_text):
 
 
 def response_engine(user_id,user_message):
+
     log('DEBUG',f"Incoming message is: "+str(user_message))
     #Set custom keyboard (defaults to none)
     reply_markup = {'type':'normal','resize_keyboard':True,'text':""}
@@ -170,11 +173,11 @@ def response_engine(user_id,user_message):
 
 
 
-    problem = "that "
+    problem = "that"
 
-    
+    bot_response_time = time.time()
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
-    
+    log('INFO',f'Bot response engine took {"% 12.2f" % (time.time()-bot_response_time)} seconds')
     if str(keyboard)=="default":
         reply_markup = {'type':'default','resize_keyboard':True,'text':""}
     else:
@@ -215,7 +218,7 @@ def response_engine(user_id,user_message):
         log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} ")
     
     if bot_text == "" or bot_text is None:
-        print(f"[WARNING] bot_text was empty or None, forcing jump to a new bot")
+        log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
         next_index = 0
         possible_bot = get_bot_ids(bot_id)
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
@@ -225,7 +228,7 @@ def response_engine(user_id,user_message):
     log("DEBUG",f"The user id is: {user_id}")
 
     if next_index is None:
-        print("[WARNING] Something went wrong next_index is None ???? Will log bad data")
+        log('ERROR',"Something went wrong next_index is None ???? Will log bad data")
 
     push_message(text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation_id,stressor=problem) # pushing user message
     push_message(text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation_id,stressor=problem) # pushing the bot response
@@ -235,9 +238,6 @@ def response_engine(user_id,user_message):
     bot_user = session.query(Users).filter_by(id = bot_id).first()
     response_dict['response_list'] = bot_text.strip().replace("'","\\'").split("\\n")
 
-
-    
- 
     try: # formatting the text with the neccessary info eg: user:name, etc...
         templist = []
         for res in response_dict['response_list']:
@@ -245,7 +245,7 @@ def response_engine(user_id,user_message):
         response_dict['response_list'] = templist
         
     except BaseException as error:
-        print(f"String interpolation failed due to: {error}")
+        log('ERROR',f"String interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
     
     if "<CONVERSATION_END>" in bot_text:
         print('Entered in the conversation end')
@@ -265,12 +265,15 @@ def response_engine(user_id,user_message):
     return response_dict
 
 def dialog_flow_engine(user_id,user_message):
+
     reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
     try:
         command = "skip"
         while command == "skip":
 
+            response_engine_time = time.time()
             response_dict  = response_engine(user_id,user_message)
+            log('INFO',f'Response engine took {time.time()-response_engine_time} to answer' )
             command = response_dict['command']
                 
         return response_dict
@@ -281,14 +284,14 @@ def dialog_flow_engine(user_id,user_message):
         return response_dict
     except AuthoringError as error:
 
-        log('AUTHORING ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
+        log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
 
         response_dict={'response_list':["My creators lest me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         return response_dict
 
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
+        log('ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
 
     except BaseException as error:
@@ -297,7 +300,7 @@ def dialog_flow_engine(user_id,user_message):
         
 
         tb = traceback.TracebackException.from_exception(error)
-        log('FATAL ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
+        log('ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
         print(str(''.join(tb.stack.format())))
         session.rollback()
         return response_dict
