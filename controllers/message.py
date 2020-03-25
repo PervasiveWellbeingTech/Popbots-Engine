@@ -4,7 +4,7 @@ from functools import partial
 import string
 import random
 import json
-from utils import log
+from utils import log,timed
 
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
@@ -169,7 +169,8 @@ def fetch_next_contents(bot_id,next_indexes):
             content_list[-1][index]['index']=next_index
     content_list = flatten(content_list)
     return content_list
-    
+
+@timed 
 def get_bot_response(bot_id,next_index,user_response,content_index):
     
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot

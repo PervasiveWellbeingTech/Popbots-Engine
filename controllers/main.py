@@ -19,7 +19,7 @@ from models.utils import get_user_id_from_name
 from models.core.config import config_string
 from models.conversation import Conversation,Message,Content,ContentFinders
 
-from utils import log
+from utils import log,timed
 
 
 engine = create_engine(config_string())
@@ -52,7 +52,7 @@ def image_fetcher(bot_text):
     return bot_text,img
 
 
-
+@timed
 def response_engine(user_id,user_message):
 
     log('DEBUG',f"Incoming message is: "+str(user_message))

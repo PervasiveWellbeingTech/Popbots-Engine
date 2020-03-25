@@ -6,7 +6,7 @@ Created on Thu Jan 16 23:04:18 2020
 """
 
 import psycopg2
-from core.config import config
+from models.core.config import config
  
  
 def create_tables():
