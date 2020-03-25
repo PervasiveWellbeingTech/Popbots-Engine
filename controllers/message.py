@@ -11,6 +11,7 @@ from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
 
 
+
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
 DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'dont', '\'t', 'nothing', 'nah', 'na']
 DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]

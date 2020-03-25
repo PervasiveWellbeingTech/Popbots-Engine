@@ -9,25 +9,33 @@ Time wrapper from https://gist.github.com/bradmontgomery/bd6288f09a24c06746bbe54
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)-4s %(message)s')
 
 
 time_logger = logging.getLogger(__name__)
-time_logger.setLevel(logging.DEBUG)
-file_handler_time = logging.FileHandler('logs/execution_time.log')
-file_handler_time.setFormatter(formatter)
 
 
 file_handler = logging.FileHandler('logs/global.log')
 file_handler.setLevel(logging.ERROR)
 file_handler.setFormatter(formatter)
 
+file_handler2 = logging.FileHandler('logs/global_debug.log')
+file_handler2.setLevel(logging.DEBUG)
+file_handler2.setFormatter(formatter)
+
+file_handler_time = logging.FileHandler('logs/execution_time.log')
+file_handler_time.setFormatter(formatter)
+file_handler_time.setLevel(logging.WARNING)
+
+
 stream_handler = logging.StreamHandler()
 stream_handler_formatter = logging.Formatter('[%(levelname)s] %(message)s')
 stream_handler.setFormatter(stream_handler_formatter)
+stream_handler.setLevel(logging.DEBUG)
 
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
+logger.addHandler(file_handler2)
 
 time_logger.addHandler(stream_handler)
 time_logger.addHandler(file_handler_time)
@@ -43,7 +51,7 @@ def log(log_type,string):
         logger.info(string)
     elif log_type == "TIME TOOK":
         logger.debug(string)
-        time_logger.debug()
+        time_logger.warning(string)
     else:
         logger.debug(string)
 
@@ -55,7 +63,12 @@ def timed(func):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        log('TIME TOOK',"{} ran in {} s".format(func.__name__, round(end - start, 2)))
+
+        file_path = func.__code__.co_filename # extract the path of the function 
+        k = file_path.rfind("/")
+        file_name = file_path[k+1:] #take the latest / of the path (may cause error if running on windows )
+        
+        log('TIME TOOK',"Time took for function {} in file {} is {} s".format(func.__name__,file_name, round(end - start, 2)))
         return result
 
     return wrapper

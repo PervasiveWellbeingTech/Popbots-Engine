@@ -39,6 +39,7 @@ def push_message(text,user_id,index,receiver_id,sender_id,conversation_id,stress
 
 def get_bot_ids(exclude):
     return [x.id for x in session.query(Users).filter_by(category_id=2) if (x.name not in {'Onboarding Bot'} and x.id not in {exclude})]
+
 def image_fetcher(bot_text):
     
     start = bot_text.find("$img$") + len("$img$")
@@ -56,18 +57,28 @@ def image_fetcher(bot_text):
 def response_engine(user_id,user_message):
 
     log('DEBUG',f"Incoming message is: "+str(user_message))
-    #Set custom keyboard (defaults to none)
-    reply_markup = {'type':'normal','resize_keyboard':True,'text':""}
-    response_dict={'response_list':None,'img':None,'command':None,'reply_markup':reply_markup}
+    
+    reply_markup = {'type':'normal','resize_keyboard':True,'text':""} #Set custom keyboard (defaults to none)
+    response_dict={'response_list':[],'img':None,'command':None,'reply_markup':reply_markup} 
 
     initialized = False
     next_index = None
     bot_id = None
     
+
+    #1. Fetching the active user or create one if needed
+    user = session.query(HumanUser).filter_by(user_id=user_id).first() 
+    if user is not None:
+        log('DEBUG',f'User is known as: {user.name}')
+    else:
+        log('DEBUG',f"User is None, with class {user}")
+        user_message = 'start' #temporary fix
+        
+    #2. Fetching the lastest active conversations 
     conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
     
     if conversation:
-        log('INFO',f"Conversation detected with the id {conversation.id}") 
+        log('DEBUG',f"Conversation detected with the id {conversation.id}") 
 
         conversation_id = conversation.id
         if (datetime.now() - conversation.datetime).seconds > 3600 : #Time out
@@ -76,28 +87,15 @@ def response_engine(user_id,user_message):
             session.commit()
     else: 
         conversation_id = None
-        print(f"Warning the conversation id is none and the message is {user_message}") 
+        log('DEBUG',f"Warning the conversation id is none and the message is {user_message}") 
 
-    print(f"This is conversational id {conversation_id}")
-
-    ############        Special Cases        ############
-    user = session.query(HumanUser).filter_by(user_id=user_id).first()
-    
-    if user is not None:
-        log('DEBUG',f'User is known as: {user.name}')
-    else:
-        log('DEBUG',f"User is None, with class {user}")
-        user_message = 'start' #temporary fix
-        
-    
-    
     if 'start' in user_message: #restart
 
-        log('INFO','Started a new session via /start')
+        log('INFO',f'New user detected with id {user_id}')
         if user is None:
             user = HumanUser(user_id=user_id)
             user.subject_id = re.findall(' ([0-9]+)', user_message)
-            user.language_id = 1 # for englishe
+            user.language_id = 1 # for english
             user.language_type_id = 1 # for formal 
             user.category_id = 1
             
@@ -131,7 +129,7 @@ def response_engine(user_id,user_message):
         bot_id = get_user_id_from_name("Onboarding Bot")
 
     if conversation is None:
-        print("[WARNING] There is no active conversation and the user did not type 'start' or 'Hi' force creating a new one ")
+        log('DEBUG',"There is no active conversation and the user did not type 'start' or 'Hi' force creating a new one ")
         dt = datetime.now()
         conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
         conversation_id = database_push(conversation)
@@ -139,26 +137,28 @@ def response_engine(user_id,user_message):
     else:
         message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation_id).order_by(Message.id.desc()).first() # finding the lastest message
     
+
+    #These if needs to be streamlined with a scenario grath soon
     if message and initialized == False and next_index is None:
         next_index = message.index 
         bot_id = message.sender_id
-        print(f"[INFO] Found a previous message pointing to {next_index} and was send by bot_id {bot_id}")
+        log('DEBUG',f"Found a previous message pointing to {next_index} and was send by bot_id {bot_id}")
 
     elif initialized and next_index is None: # in this case it is normal to have no message
-        print("[WARNING] Entered in the in initized Here")
+        log('DEBUG',f"Entered in the in initized Here")
         bot_id = get_user_id_from_name("Onboarding Bot") # this is where it will need to be smart
         next_index = 14
         print(f"[INFO] Initialized with next_index =  {next_index} and was send to bot_id {bot_id}")
     elif message is None and next_index is None: # there is no message 
-        print("[WARNING] Should not have entered in the no message, no in itialized scenario but did")
+        log('DEBUG',f"Should not have entered in the no message, no in itialized scenario but did")
         next_index=0
         possible_bot = get_bot_ids(bot_id)
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
 
-    if next_index != 0 and next_index is not None:
+    if next_index != 0 and next_index is not None: # THIERRY NOTE again at this point next_index should be set this is spaghetti code...
 
         content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
-        print(f"[INFO] Finding selector for message_index =  {next_index} and was send by bot_id {bot_id}")
+        log('DEBUG',f"Finding selector for message_index =  {next_index} and was send by bot_id {bot_id}")
     else:
         content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
 
@@ -172,16 +172,14 @@ def response_engine(user_id,user_message):
         content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
 
 
-
     problem = "that"
-
-    bot_response_time = time.time()
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
-    log('INFO',f'Bot response engine took {"% 12.2f" % (time.time()-bot_response_time)} seconds')
+    
+    
     if str(keyboard)=="default":
-        reply_markup = {'type':'default','resize_keyboard':True,'text':""}
+        reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
     else:
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}  #
         
 
     try:
@@ -189,7 +187,8 @@ def response_engine(user_id,user_message):
         if len(triggers)>0:
             for trigger in triggers:
                 if "#" in trigger:
-                    trigger = trigger.replace("#","")
+                    trigger = trigger.replace("#","") 
+
                     if len(trigger.split(".")) ==2:
                         class_name,class_variable = trigger.split(".")
                         #exec(trigger+"="+str(user_message) )
@@ -200,7 +199,7 @@ def response_engine(user_id,user_message):
 
 
     except Exception as error:
-        log('ERROR',error)
+        log('ERROR',f"Trigger error"+error)
 
     if "$img$" in bot_text:
         bot_text,img = image_fetcher(bot_text)
@@ -248,8 +247,7 @@ def response_engine(user_id,user_message):
         log('ERROR',f"String interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
     
     if "<CONVERSATION_END>" in bot_text:
-        print('Entered in the conversation end')
-        
+        log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
         conversation.closed = True
         session.commit()
         response_dict['command'] = "skip"
@@ -260,6 +258,7 @@ def response_engine(user_id,user_message):
 
     response_dict['reply_markup'] = reply_markup
     response_dict['bot_name'] = bot_user.name
+
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
     return response_dict
@@ -271,9 +270,7 @@ def dialog_flow_engine(user_id,user_message):
         command = "skip"
         while command == "skip":
 
-            response_engine_time = time.time()
             response_dict  = response_engine(user_id,user_message)
-            log('INFO',f'Response engine took {time.time()-response_engine_time} to answer' )
             command = response_dict['command']
                 
         return response_dict
@@ -282,18 +279,17 @@ def dialog_flow_engine(user_id,user_message):
         log('ERROR',error)
         response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         return response_dict
+
     except AuthoringError as error:
-
         log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
-
-        response_dict={'response_list':["My creators lest me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         return response_dict
 
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         log('ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
-
+    
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
@@ -301,7 +297,6 @@ def dialog_flow_engine(user_id,user_message):
 
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
-        print(str(''.join(tb.stack.format())))
         session.rollback()
         return response_dict
         

@@ -1,5 +1,3 @@
-
-
 import os
 import re
 import time
@@ -9,18 +7,11 @@ import string
 import sys
 import traceback
 from time import sleep
-
-
+from collections import defaultdict
 
 
 from controllers.main import dialog_flow_engine
-
 from utils import log,timed
-
-
-
-#!popbotsenv/bin/python
-from collections import defaultdict
 
 
 import telegram
@@ -31,14 +22,11 @@ from telegram.error import NetworkError, Unauthorized
 
 #from messenger import Message
 TIMEOUT_SECONDS = 3600
-
-
 QUEUE_TIME_THRESHOLD = 1
 
 class TelegramBot():
 
     def __init__(self, token): #, reply_dict, **kwargs):
-        print("Bot initialization.")
         #initialize telegram bot
         self.bot = telegram.Bot(token)
         self.message_queues = {}
@@ -114,6 +102,11 @@ class TelegramBot():
 
             try:
                 message = update.message
+
+                incoming_delta = datetime.datetime.utcnow() - message.date
+
+                log('DEBUG',f"Message received and was sent at {message.date}, delay to receive is {incoming_delta.seconds} ")
+                log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
                 if message.chat_id in self.message_queues:
                     message_queue = self.message_queues[message.chat_id] 
                     message_queue.append({'text':message.text,'date':message.date}) 
@@ -152,7 +145,7 @@ class TelegramBot():
         dp.add_handler(CommandHandler("switch", self.callback_handler))
 
         #dp.add_error_handler(self.error_callback)
-        print("Running Bot ... (Ctrl-C to exit)")
+        log('INFO',"Started telegram bot socket ... (Ctrl-C to exit)")
         updater.start_polling()
 
 
@@ -166,7 +159,7 @@ if __name__ == '__main__':
         token = os.getenv("TELEGRAM_TEST_BOT_TOKEN")
 
     if token is None:
-        print("No Token found")
+        log('ERROR','Not token has been found, telegram socket cannot be launched')
         raise ValueError
 
     bot = TelegramBot(token)
