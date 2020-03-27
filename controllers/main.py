@@ -18,9 +18,13 @@ from models.utils import get_user_id_from_name
 from models.core.config import config_string
 from models.conversation import Conversation,Message,Content,ContentFinders
 
+from telegram.ext.dispatcher import run_async
+
 from utils import log,timed
 
 from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
+
+from threading import Thread, current_thread
 
 
 def database_push(element):
@@ -262,9 +266,12 @@ def response_engine(user_id,user_message):
     return response_dict
 
 def dialog_flow_engine(user_id,user_message):
-
     global thread_session
     global session 
+
+    
+    log('INFO',f"Current thread is: {current_thread().name}")
+    
     thread_session = ThreadSessionRequest()
     session = get_session()
 
