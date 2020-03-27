@@ -306,14 +306,6 @@ def dialog_flow_engine(user_id,user_message):
         return response_dict
     
     finally:
-        del thread_session
         session.close()
-
-if __name__ == "__main__":
-
-    bot_response = ""
-    while bot_response != "<CONVERSATION_END>":
-        user_response = input("My  input: ")
-        bot_response = dialog_flow_engine(user_id=1234567,user_message=user_response)
-        print("Bot reply: " + str(bot_response['response_list']))
+        del thread_session
 

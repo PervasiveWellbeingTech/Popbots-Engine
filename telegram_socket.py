@@ -22,7 +22,7 @@ from telegram.error import NetworkError, Unauthorized
 
 #from messenger import Message
 TIMEOUT_SECONDS = 3600
-QUEUE_TIME_THRESHOLD = 3
+QUEUE_TIME_THRESHOLD = 0.01
 
 class TelegramBot():
 
@@ -67,7 +67,7 @@ class TelegramBot():
         else:
             return telegram.ReplyKeyboardRemove()
 
-    
+    @run_async
     def process_message(self, user_id, query):
         """
         """
@@ -121,8 +121,7 @@ class TelegramBot():
                     delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
                     if delta.seconds > QUEUE_TIME_THRESHOLD:
                         final_message = ""
-                        for element in message_queue:
-                            final_message += element['text']
+                        final_message = " ".join([element['text'] for element in message_queue])
                         self.process_message(message.chat_id, final_message)
                         message_queue.clear()
             
