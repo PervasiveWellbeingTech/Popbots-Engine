@@ -5,8 +5,7 @@ import sys
 import traceback
 
 from datetime import datetime
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+
 
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
@@ -21,15 +20,14 @@ from models.conversation import Conversation,Message,Content,ContentFinders
 
 from utils import log,timed
 
-
-engine = create_engine(config_string())
-Session = sessionmaker(bind=engine)
-session = Session()
+from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
 
 
 def database_push(element):
-    session.add(element)
-    session.commit()
+    thread_session.s.add(element)
+    thread_session.safe_commit()
+    #session.add(element)
+    #session.commit()
     return element.id
 def push_message(text,user_id,index,receiver_id,sender_id,conversation_id,stressor):
     content_user = Content(text=text,user_id=user_id)
@@ -265,6 +263,12 @@ def response_engine(user_id,user_message):
 
 def dialog_flow_engine(user_id,user_message):
 
+    global thread_session
+    global session 
+    thread_session = ThreadSessionRequest()
+    session = get_session()
+
+
     reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
     try:
         command = "skip"
@@ -272,35 +276,38 @@ def dialog_flow_engine(user_id,user_message):
 
             response_dict  = response_engine(user_id,user_message)
             command = response_dict['command']
-                
         return response_dict
     
     except BadKeywordInputError as error:
         log('ERROR',error)
         response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        session.rollback()
         return response_dict
 
     except AuthoringError as error:
         log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
         response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        session.rollback()
         return response_dict
 
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         log('ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
+        session.rollback()
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
     
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         
-
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
         session.rollback()
         return response_dict
-        
     
+    finally:
+        del thread_session
+        session.close()
 
 if __name__ == "__main__":
 

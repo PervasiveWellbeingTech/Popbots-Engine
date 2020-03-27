@@ -22,7 +22,7 @@ from telegram.error import NetworkError, Unauthorized
 
 #from messenger import Message
 TIMEOUT_SECONDS = 3600
-QUEUE_TIME_THRESHOLD = 1
+QUEUE_TIME_THRESHOLD = 3
 
 class TelegramBot():
 
@@ -71,7 +71,6 @@ class TelegramBot():
     def process_message(self, user_id, query):
         """
         """
-        
         response  = dialog_flow_engine(user_id,user_message=query)
         keyboard = self.get_keyboard(response['reply_markup'])
         
@@ -109,9 +108,9 @@ class TelegramBot():
                 log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
                 if message.chat_id in self.message_queues:
                     message_queue = self.message_queues[message.chat_id] 
-                    message_queue.append({'text':message.text,'date':message.date}) 
+                    message_queue.append({'text':message.text,'date':datetime.datetime.utcnow()}) 
                 else :
-                    self.message_queues[message.chat_id] = [{'text':message.text,'date':message.date}]
+                    self.message_queues[message.chat_id] = [{'text':message.text,'date':datetime.datetime.utcnow()}]
                     message_queue = self.message_queues[message.chat_id]
                 queue_size = len(message_queue)
                 
@@ -121,8 +120,11 @@ class TelegramBot():
                     self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
                     delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
                     if delta.seconds > QUEUE_TIME_THRESHOLD:
-                        message_queue = []
-                        self.process_message(message.chat_id, message.text)   
+                        final_message = ""
+                        for element in message_queue:
+                            final_message += element['text']
+                        self.process_message(message.chat_id, final_message)
+                        message_queue.clear()
             
             except:
                 exc_info = sys.exc_info()
