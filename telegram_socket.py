@@ -19,6 +19,8 @@ from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater, CommandHandler, Filters, MessageHandler
 from telegram.error import NetworkError, Unauthorized
 
+from threading import Thread, current_thread
+
 
 #from messenger import Message
 TIMEOUT_SECONDS = 3600
@@ -66,13 +68,15 @@ class TelegramBot():
             return telegram.ReplyKeyboardRemove()
         else:
             return telegram.ReplyKeyboardRemove()
-
+    
     @run_async
     def process_message(self, user_id, query):
         """
         """
         response  = dialog_flow_engine(user_id,user_message=query)
         keyboard = self.get_keyboard(response['reply_markup'])
+
+        #print("__________________________ Current thread ________" + str(current_thread()))
         
         if not response['img']:
             self.send_message(user_id,response['response_list'],keyboard)
@@ -98,6 +102,8 @@ class TelegramBot():
             This function will also catch and print out errors in the console
             
             """
+            #print("__________________________ Current thread ________" + str(current_thread()))
+
 
             try:
                 message = update.message
@@ -140,7 +146,10 @@ class TelegramBot():
         Run the bot.
         """
         updater = Updater(token,use_context = True)
+        
         dp = updater.dispatcher # Get the dispatcher to register handlers 
+        dp.run_async(self.callback_handler)
+        dp.run_async(self.process_message)
         dp.add_handler(MessageHandler(Filters.text, self.callback_handler))
         dp.add_handler(CommandHandler("start", self.callback_handler))
         dp.add_handler(CommandHandler("switch", self.callback_handler))

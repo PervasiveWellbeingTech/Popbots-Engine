@@ -18,7 +18,6 @@ from models.utils import get_user_id_from_name
 from models.core.config import config_string
 from models.conversation import Conversation,Message,Content,ContentFinders
 
-from telegram.ext.dispatcher import run_async
 
 from utils import log,timed
 
@@ -27,19 +26,58 @@ from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequ
 from threading import Thread, current_thread
 
 
-def database_push(element):
-    thread_session.s.add(element)
-    thread_session.safe_commit()
-    #session.add(element)
-    #session.commit()
+def database_push(session,element):
+    session.add(element)
+    session.commit()
     return element.id
-def push_message(text,user_id,index,receiver_id,sender_id,conversation_id,stressor):
-    content_user = Content(text=text,user_id=user_id)
-    content_id_user  = database_push(content_user)
-    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,stressor=stressor,datetime=datetime.now())
-    _ = database_push(message_user) 
 
-def get_bot_ids(exclude):
+@timed
+def push_message(session,text,user_id,index,receiver_id,sender_id,conversation_id,stressor):
+    content_user = Content(text=text,user_id=user_id)
+    content_id_user  = database_push(session,content_user)
+    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,stressor=stressor,datetime=datetime.now())
+    _ = database_push(session,message_user) 
+
+def delconv(session,user_id):
+    conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
+    if conversation:
+        conversation.closed = True
+        session.commit()
+
+
+def change_bot(session,bot_id):
+    next_index=0
+    possible_bot = get_bot_ids(session,bot_id)
+    bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
+    content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
+
+    return next_index,bot_id,content_index
+
+@timed
+def create_human_user(session,user_id,user_message):
+    user = HumanUser(user_id=user_id)
+    user.subject_id = re.findall(' ([0-9]+)', user_message)
+    user.language_id = 1 # for english
+    user.language_type_id = 1 # for formal 
+    user.category_id = 1
+    
+    user.name = "Human" # this is the default
+    session.add(user)
+    session.commit()
+
+    return user
+
+@timed
+def create_conversation(session,user_id):
+    dt = datetime.now()
+    conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
+    _ = database_push(session,conversation)
+
+    return conversation
+
+
+
+def get_bot_ids(session,exclude):
     return [x.id for x in session.query(Users).filter_by(category_id=2) if (x.name not in {'Onboarding Bot'} and x.id not in {exclude})]
 
 def image_fetcher(bot_text):
@@ -56,25 +94,28 @@ def image_fetcher(bot_text):
 
 
 @timed
-def response_engine(user_id,user_message):
+def response_engine(session,user_id,user_message):
 
     log('DEBUG',f"Incoming message is: "+str(user_message))
     
     reply_markup = {'type':'normal','resize_keyboard':True,'text':""} #Set custom keyboard (defaults to none)
     response_dict={'response_list':[],'img':None,'command':None,'reply_markup':reply_markup} 
 
-    initialized = False
     next_index = None
     bot_id = None
     
 
     #1. Fetching the active user or create one if needed
-    user = session.query(HumanUser).filter_by(user_id=user_id).first() 
+    user = session.query(HumanUser).filter_by(user_id=str(user_id)).first() 
     if user is not None:
         log('DEBUG',f'User is known as: {user.name}')
     else:
-        log('DEBUG',f"User is None, with class {user}")
-        user_message = 'start' #temporary fix
+        user = create_human_user(session,user_id,user_message)
+        log('DEBUG',f"User with id: {user.id} has been created")
+        
+        bot_id = get_user_id_from_name("Onboarding Bot")
+        next_index = 0
+        message = None
         
     #2. Fetching the lastest active conversations 
     conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
@@ -82,108 +123,108 @@ def response_engine(user_id,user_message):
     if conversation:
         log('DEBUG',f"Conversation detected with the id {conversation.id}") 
 
-        conversation_id = conversation.id
+        CONVERSATION_INIT = False
+
         if (datetime.now() - conversation.datetime).seconds > 3600 : #Time out
             conversation.closed = True
-            conversation_id = None
             session.commit()
+            conversation = create_conversation(session,user_id)
+            CONVERSATION_INIT = True
+
     else: 
-        conversation_id = None
-        log('DEBUG',f"Warning the conversation id is none and the message is {user_message}") 
+        log('DEBUG',f"Warning the conversation id is none and the message is {user_message}")
+        conversation = create_conversation(session,user_id)
+        CONVERSATION_INIT = True
 
-    if 'start' in user_message: #restart
-
-        log('INFO',f'New user detected with id {user_id}')
-        if user is None:
-            user = HumanUser(user_id=user_id)
-            user.subject_id = re.findall(' ([0-9]+)', user_message)
-            user.language_id = 1 # for english
-            user.language_type_id = 1 # for formal 
-            user.category_id = 1
-            
-            user.name = "Human" # this is the default
-            session.add(user)
-            session.commit()
-
-        if conversation: # closing the previous conversation is there is
-            conversation.closed = True
-            session.commit()
-
-        dt = datetime.now()
-        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
-        conversation_id = database_push(conversation)
-
-       
-        bot_id = get_user_id_from_name("Onboarding Bot") # this is the onboarding bot, serve multiple purposes
-        next_index = 0 
-
-    
-    elif re.match(r'Hi',user_message):
-
-        if conversation: # closing the previous conversation
-            conversation.closed = True
-            session.commit()
-        
-        initialized = True
-        dt = datetime.now()
-        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
-        conversation_id = database_push(conversation)
         bot_id = get_user_id_from_name("Onboarding Bot")
-
-    if conversation is None:
-        log('DEBUG',"There is no active conversation and the user did not type 'start' or 'Hi' force creating a new one ")
-        dt = datetime.now()
-        conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
-        conversation_id = database_push(conversation)
+        next_index = 14
         message = None
-    else:
-        message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation_id).order_by(Message.id.desc()).first() # finding the lastest message
+
+    #handling /start, the user wants to restart the onboarding process
+    if re.match(r'/start',user_message): #force restart the onboarding process
+
+        if conversation and not CONVERSATION_INIT: # closing the previous conversation
+            conversation.closed = True
+            session.commit()
+            conversation = create_conversation(session,user_id)
+        bot_id = get_user_id_from_name("Onboarding Bot")
+        next_index = 0
+        message = None
+
+    #handling Hi the user want to force restart a conversation
+    elif re.match(r'Hi',user_message): 
+
+        if conversation and not CONVERSATION_INIT: # closing the previous conversation
+            conversation.closed = True
+            session.commit()
+            conversation = create_conversation(session,user_id)
+        
+        bot_id = get_user_id_from_name("Onboarding Bot")
+        next_index = 14
+        message = None
+
+    
+    
+    message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation.id).order_by(Message.id.desc()).first() # finding the lastest message
     
 
-    #These if needs to be streamlined with a scenario grath soon
-    if message and initialized == False and next_index is None:
+    # general case, means that we did not enter in /start or Hi
+    if message is not None and next_index is None:
         next_index = message.index 
         bot_id = message.sender_id
         log('DEBUG',f"Found a previous message pointing to {next_index} and was send by bot_id {bot_id}")
 
-    elif initialized and next_index is None: # in this case it is normal to have no message
-        log('DEBUG',f"Entered in the in initized Here")
-        bot_id = get_user_id_from_name("Onboarding Bot") # this is where it will need to be smart
-        next_index = 14
-        print(f"[INFO] Initialized with next_index =  {next_index} and was send to bot_id {bot_id}")
     elif message is None and next_index is None: # there is no message 
         log('DEBUG',f"Should not have entered in the no message, no in itialized scenario but did")
-        next_index=0
-        possible_bot = get_bot_ids(bot_id)
-        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
+        next_index,bot_id,content_index = change_bot(session,bot_id)
 
-    if next_index != 0 and next_index is not None: # THIERRY NOTE again at this point next_index should be set this is spaghetti code...
-
+    #next_index could be none because of bad storage of the previous_index in the last message
+    if next_index is not None:  
         content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
-        log('DEBUG',f"Finding selector for message_index =  {next_index} and was send by bot_id {bot_id}")
     else:
-        content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
+        next_index,bot_id,content_index = change_bot(session,bot_id) 
 
-
-    
     if re.match(r'/switch', user_message): #switch
         
-        next_index=0
-        possible_bot = get_bot_ids(bot_id)
-        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
-        content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = 0).first().id
+        next_index,bot_id,content_index = change_bot(session,bot_id)
 
-
+    #include here the problem with problem parser
     problem = "that"
+
+    #fetching the bot text response, the keyboards and eventual triggers
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
+
+    log('DEBUG',f'Bot text would be: {bot_text}')
+
+    ## handle special flag in bot scrips 
+
+    if "<SWITCH>" in bot_text:
+        response_dict['command'] = "skip"
+        next_index,bot_id,content_index = change_bot(session,bot_id)
+        log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} ")
     
+    elif bot_text == "<START>":
+        response_dict['command'] = "skip"
+
+    
+    # if the response is empty switch bot, add the message to db but keep
+    if bot_text == "" or bot_text is None:
+        log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
+        next_index,bot_id,content_index = change_bot(session,bot_id)
+        response_dict['command'] = "skip"
+        
+    
+    #fetching the bot_user
+    bot_user = session.query(Users).filter_by(id = bot_id).first()
+
+    #handle keyboards add reply markup
     if str(keyboard)=="default":
         reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
     else:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}  #
         
-
+    #handle triggers
     try:
 
         if len(triggers)>0:
@@ -203,43 +244,33 @@ def response_engine(user_id,user_message):
     except Exception as error:
         log('ERROR',f"Trigger error"+error)
 
+    # handle images if required
     if "$img$" in bot_text:
         bot_text,img = image_fetcher(bot_text)
         response_dict['img'] = img
         
-
-    log('DEBUG',f'Bot text would be: {bot_text}')
-
-    if "<SWITCH>" in bot_text:
-        response_dict['command'] = "skip"
-        next_index = 0
-        possible_bot = get_bot_ids(bot_id)
-        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
-
-        log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} ")
-    
-    if bot_text == "" or bot_text is None:
-        log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
-        next_index = 0
-        possible_bot = get_bot_ids(bot_id)
-        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)]
-        
-
 
     log("DEBUG",f"The user id is: {user_id}")
 
     if next_index is None:
         log('ERROR',"Something went wrong next_index is None ???? Will log bad data")
 
-    push_message(text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation_id,stressor=problem) # pushing user message
-    push_message(text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation_id,stressor=problem) # pushing the bot response
+    #pushing messages in database
+    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem) # pushing user message
+    push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,stressor=problem) # pushing the bot response
 
-   
-
-    bot_user = session.query(Users).filter_by(id = bot_id).first()
+    #closing the conversation if needed
+    if "<CONVERSATION_END>" in bot_text: 
+        log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
+        conversation.closed = True
+        session.commit()
+        response_dict['command'] = "skip"
+    
+    # parsing the data before sending
     response_dict['response_list'] = bot_text.strip().replace("'","\\'").split("\\n")
-
-    try: # formatting the text with the neccessary info eg: user:name, etc...
+    
+    # formatting the text with the neccessary info eg: user:name, etc...
+    try: 
         templist = []
         for res in response_dict['response_list']:
             templist.append(eval(f"f'{res}'"))
@@ -248,15 +279,6 @@ def response_engine(user_id,user_message):
     except BaseException as error:
         log('ERROR',f"String interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
     
-    if "<CONVERSATION_END>" in bot_text:
-        log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
-        conversation.closed = True
-        session.commit()
-        response_dict['command'] = "skip"
-
-    if bot_text == "<START>":
-        response_dict['command'] = "skip"
-
 
     response_dict['reply_markup'] = reply_markup
     response_dict['bot_name'] = bot_user.name
@@ -265,15 +287,15 @@ def response_engine(user_id,user_message):
 
     return response_dict
 
+
+
 def dialog_flow_engine(user_id,user_message):
-    global thread_session
-    global session 
 
     
-    log('INFO',f"Current thread is: {current_thread().name}")
+    log('INFO',f"Current thread is: {current_thread()}")
     
-    thread_session = ThreadSessionRequest()
-    session = get_session()
+    thread_session = ThreadSessionRequest() # thread safe SQL Alchemy session
+    session = thread_session.s
 
 
     reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
@@ -281,7 +303,7 @@ def dialog_flow_engine(user_id,user_message):
         command = "skip"
         while command == "skip":
 
-            response_dict  = response_engine(user_id,user_message)
+            response_dict  = response_engine(session,user_id,user_message)
             command = response_dict['command']
         return response_dict
     
@@ -289,18 +311,21 @@ def dialog_flow_engine(user_id,user_message):
         log('ERROR',error)
         response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         session.rollback()
+        delconv(session,user_id)
         return response_dict
 
     except AuthoringError as error:
         log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
         response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
         session.rollback()
+        delconv(session,user_id)
         return response_dict
 
     except NoPossibleAnswer as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         log('ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
         session.rollback()
+        delconv(session,user_id)
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
     
     except BaseException as error:
@@ -310,6 +335,7 @@ def dialog_flow_engine(user_id,user_message):
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
         session.rollback()
+        delconv(session,user_id)
         return response_dict
     
     finally:
