@@ -207,6 +207,12 @@ def response_engine(session,user_id,user_message):
     elif bot_text == "<START>":
         response_dict['command'] = "skip"
 
+    #closing the conversation if needed
+    if "<CONVERSATION_END>" in bot_text: 
+        log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
+        conversation.closed = True
+        session.commit()
+        response_dict['command'] = "skip"
     
     # if the response is empty switch bot, add the message to db but keep
     if bot_text == "" or bot_text is None:
@@ -259,15 +265,10 @@ def response_engine(session,user_id,user_message):
     push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem) # pushing user message
     push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,stressor=problem) # pushing the bot response
 
-    #closing the conversation if needed
-    if "<CONVERSATION_END>" in bot_text: 
-        log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
-        conversation.closed = True
-        session.commit()
-        response_dict['command'] = "skip"
+
     
     # parsing the data before sending
-    response_dict['response_list'] = bot_text.strip().replace("'","\\'").split("\\n")
+    response_dict['response_list'] = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\n")
     
     # formatting the text with the neccessary info eg: user:name, etc...
     try: 
