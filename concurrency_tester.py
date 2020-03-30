@@ -10,14 +10,14 @@ from models.user import HumanUser,Users
 from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
 thread_session = ThreadSessionRequest()
 
-NUM_USERS = 20
+NUM_USERS = 100
 NUM_MESSAGES = 1
 
 
 
-def add_user(user_id):
-    delete = thread_session.s.query(Users).filter_by(id=user_id).delete()
-    session = thread_session.s
+def add_user(session,user_id):
+    #delete = thread_session.s.query(Users).filter_by(id=user_id).delete()
+    
     user = HumanUser(user_id=user_id)
     user.subject_id = 123 #re.findall(' ([0-9]+)', user_message)
     user.language_id = 1 # for english
@@ -29,8 +29,11 @@ def add_user(user_id):
     session.commit()
 
 def user(user_id):
-
-    #add_user(user_id)
+    session = thread_session.s
+    user = session.query(Users).filter_by(id=user_id).first()
+    if user is None:
+        print("Entered in user")
+        add_user(session,user_id)
     times = []
     for i in range(NUM_MESSAGES):
         start = time.time()

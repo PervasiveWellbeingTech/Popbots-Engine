@@ -10,6 +10,8 @@ import sqlalchemy
 
 from controllers.main import dialog_flow_engine
 
+
+
 @RTMClient.run_on(event="message")
 def slack_socket(**payload):
 
@@ -24,7 +26,7 @@ def slack_socket(**payload):
         user = data["user"]
         user_id = "".join(str(ord(x)) for x in user)#re.sub("[^0-9]", "",user )
         response  = dialog_flow_engine(int(user_id[0:9]),user_message=query)
-
+        
         command  = response['command']
 
         if command != "pass":
@@ -88,6 +90,7 @@ def slack_socket(**payload):
 
 
 if __name__ == "__main__":
+
     SLACK_API_TOKEN = os.getenv("SLACK_API_TOKEN")
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     slack_token = SLACK_API_TOKEN

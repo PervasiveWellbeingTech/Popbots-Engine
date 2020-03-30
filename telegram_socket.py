@@ -24,7 +24,7 @@ from threading import Thread, current_thread
 
 #from messenger import Message
 TIMEOUT_SECONDS = 3600
-QUEUE_TIME_THRESHOLD = 0.01
+QUEUE_TIME_THRESHOLD = 2
 
 class TelegramBot():
 
