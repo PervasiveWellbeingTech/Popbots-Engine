@@ -25,6 +25,7 @@ class Message(Base):
     conversation_id = Column(Integer)
     stressor = Column(String)
     datetime = Column(DateTime)
+    tag = Column(String)
 
 
 class Content(Base):

@@ -17,12 +17,10 @@ from models.user import HumanUser,Users
 from models.utils import get_user_id_from_name
 from models.core.config import config_string
 from models.conversation import Conversation,Message,Content,ContentFinders
+from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
 
 
 from utils import log,timed
-
-from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
-
 from threading import Thread, current_thread
 
 
@@ -32,10 +30,10 @@ def database_push(session,element):
     return element.id
 
 @timed
-def push_message(session,text,user_id,index,receiver_id,sender_id,conversation_id,stressor):
+def push_message(session,text,user_id,index,receiver_id,sender_id,conversation_id,stressor,tag):
     content_user = Content(text=text,user_id=user_id)
     content_id_user  = database_push(session,content_user)
-    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,stressor=stressor,datetime=datetime.now())
+    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,stressor=stressor,datetime=datetime.now(),tag=tag)
     _ = database_push(session,message_user) 
 
 def delconv(session,user_id):
@@ -45,10 +43,17 @@ def delconv(session,user_id):
         session.commit()
 
 
-def change_bot(session,bot_id):
+def change_bot(session,current_bot_id,destination_bot_name):
     next_index=0
-    possible_bot = get_bot_ids(session,bot_id)
-    bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
+    if destination_bot_name is None:
+        possible_bot = get_bot_ids(session,current_bot_id,"Onboarding Bot") #### Replace with the correct module
+        bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
+    else:
+        bot_id = get_user_id_from_name(destination_bot_name)
+
+        if bot_id == current_bot_id:
+            log('INFO',f'You are switching to the exact same bot with bot_id: {bot_id} ')
+    
     content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
 
     return next_index,bot_id,content_index
@@ -77,8 +82,8 @@ def create_conversation(session,user_id):
 
 
 
-def get_bot_ids(session,exclude):
-    return [x.id for x in session.query(Users).filter_by(category_id=2) if (x.name not in {'Onboarding Bot'} and x.id not in {exclude})]
+def get_bot_ids(session,exclude_id,exclude_name):
+    return [x.id for x in session.query(Users).filter_by(category_id=2) if (x.name not in {exclude_name} and x.id not in {exclude_id})]
 
 def image_fetcher(bot_text):
     
@@ -176,17 +181,17 @@ def response_engine(session,user_id,user_message):
 
     elif message is None and next_index is None: # there is no message 
         log('DEBUG',f"Should not have entered in the no message, no in itialized scenario but did")
-        next_index,bot_id,content_index = change_bot(session,bot_id)
+        next_index,bot_id,content_index = change_bot(session,bot_id,None)
 
     #next_index could be none because of bad storage of the previous_index in the last message
     if next_index is not None:  
         content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
     else:
-        next_index,bot_id,content_index = change_bot(session,bot_id) 
+        next_index,bot_id,content_index = change_bot(session,bot_id,None) 
 
     if re.match(r'/switch', user_message): #switch
         
-        next_index,bot_id,content_index = change_bot(session,bot_id)
+        next_index,bot_id,content_index = change_bot(session,bot_id,None)
 
     #include here the problem with problem parser
     problem = "that"
@@ -195,14 +200,24 @@ def response_engine(session,user_id,user_message):
     bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index)
     
 
-    log('DEBUG',f'Bot text would be: {bot_text}')
+    log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
 
     ## handle special flag in bot scrips 
 
     if "<SWITCH>" in bot_text:
         response_dict['command'] = "skip"
-        next_index,bot_id,content_index = change_bot(session,bot_id)
-        log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} ")
+        bool_trigger = [True if "~" in x else False for x in triggers]
+
+        if not all(bool_trigger):
+            next_bot_name = [x for x in triggers if "~" in x][0].replace("~","")
+            
+            if next_bot_name == "choose_bot":
+                log('INFO',f"Switching to bot or module {next_bot_name}, with id {bot_id}")
+                next_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=None)
+            else:
+                next_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+
+            log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} and name {next_bot_name} ")
     
     elif bot_text == "<START>":
         response_dict['command'] = "skip"
@@ -217,7 +232,7 @@ def response_engine(session,user_id,user_message):
     # if the response is empty switch bot, add the message to db but keep
     if bot_text == "" or bot_text is None:
         log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
-        next_index,bot_id,content_index = change_bot(session,bot_id)
+        next_index,bot_id,content_index = change_bot(session,bot_id,None)
         response_dict['command'] = "skip"
         
     
@@ -262,8 +277,8 @@ def response_engine(session,user_id,user_message):
         log('ERROR',"Something went wrong next_index is None ???? Will log bad data")
 
     #pushing messages in database
-    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem) # pushing user message
-    push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,stressor=problem) # pushing the bot response
+    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem,tag=None) # pushing user message
+    push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,stressor=problem,tag=None) # pushing the bot response
 
 
     

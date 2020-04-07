@@ -38,13 +38,24 @@ def find_keyword(input_str, word_list):
         word_list (list/tuple) -- list of extract_keywords_from_text
 
     Returns:
-        (boolean) -- if keyword is found.
+        (boolean) -- true if keyword is found.
     """
 
     input_str = input_str.lower()
     return any([str(each) in str(input_str) for each in word_list])
 
 
+def return_feature(input_string,condition,alternative):
+    """
+    Fetch the synonyms of the condition and return condition if input_string contains one the words or alternative. 
+    """    
+    word_list = FEATURES_DICT_VOCAB[condition]
+
+    if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+        feature = condition
+    else: 
+        feature = alternative
+    return feature
 
 def feature_selector_split(input_string,selector):
     """
@@ -60,7 +71,7 @@ def feature_selector_split(input_string,selector):
         (boolean) -- if keyword is found.
     """
 
-    log("DEBUG",f"Analysed selector is {selector}")
+    #log("DEBUG",f"Analysed selector is {selector}")
 
     parsed_features = []
     feature = None
@@ -68,26 +79,43 @@ def feature_selector_split(input_string,selector):
 
     if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         # these condition are formatted as ?keyword,alternative
-        
-        condition,alternative  = selector.split("?")
-        parsed_features.append(condition)
-        parsed_features.append(alternative)
-        word_list = FEATURES_DICT_VOCAB[condition]
+        features = selector.split("?")
+        parsed_features = features.copy()
 
-        if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
-            feature = condition
-        else: 
-            feature = alternative
+        alternative = features[-1]
+        all_selectors = []
+        del features[-1]
+
+        for fea in features:
+
+            all_selectors.append(return_feature(input_string,fea,alternative))
+        
+        feature_set = set(all_selectors) # sum all unique elements
+
+        if len(feature_set)>1:
+            if alternative in feature_set:
+                feature_set.remove(alternative)
+                if len(feature_set)>1:
+                    feature_set = {alternative} # there is an ambiguity between two selectors folding back to else                
+            else:
+                feature_set = {alternative}
+        
+        feature = list(feature_set)[0]
+
+
+        
     elif "none" in selector:
         feature = "none"
         parsed_features.append(feature)
-    elif "#" in selector or "@" in selector or "!" in selector: ### these are triggers
+    elif "#" in selector or "@" in selector or "!" in selector or "~" in selector: ### these are triggers
         trigger = selector
     else:
-        log('ERROR','SELECTOR does not match any pattern error will be raised')
-        raise NoMatchingSelectorPattern(selector)
+        #log('ERROR','SELECTOR does not match any pattern error will be raised')
+        raise BaseException
     
     return feature,trigger,parsed_features
+
+
 
 
 

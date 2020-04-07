@@ -50,10 +50,36 @@ def create_tables():
         CREATE TABLE conversations (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
-            datetime timestamp not null default CURRENT_TIMESTAMP,
+            datetime timestamp not NULL default CURRENT_TIMESTAMP,
             closed BOOLEAN,
             FOREIGN KEY (user_id) REFERENCES users (id))
         """,
+        """
+        CREATE TABLE public.stressor (
+
+            id SERIAL PRIMARY KEY,
+            stressor_text text NULL,
+            conversation_id int not NULL,
+            
+            category1 text NULL,
+            category2 text NULL,
+            category3 text NULL,
+            category4 text NULL,
+            category5 text NULL,
+            category6 text NULL,
+
+            probability1 float(6),
+            probability2 float(6),
+            probability3 float(6),
+            probability4 float(6),
+            probability5 float(6),
+
+            FOREIGN KEY (conversation_id) REFERENCES conversations (id)
+            
+
+        );
+
+        """, 
         """
         CREATE TABLE contents (
             id SERIAL PRIMARY KEY,
@@ -89,7 +115,7 @@ def create_tables():
             content_id INTEGER NOT NULL,
             conversation_id INTEGER NOT NULL,
             stressor TEXT,
-            datetime timestamp not null default CURRENT_TIMESTAMP,
+            datetime timestamp not NULL default CURRENT_TIMESTAMP,
             FOREIGN KEY (sender_id) REFERENCES users (id),
             FOREIGN KEY (receiver_id) REFERENCES users (id),
             FOREIGN KEY (content_id) REFERENCES contents (id),

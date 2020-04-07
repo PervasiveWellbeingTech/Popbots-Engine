@@ -1,6 +1,6 @@
 import sqlalchemy as db
 from sqlalchemy import Table, Column, Integer, String, MetaData, join, ForeignKey, \
-        create_engine, Column, Integer,Boolean, String,DateTime,ForeignKey
+        create_engine, Column, Integer,Boolean, String,DateTime,ForeignKey,Float
 from sqlalchemy.sql import func
 
 from sqlalchemy.orm import scoped_session
