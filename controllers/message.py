@@ -10,14 +10,26 @@ from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
 
+from nltk.tokenize import word_tokenize
+
 
 
 DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
 DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'dont', '\'t', 'nothing', 'nah', 'na']
 DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
+ENJOYABLE = ['enjoyable']
+FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK,"greetings":GREETINGS,'enjoyable':ENJOYABLE}
 
-FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK}
+
+def greaterthan(input_string,word_len,condition,alternative):
+    
+    if len(word_tokenize(input_string))>word_len:
+        return condition,[condition,alternative]
+    else:
+        return alternative,[condition,alternative]
+
+
 
 def flatten(l):
     """
@@ -102,12 +114,17 @@ def feature_selector_split(input_string,selector):
         
         feature = list(feature_set)[0]
 
+    elif "@" in selector:
 
-        
+        if "@greaterthan" in selector:
+            selector = selector.replace("@","")
+            feature,temp_parsed_features = eval(selector)
+            parsed_features = parsed_features + temp_parsed_features
+            
     elif "none" in selector:
         feature = "none"
         parsed_features.append(feature)
-    elif "#" in selector or "@" in selector or "!" in selector or "~" in selector: ### these are triggers
+    elif "#" in selector or "!" in selector or "~" in selector or "tag:" in selector: ### these are triggers
         trigger = selector
     else:
         #log('ERROR','SELECTOR does not match any pattern error will be raised')

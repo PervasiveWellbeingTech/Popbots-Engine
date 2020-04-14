@@ -10,6 +10,7 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
     datetime = Column(DateTime)
+    stressor = Column(String)
     closed = Column(Boolean)
     
 
@@ -23,7 +24,6 @@ class Message(Base):
     receiver_id = Column(Integer,ForeignKey(Users.id))
     content_id = Column(Integer)
     conversation_id = Column(Integer)
-    stressor = Column(String)
     datetime = Column(DateTime)
     tag = Column(String)
 

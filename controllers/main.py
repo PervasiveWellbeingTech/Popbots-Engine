@@ -108,6 +108,7 @@ def response_engine(session,user_id,user_message):
 
     next_index = None
     bot_id = None
+    tag = None
     
 
     #1. Fetching the active user or create one if needed
@@ -219,9 +220,13 @@ def response_engine(session,user_id,user_message):
 
             log("DEBUG",f" Switching to a new bot with bot_id = {bot_id} and name {next_bot_name} ")
     
+    
     elif bot_text == "<START>":
         response_dict['command'] = "skip"
-
+    
+    elif bot_text == "<SKIP>":
+        response_dict['command'] = "skip"
+    
     #closing the conversation if needed
     if "<CONVERSATION_END>" in bot_text: 
         log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
@@ -239,12 +244,7 @@ def response_engine(session,user_id,user_message):
     #fetching the bot_user
     bot_user = session.query(Users).filter_by(id = bot_id).first()
 
-    #handle keyboards add reply markup
-    if str(keyboard)=="default":
-        reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
-    else:
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':str(keyboard)}  #
-        
+    
     #handle triggers
     try:
 
@@ -260,6 +260,8 @@ def response_engine(session,user_id,user_message):
                     else: # we assume that it is one
                     
                         locals()[trigger]=user_message
+                elif "tag:" in trigger:
+                    tag = re.sub('tag:','',trigger)
 
 
     except Exception as error:
@@ -277,7 +279,7 @@ def response_engine(session,user_id,user_message):
         log('ERROR',"Something went wrong next_index is None ???? Will log bad data")
 
     #pushing messages in database
-    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem,tag=None) # pushing user message
+    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,stressor=problem,tag=tag) # pushing user message
     push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,stressor=problem,tag=None) # pushing the bot response
 
 
@@ -295,9 +297,26 @@ def response_engine(session,user_id,user_message):
     except BaseException as error:
         log('ERROR',f"String interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
     
+    # formating keyboard text
+    try:
+        keyboard = eval(f"f'{str(keyboard)}'")
+    except BaseException as error:
 
+        log('ERROR',f"Keyboard interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
+
+
+
+
+    #handle keyboards add reply markup
+    if keyboard=="default":
+        reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
+    else:
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #
+        
     response_dict['reply_markup'] = reply_markup
     response_dict['bot_name'] = bot_user.name
+
+
 
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 

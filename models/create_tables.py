@@ -6,7 +6,7 @@ Created on Thu Jan 16 23:04:18 2020
 """
 
 import psycopg2
-from models.core.config import config
+from core.config import config
  
  
 def create_tables():
@@ -42,7 +42,7 @@ def create_tables():
             subject_id VARCHAR(255) NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
         """,        
@@ -50,17 +50,20 @@ def create_tables():
         CREATE TABLE conversations (
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
+            stressor text,
             datetime timestamp not NULL default CURRENT_TIMESTAMP,
             closed BOOLEAN,
-            FOREIGN KEY (user_id) REFERENCES users (id))
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
+            )
         """,
         """
-        CREATE TABLE public.stressor (
+        CREATE TABLE stressor (
 
             id SERIAL PRIMARY KEY,
             stressor_text text NULL,
             conversation_id int not NULL,
             
+            category0 text NULL,
             category1 text NULL,
             category2 text NULL,
             category3 text NULL,
@@ -68,6 +71,7 @@ def create_tables():
             category5 text NULL,
             category6 text NULL,
 
+            probability0 float(6),
             probability1 float(6),
             probability2 float(6),
             probability3 float(6),
@@ -85,7 +89,9 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             text TEXT NOT NULL,
             user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id))
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            
+            ) 
         """,
         """
         CREATE TABLE keyboards (
@@ -101,7 +107,7 @@ def create_tables():
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
             FOREIGN KEY (keyboard_id) REFERENCES keyboards (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
@@ -114,7 +120,7 @@ def create_tables():
             receiver_id INTEGER NOT NULL,
             content_id INTEGER NOT NULL,
             conversation_id INTEGER NOT NULL,
-            stressor TEXT,
+            tag VARCHAR,
             datetime timestamp not NULL default CURRENT_TIMESTAMP,
             FOREIGN KEY (sender_id) REFERENCES users (id),
             FOREIGN KEY (receiver_id) REFERENCES users (id),
@@ -140,7 +146,7 @@ def create_tables():
             source_message_index INTEGER,
             message_index INTEGER NOT NULL,
             bot_content_index INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
             )
         """,
         #features_index INTEGER NOT NULL,
@@ -169,7 +175,7 @@ def create_tables():
             source_message_index INTEGER NOT NULL,
             next_message_index INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
             )
         """,
         """
