@@ -19,12 +19,20 @@ DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'do
 DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
 GREETINGS = ['hi','hey', 'hello']
 ENJOYABLE = ['enjoyable']
-FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK,"greetings":GREETINGS,'enjoyable':ENJOYABLE}
+OTHER = ['other']
+FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK,"greeting":GREETINGS,'enjoyable':ENJOYABLE,'other':OTHER}
 
 
-def greaterthan(input_string,word_len,condition,alternative):
+def min_word(input_string,word_len,condition,alternative):
     
     if len(word_tokenize(input_string))>word_len:
+        return condition,[condition,alternative]
+    else:
+        return alternative,[condition,alternative]
+
+def greater_than(el1,el2,condition,alternative):
+    
+    if el1>el2:
         return condition,[condition,alternative]
     else:
         return alternative,[condition,alternative]
@@ -88,7 +96,7 @@ def feature_selector_split(input_string,selector):
     parsed_features = []
     feature = None
     trigger = None
-
+    print(selector)
     if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         # these condition are formatted as ?keyword,alternative
         features = selector.split("?")
@@ -116,10 +124,15 @@ def feature_selector_split(input_string,selector):
 
     elif "@" in selector:
 
-        if "@greaterthan" in selector:
+        if "@min_word" in selector:
             selector = selector.replace("@","")
             feature,temp_parsed_features = eval(selector)
             parsed_features = parsed_features + temp_parsed_features
+        elif "@greater_than" in selector:
+            selector = selector.replace("@","")
+            feature,temp_parsed_features = eval(selector)
+            parsed_features = parsed_features + temp_parsed_features
+
             
     elif "none" in selector:
         feature = "none"
@@ -217,8 +230,10 @@ def fetch_next_contents(bot_id,next_indexes):
     return content_list
 
 @timed 
-def get_bot_response(bot_id,next_index,user_response,content_index):
-    
+def get_bot_response(bot_id,next_index,user_response,content_index,stressore):
+    global stressor
+
+    stressor = stressore
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
     if len(next_indexes)<1:raise AuthoringError(bot_id,next_index,"no next index in next_message_finder")

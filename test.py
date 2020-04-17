@@ -1,11 +1,12 @@
 #! ../popbots_venv/bin/python3
 
-#from controllers.message import get_bot_response
-#from models.database_operations import connection_wrapper,select_from_join
-#rom models.user import HumanUser,Users
+from controllers.main import *
+from controllers.message import get_bot_response
+from models.database_operations import connection_wrapper,select_from_join
+from models.user import HumanUser,Users
 
-#from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
-#thread_session = ThreadSessionRequest()
+from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
+session = ThreadSessionRequest().s
 
 #user = thread_session.s.query(Users).filter_by(id=1231).delete()
 
@@ -137,11 +138,11 @@ def feature_selector_split(input_string,selector):
 if __name__ == "__main__":
     #print(feature_selector_split("yes i am ready","no?else"))
     
-    list = ["~something","!random"]
+    #list = ["~something","!random"]
 
-     
+    print(get_bot_ids(session,1,"Greeting Module"))
     
-    bool_trigger = [True if "~" in x else False for x in list ]
-    print(not all(bool_trigger))
+    #bool_trigger = [True if "~" in x else False for x in list ]
+    #rint(not all(bool_trigger))
 
 

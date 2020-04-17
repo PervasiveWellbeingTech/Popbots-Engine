@@ -1,5 +1,6 @@
 import psycopg2
 import traceback
+import re
 
 from models.user import Users
 from models.core.config import config_string
@@ -15,7 +16,7 @@ engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
 
-SPREADSHEET_ID = "1mlegVF0CFDVVRgrfe08J53j6eNfHRThQitIuUEA5pwU"
+SPREADSHEET_ID = "1xRTnHL9jpNsNbfC8qNEbrSIqDT0JCdkQmAE9xSKWsEg"
 RANGE_NAME = "Users"
 
 normal = False 
@@ -91,10 +92,12 @@ try:
 
 
             print(f"Added new content {new_content.content_finders_id}")
+            r = re.compile(r'(?:[^,(]|\([^)]*\))+')
+         
 
             ## adding features and selectors
-            push_feature_list(session,features=script.features.split(","),content_finder_id=new_content.content_finders_id)
-            push_selector_list(session,selectors=script.selectors.split(","),content_finder_id=new_content.content_finders_id)
+            push_feature_list(session,features=r.findall(script.features),content_finder_id=new_content.content_finders_id)
+            push_selector_list(session,selectors=r.findall(script.selectors),content_finder_id=new_content.content_finders_id)
 
 
         print(f'Added all new contents for bot {user.name}')
@@ -110,6 +113,7 @@ try:
             )
             session.add(new_nmf)
             session.commit()
+            print(f'Added nmf contents with id: {new_nmf.id} for bot {user.name}')
         print(f'Added nmf contents for bot {user.name}')
 
 
