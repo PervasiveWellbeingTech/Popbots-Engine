@@ -230,10 +230,10 @@ def fetch_next_contents(bot_id,next_indexes):
     return content_list
 
 @timed 
-def get_bot_response(bot_id,next_index,user_response,content_index,stressore):
+def get_bot_response(bot_id,next_index,user_response,content_index,stressor_object):
     global stressor
 
-    stressor = stressore
+    stressor = stressor_object
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
     if len(next_indexes)<1:raise AuthoringError(bot_id,next_index,"no next index in next_message_finder")

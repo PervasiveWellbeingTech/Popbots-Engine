@@ -35,7 +35,7 @@ class Stressor(Base):
 import requests
 import ast
 
-FLASK_CLASSIFIER_SERVER_URL = "http://commuter.stanford.edu/classifier/stressor/"
+FLASK_CLASSIFIER_SERVER_URL = "http://18.191.63.187/classifier/stressor/"
 
 
 def get_pred_api(stressor):
@@ -53,9 +53,33 @@ def get_pred_api(stressor):
     except Exception as error:
         raise Exception(error)
 
-    return response
+    return response.json()
 
 
+def populated_stressor(stressor,conv_id):
 
+    result = get_pred_api(stressor)
+
+    stressor = Stressor( # added as a dummy for now
+
+        conversation_id = conv_id,
+        stressor_text = stressor,
+        category0 = result['raw']['category0'],
+        category1 = result['raw']['category1'],
+        category2 = result['raw']['category2'],
+        category3 = result['raw']['category3'],
+        category4 = result['raw']['category4'],
+        category5 = result['raw']['category5'],
+        category6 = "Other",
+
+        probability0 = round(result['raw']['probability0'],4),
+        probability1 = round(result['raw']['probability1'],4),
+        probability2 = round(result['raw']['probability2'],4),
+        probability3 = round(result['raw']['probability3'],4),
+        probability4 = round(result['raw']['probability4'],4),
+        probability5 = round(result['raw']['probability5'],4)
+    )
+
+    return stressor
     
 

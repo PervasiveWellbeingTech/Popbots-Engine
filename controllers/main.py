@@ -16,8 +16,8 @@ from controllers.message import get_bot_response
 from models.user import HumanUser,Users
 from models.utils import get_user_id_from_name
 from models.core.config import config_string
-from models.conversation import Conversation,Message,Content,ContentFinders
-from models.stressor import Stressor
+from models.conversation import Conversation,Message,Content,ContentFinders,MessageContent
+from models.stressor import Stressor,populated_stressor
 from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
 
 
@@ -98,6 +98,26 @@ def image_fetcher(bot_text):
     
     return bot_text,img
 
+def push_stressor(session,conv_id):
+    print(conv_id)
+    stressor1 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor1').first()
+    stressor2 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor2').first()
+    stressor3 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor3').first()
+
+    print(stressor1)
+    stressor_list = [stressor1,stressor2,stressor3]
+    print(stressor_list)
+    stressor_text = ' '.join(x.text for x in stressor_list if x)
+
+    stressor = populated_stressor(stressor_text,conv_id = conv_id)
+
+    session.add(stressor)
+    session.commit()
+
+    log('INFO',f'Stressor: {stressor_text} sucessfully added to conversation id {conv_id}')
+
+    
+    
 
 @timed
 def response_engine(session,user_id,user_message):
@@ -198,30 +218,10 @@ def response_engine(session,user_id,user_message):
     #include here the problem with problem parser
     problem = "that"
 
-    stressor = Stressor( # added as a dummy for now
+    stressor = session.query(Stressor).filter_by(conversation_id = conversation.id).first()
 
-        conversation_id = conversation.id,
-        stressor_text = "test",
-        category0 = "Work",
-        category1 = "School",
-        category2 = "Emotional Turmoil",
-        category3 = "Financial Problem",
-        category4 = "Health or Physical Pain",
-        category5 = "Family Issue",
-        category6 = "Other",
-
-        probability0 = 0.2,
-
-        probability1 = 0.19,
-        probability2 = 0.18,
-        probability3 = 0.16,
-        probability4 = 0.15,
-        probability5 = 0.14
-    )
-    session.add(stressor)
-    session.commit()
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressore=stressor)
+    bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
     
 
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
@@ -247,8 +247,9 @@ def response_engine(session,user_id,user_message):
     elif bot_text == "<START>":
         response_dict['command'] = "skip"
     
-    elif bot_text == "<SKIP>":
+    elif "<SKIP>" in bot_text:
         response_dict['command'] = "skip"
+        bot_text = bot_text.replace("<SKIP>","")
     
     #closing the conversation if needed
     if "<CONVERSATION_END>" in bot_text: 
@@ -285,6 +286,8 @@ def response_engine(session,user_id,user_message):
                         locals()[trigger]=user_message
                 elif "tag:" in trigger:
                     tag = re.sub('tag:','',trigger)
+                elif "!stressor" in trigger:
+                    push_stressor(session = session,conv_id = conversation.id)#conversation.id)
 
 
     except Exception as error:
@@ -338,7 +341,7 @@ def response_engine(session,user_id,user_message):
     response_dict['bot_name'] = bot_user.name
 
 
-
+    session.commit()
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
     return response_dict

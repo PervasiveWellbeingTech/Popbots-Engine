@@ -15,17 +15,6 @@ class Conversation(Base):
     
 
 
-class Message(Base):
-    __tablename__= 'messages'
-
-    id = Column(Integer,primary_key=True)
-    index = Column(Integer)
-    sender_id = Column(Integer,ForeignKey(Users.id))
-    receiver_id = Column(Integer,ForeignKey(Users.id))
-    content_id = Column(Integer)
-    conversation_id = Column(Integer)
-    datetime = Column(DateTime)
-    tag = Column(String)
 
 
 class Content(Base):
@@ -35,6 +24,17 @@ class Content(Base):
     id = Column(Integer,primary_key=True)
     user_id = Column(Integer,ForeignKey(Users.id))
     text = Column(String)
+class Message(Base):
+    __tablename__= 'messages'
+
+    id = Column(Integer,primary_key=True)
+    index = Column(Integer)
+    sender_id = Column(Integer,ForeignKey(Users.id))
+    receiver_id = Column(Integer,ForeignKey(Users.id))
+    content_id = Column(Integer,ForeignKey(Content.id))
+    conversation_id = Column(Integer)
+    datetime = Column(DateTime)
+    tag = Column(String)
 
 class NextMessageFinders(Base):
     __tablename__=  'next_message_finders'
@@ -93,6 +93,15 @@ class ContentFinderJoin(Base):
     #content
     
 
+user_content_join =  join(Message,Content,Message.content_id == Content.id)
+
+class MessageContent(Base):
+    __table__ = user_content_join
+    message_id = Message.id
+    content_ids = column_property(Content.id,Message.content_id)
+    conversation_id = Message.conversation_id
+    tag = Message.tag
+    text = Content.text
 
 
 if __name__ == "__main__":
