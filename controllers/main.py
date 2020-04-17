@@ -100,9 +100,9 @@ def image_fetcher(bot_text):
 
 def push_stressor(session,conv_id):
     print(conv_id)
-    stressor1 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor1').first()
-    stressor2 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor2').first()
-    stressor3 = session.query(MessageContent).filter_by(conversation_id = 38,tag = 'stressor3').first()
+    stressor1 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor1').first()
+    stressor2 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor2').first()
+    stressor3 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor3').first()
 
     print(stressor1)
     stressor_list = [stressor1,stressor2,stressor3]
