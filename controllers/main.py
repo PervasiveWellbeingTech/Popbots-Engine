@@ -247,9 +247,8 @@ def response_engine(session,user_id,user_message):
     elif bot_text == "<START>":
         response_dict['command'] = "skip"
     
-    elif "<SKIP>" in bot_text:
+    elif bot_text == "<SKIP>":
         response_dict['command'] = "skip"
-        bot_text = bot_text.replace("<SKIP>","")
     
     #closing the conversation if needed
     if "<CONVERSATION_END>" in bot_text: 
