@@ -391,12 +391,14 @@ def dialog_flow_engine(user_id,user_message):
             if command["stack"] == True:
                 if image is not None:
                     response_dict['response_list'].append("image")
+                    response_dict['img'] = image
                 response_dict['response_list'] = response_dict['response_list'] + response_list
+
             
-            response_dict['img'] = image
+            
             response_dict['reply_markup'] = reply_markup
             response_dict['bot_name'] = bot_name
-
+            print(response_dict['response_list'])
         return response_dict
     
     except BadKeywordInputError as error:

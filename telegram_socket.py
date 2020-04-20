@@ -51,7 +51,11 @@ class TelegramBot():
                 #sleep(min(len(res)/20,2.5))
                 self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
             else:
-                self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)
+                try: 
+                    self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)
+                except Exception as error:
+                    log('ERROR',f"Image fail image: {image} to send to user id {user_id} with error {error}")
+                    
                 log('DEBUG',f"Image sent to user id {user_id}")
 
         log('DEBUG',f"Message block sent to user id {user_id}")
