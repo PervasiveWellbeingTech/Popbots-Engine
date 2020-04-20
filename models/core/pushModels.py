@@ -102,7 +102,7 @@ def push_selector_list(session,selectors,content_finder_id):
         
         session.commit()
 
-    except exc.IntegrityError as error:
+    except Exception as error:
         print(error)
 
 def push_feature_list(session,features,content_finder_id):
@@ -122,7 +122,7 @@ def push_feature_list(session,features,content_finder_id):
         
         session.commit()
 
-    except exc.IntegrityError as error:
+    except Exception as error:
         print(error)
 
 def push_trigger_list(session,triggers,content_finder_id):
@@ -142,7 +142,7 @@ def push_trigger_list(session,triggers,content_finder_id):
         
         session.commit()
 
-    except exc.IntegrityError as error:
+    except Exception as error:
         print(error)
 
 
