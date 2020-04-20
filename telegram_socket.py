@@ -41,12 +41,19 @@ class TelegramBot():
         #    self.bots_keyboard.append([keyboards[-1]])
 
     @timed
-    def send_message(self,user_id,text_response,keyboard):
+    def send_message(self,user_id,text_response,keyboard,image):
         log('DEBUG',f"Trying to send a message block to user id {user_id} ")
         for res in text_response:
-            self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-            #sleep(min(len(res)/20,2.5))
-            self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
+
+            if not re.match('image',res):
+            
+                self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
+                #sleep(min(len(res)/20,2.5))
+                self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
+            else:
+                self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)
+                log('DEBUG',f"Image sent to user id {user_id}")
+
         log('DEBUG',f"Message block sent to user id {user_id}")
     
     def get_keyboard(self,reply_markup):
@@ -75,23 +82,13 @@ class TelegramBot():
         """
         response  = dialog_flow_engine(user_id,user_message=query)
         keyboard = self.get_keyboard(response['reply_markup'])
+        image = response['img']
 
         #print("__________________________ Current thread ________" + str(current_thread()))
         
-        if not response['img']:
-            self.send_message(user_id,response['response_list'],keyboard)
+        if len(response['response_list'])>0:
+            self.send_message(user_id,response['response_list'],keyboard,image)
 
-        elif response['img'] and len(response['response_list'])>0:
-            try:
-                self.bot.send_photo(chat_id=user_id, photo=response['img'],timeout=10)
-                log('DEBUG',f"Image sent to user id {user_id}")
-            except:
-                log('DEBUG',f"Failed to send image {response['img']} sent to user id {user_id}")
-            try:
-                log('DEBUG',f"Trying to send a message block to user id {user_id} ")
-                self.send_message(user_id,response['response_list'],keyboard)
-            except:
-                log('DEBUG',f"Message block sent to user id {user_id}")
 
             
     @run_async

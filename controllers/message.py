@@ -191,6 +191,23 @@ def fetch_selectors_name(message_index,bot_id):
         (("selector_finders.index",message_index),))
     return selectors
 
+def fetch_triggers_name(message_index,bot_id):
+    """
+    Query the SQL database and return the trigger list associated with a particular bot_id at a certain index
+
+    Parameters:
+        msg_index (string) -- index of the particular message 
+        bot_id (int) -- id of the current bot
+
+    Returns:
+        triggers (list/dict) --  
+    """
+    #we need to actualize the triggers to the lastest state
+    triggers = connection_wrapper(select_from_join,True,"trigger_finders","ALL triggers.name",
+        (("triggers","trigger_finders.trigger_id","triggers.id"),),
+        (("trigger_finders.index",message_index),))
+    return triggers
+
 def fetch_feature_name(message_index,bot_id):
     #we need to actualize the selectors to the lastest state
     features = connection_wrapper(select_from_join,True,"feature_finders","ALL features.name",
@@ -285,7 +302,10 @@ def get_bot_response(bot_id,next_index,user_response,content_index,stressor_obje
          
     else:
         raise NoPossibleAnswer(bot_id,next_indexes)
- 
+    
+    message_local_trigger = [trigger['name'] for trigger in fetch_triggers_name(message_index=final_answers['id'],bot_id=bot_id)] 
+    triggers += message_local_trigger # concatening triggers coming from the previous message selector and the new message "triggers". 
+
     return final_answers['text'],final_answers['next_indexes'],final_answers['name'],triggers
 
 

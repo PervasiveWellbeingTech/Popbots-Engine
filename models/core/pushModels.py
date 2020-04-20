@@ -54,6 +54,17 @@ class FeatureFinders(Base):
     index =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
     feature_id = Column(Integer, ForeignKey('features.id'))
 
+class Trigger(Base):
+    __tablename__='triggers'
+    id = Column(Integer,primary_key=True)
+    name = Column(String)
+
+class TriggerFinders(Base):
+    __tablename__='trigger_finders'
+    id = Column(Integer,primary_key=True)
+    index =  Column(Integer, ForeignKey('trigger_finders.id', ondelete='CASCADE'))
+    trigger_id = Column(Integer, ForeignKey('triggers.id'))
+
 
 class ContentFinders(Base):
     __tablename__='content_finders'
@@ -113,6 +124,27 @@ def push_feature_list(session,features,content_finder_id):
 
     except exc.IntegrityError as error:
         print(error)
+
+def push_trigger_list(session,triggers,content_finder_id):
+
+    try:
+
+        for trig in triggers:
+            trigger = session.query(Trigger).filter_by(name=trig).first()
+
+            if trigger is None:
+                trigger = Trigger(name=trig)
+                session.add(trigger)
+                session.commit()
+
+            manytomany = TriggerFinders(index=content_finder_id,trigger_id = trigger.id)
+            session.add(manytomany)
+        
+        session.commit()
+
+    except exc.IntegrityError as error:
+        print(error)
+
 
 
 if __name__ == "__main__":

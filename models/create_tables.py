@@ -132,6 +132,11 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL)
         """,
+        """
+        CREATE TABLE triggers (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL)
+        """,
         
         """
         CREATE TABLE selectors (
@@ -168,6 +173,14 @@ def create_tables():
             feature_id INTEGER NOT NULL,
             FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (feature_id) REFERENCES features (id) on delete cascade)
+        """,
+        """
+        CREATE TABLE trigger_finders (
+            id SERIAL PRIMARY KEY,
+            index INTEGER NOT NULL,
+            trigger_id INTEGER NOT NULL,
+            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (trigger_id) REFERENCES triggers (id) on delete cascade)
         """,
         """
         CREATE TABLE next_message_finders (

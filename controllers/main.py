@@ -83,8 +83,13 @@ def create_conversation(session,user_id):
 
 
 
+
+
 def get_bot_ids(session,exclude_id,exclude_name):
     return [x.id for x in session.query(Users).filter(Users.category_id==2,~Users.name.contains('Module')) if (x.name not in {exclude_name} and x.id not in {exclude_id})]
+def get_bot_names(session,exclude_id,exclude_name):
+    return [x.name for x in session.query(Users).filter(Users.category_id==2,~Users.name.contains('Module')) if (x.name not in {exclude_name} and x.id not in {exclude_id})]
+
 
 def image_fetcher(bot_text):
     
@@ -124,12 +129,12 @@ def response_engine(session,user_id,user_message):
 
     log('DEBUG',f"Incoming message is: "+str(user_message))
     
-    reply_markup = {'type':'normal','resize_keyboard':True,'text':""} #Set custom keyboard (defaults to none)
-    response_dict={'response_list':[],'img':None,'command':None,'reply_markup':reply_markup} 
 
     next_index = None
     bot_id = None
     tag = None
+    image = None
+    command = {"skip":False,"stack":True}
     
 
     #1. Fetching the active user or create one if needed
@@ -213,7 +218,7 @@ def response_engine(session,user_id,user_message):
 
     if re.match(r'/switch', user_message): #switch
         
-        next_index,bot_id,content_index = change_bot(session,bot_id,None)
+        next_index,bot_id,content_index = change_bot(session,bot_id,'Switch Module')
 
     #include here the problem with problem parser
     problem = "that"
@@ -221,47 +226,56 @@ def response_engine(session,user_id,user_message):
     stressor = session.query(Stressor).filter_by(conversation_id = conversation.id).first()
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
     
+
+
 
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
 
     ## handle special flag in bot scrips 
 
     if "<SWITCH>" in bot_text:
-        response_dict['command'] = "skip"
+        command = {"skip":True,"stack":False}
         bool_trigger = [True if "~" in x else False for x in triggers]
 
         if any(bool_trigger):
+            
             next_bot_name = [x for x in triggers if "~" in x][0].replace("~","")
-            if next_bot_name == "choose_bot":
+            
+            if next_bot_name == "choose_bot" or user_message=="Choose for me":
                 log('INFO',f"Switching to bot or module {next_bot_name}, from id {bot_id}")
-                next_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=None)
+                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=None)
+            
+            elif next_bot_name == "user_input":
+                log('INFO',f"Switching to bot or module {next_bot_name}, from id {bot_id}")
+                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=user_message)
+            
             else:
-                next_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
 
             log("DEBUG",f"Switching to a new bot with bot_id = {bot_id} and name {next_bot_name} ")
         else:
             log('ERROR',f"Trying to switch to a new bot but there is no ~something in triggers")
     
     elif bot_text == "<START>":
-        response_dict['command'] = "skip"
+        command = {"skip":True,"stack":False}
     
     elif bot_text == "<SKIP>":
-        response_dict['command'] = "skip"
+        command = {"skip":True,"stack":False}
     
     #closing the conversation if needed
     if "<CONVERSATION_END>" in bot_text: 
         log('DEBUG',f'Ending conversation id {conversation.id} for user {user.id}')
         conversation.closed = True
         session.commit()
-        response_dict['command'] = "skip"
+        command = {"skip":False,"stack":False}
     
     # if the response is empty switch bot, add the message to db but keep
     if bot_text == "" or bot_text is None:
         log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
-        next_index,bot_id,content_index = change_bot(session,bot_id,None)
-        response_dict['command'] = "skip"
+        current_index,bot_id,content_index = change_bot(session,bot_id,None)
+        command = {"skip":True,"stack":False}
         
     
     #fetching the bot_user
@@ -287,6 +301,8 @@ def response_engine(session,user_id,user_message):
                     tag = re.sub('tag:','',trigger)
                 elif "!stressor" in trigger:
                     push_stressor(session = session,conv_id = conversation.id)#conversation.id)
+                elif "!skip_response" in trigger:
+                    command = {"skip":True,"stack":True}
 
 
     except Exception as error:
@@ -294,30 +310,30 @@ def response_engine(session,user_id,user_message):
 
     # handle images if required
     if "$img$" in bot_text:
-        bot_text,img = image_fetcher(bot_text)
-        response_dict['img'] = img
+        bot_text,image = image_fetcher(bot_text)
+        
         
 
     log("DEBUG",f"The user id is: {user_id}")
 
-    if next_index is None:
-        log('ERROR',"Something went wrong next_index is None ???? Will log bad data")
+    if current_index is None:
+        log('ERROR',"Something went wrong current_index is None ???? Will log bad data")
 
     #pushing messages in database
     push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
-    push_message(session,text=bot_text,user_id=bot_id,index=next_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=None) # pushing the bot response
+    push_message(session,text=bot_text,user_id=bot_id,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=None) # pushing the bot response
 
 
     
     # parsing the data before sending
-    response_dict['response_list'] = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\n")
+    response_list = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\n")
     
     # formatting the text with the neccessary info eg: user:name, etc...
     try: 
         templist = []
-        for res in response_dict['response_list']:
+        for res in response_list:
             templist.append(eval(f"f'{res}'"))
-        response_dict['response_list'] = templist
+        response_list = templist
         
     except BaseException as error:
         log('ERROR',f"String interpolation for {bot_user.id},{bot_user.name} failed due to: {error}")
@@ -333,17 +349,24 @@ def response_engine(session,user_id,user_message):
     #handle keyboards add reply markup
     if keyboard=="default":
         reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
+    
+    elif keyboard == "all_bots":
+
+        possible_bot = get_bot_names(session,None,None) #### Replace with the correct module
+        possible_bot.insert(0,"Choose for me")
+        keyboard = ','.join(possible_bot)
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}
     else:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #
         
-    response_dict['reply_markup'] = reply_markup
-    response_dict['bot_name'] = bot_user.name
+    bot_name = bot_user.name
 
 
     session.commit()
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
-    return response_dict
+
+    return command,response_list,image,bot_name,reply_markup
 
 
 
@@ -357,12 +380,23 @@ def dialog_flow_engine(user_id,user_message):
 
 
     reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-    try:
-        command = "skip"
-        while command == "skip":
+    response_dict={'response_list':[],'img':None,'reply_markup':reply_markup,'bot_name':""}
 
-            response_dict  = response_engine(session,user_id,user_message)
-            command = response_dict['command']
+    try:
+        command = {"skip":True,"stack":False}
+        while command["skip"]==True:
+
+            command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+
+            if command["stack"] == True:
+                if image is not None:
+                    response_dict['response_list'].append("image")
+                response_dict['response_list'] = response_dict['response_list'] + response_list
+            
+            response_dict['img'] = image
+            response_dict['reply_markup'] = reply_markup
+            response_dict['bot_name'] = bot_name
+
         return response_dict
     
     except BadKeywordInputError as error:

@@ -5,20 +5,20 @@ from oauth2client import file, client, tools
 import pandas as pd
 
 
+from google.oauth2 import service_account
+
+SCOPES = ['https://www.googleapis.com/auth/sqlservice.admin']
+SERVICE_ACCOUNT_FILE = 'credentials/service_credentials.json'
 
 
 
 def get_google_sheet(spreadsheet_id, range_name):
     """ Retrieve sheet data using OAuth credentials and Google Python API. """
-    scopes = 'https://www.googleapis.com/auth/spreadsheets.readonly'
-    # Setup the Sheets API
-    store = file.Storage('credentials/credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('credentials/client_secrets.json', scopes)
-        creds = tools.run_flow(flow, store)
-    service = build('sheets', 'v4', http=creds.authorize(Http()))
+    scopes = ['https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/drive']	
 
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=scopes)
+    service = build('sheets', 'v4', credentials = creds)
     # Call the Sheets API
     gsheet = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_name).execute()
     return gsheet
@@ -53,15 +53,3 @@ def fetch_csv(SPREADSHEET_ID,RANGE_NAME):
 
     return df
 
-
-if __name__ == "__main__":
-
-    """ Retrieve sheet data using OAuth credentials and Google Python API. """
-    scopes = 'https://www.googleapis.com/auth/spreadsheets.readonly'
-    # Setup the Sheets API
-    store = file.Storage('credentials/credentials.json')
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets('credentials/client_secrets.json', scopes)
-        creds = tools.run_flow(flow, store)
-    service = build('sheets', 'v4', http=creds.authorize(Http()))
