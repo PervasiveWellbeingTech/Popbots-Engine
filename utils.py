@@ -45,6 +45,8 @@ def log(log_type,string):
 
     if log_type=="AUTHORING ERROR" or log_type=="FATAL ERROR":
         logger.error(string)
+    elif log_type == 'ERROR':
+        logger.error(string)
     elif log_type == 'DEBUG':
         logger.debug(string)
     elif log_type == "INFO":

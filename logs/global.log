@@ -1,2 +1,23 @@
 2020-04-16 15:27:07,384 ERROR Onboarding Bot is not in the database
 2020-04-16 15:49:17,100 ERROR affirmation module is not in the database
+2020-04-22 18:46:39,882 ERROR :loudspeaker: [FATAL ERROR]name 'session' is not defined  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 389, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 229, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 253, in get_bot_response
+    bot_user = session.query(Users).filter_by(id = bot_id).first()
+
+2020-04-22 18:50:11,257 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 18:51:48,071 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 18:52:57,257 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 18:54:50,889 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 18:57:49,820 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 18:58:15,968 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 19:01:32,832 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 19:10:26,553 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 19:17:26,064 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch possible feature from selector none , but given features at next index is no" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
+2020-04-22 19:31:20,090 ERROR :x: [FATAL AUTHORING ERROR] Selector to feature mismatch. Possible feature from selector: none , but features given at next index is: no. This is an authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved

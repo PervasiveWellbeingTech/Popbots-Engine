@@ -224,9 +224,11 @@ def response_engine(session,user_id,user_message):
     problem = "that"
 
     stressor = session.query(Stressor).filter_by(conversation_id = conversation.id).first()
+    
+    bot_user = session.query(Users).filter_by(id = bot_id).first()
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,current_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
     
 
 

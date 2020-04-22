@@ -12,7 +12,7 @@ class AuthoringError(Exception):
             bot_id, message_index, authoring_error_type)
 
     def __str__(self):
-        return f'"{self.authoring_error_type}" authoring error for bot_id: "{self.bot_id}"" at message_index: "{self.message_index}" the bot will be deactivated until this issue has been resolved'
+        return f'{self.authoring_error_type}. This is an authoring error for bot named: "{self.bot_id}"" at message_index: "{self.message_index}" the bot should be should be deacivated until this issue has been resolved'
 
 
 

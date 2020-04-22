@@ -247,13 +247,14 @@ def fetch_next_contents(bot_id,next_indexes):
     return content_list
 
 @timed 
-def get_bot_response(bot_id,next_index,user_response,content_index,stressor_object):
+def get_bot_response(bot_user,next_index,user_response,content_index,stressor_object):
     global stressor
 
+    bot_id = bot_user.id
     stressor = stressor_object
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
-    if len(next_indexes)<1:raise AuthoringError(bot_id,next_index,"no next index in next_message_finder")
+    if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index in next_message_finder")
     log('DEBUG',f'Possible indexes are : {next_indexes}')
     
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
@@ -265,7 +266,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index,stressor_obje
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)]
     
     try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
-    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_id,next_index,"bad selector pattern") from e
+    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad selector pattern") from e
     
     log('DEBUG',f'Possible features are: {features_name}')
     log('DEBUG',f'All possible feature from selectors are {parsed_features}')
@@ -280,7 +281,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index,stressor_obje
     
     
     if not bool(set(parsed_features).intersection(features_name)):
-        raise AuthoringError(bot_id,next_index,"Selector to feature mismatch")
+        raise AuthoringError(bot_user.name,next_index,f"Selector to feature mismatch. Possible feature from selector: {' and '.join(set(parsed_features))} , but features given at next index is: {' and '.join(features_name)}")
 
     if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
         raise BadKeywordInputError(features_name)
@@ -294,7 +295,7 @@ def get_bot_response(bot_id,next_index,user_response,content_index,stressor_obje
     log('DEBUG',f'Possible answers are : {possible_answers}')
 
     if 'random!' not in triggers and len(possible_answers)>1:
-        raise AuthoringError(bot_id,next_index,"Multiple responses and random is not in the feature space")
+        raise AuthoringError(bot_user.name,next_index,"Multiple responses and random is not in the feature space")
         
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
