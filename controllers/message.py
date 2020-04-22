@@ -32,7 +32,7 @@ def min_word(input_string,word_len,condition,alternative):
 
 def greater_than(el1,el2,condition,alternative):
     
-    if el1>el2:
+    if int(el1)>int(el2):
         return condition,[condition,alternative]
     else:
         return alternative,[condition,alternative]
