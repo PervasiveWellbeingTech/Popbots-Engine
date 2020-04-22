@@ -74,7 +74,7 @@ def return_feature(input_string,condition,alternative):
     """
     Fetch the synonyms of the condition and return condition if input_string contains one the words or alternative. 
     """    
-    word_list = FEATURES_DICT_VOCAB[condition]
+    
     if "^" in condition:
         condition = condition.replace("^", "")
 
@@ -83,6 +83,7 @@ def return_feature(input_string,condition,alternative):
         else:
             feature = alternative
     else:
+        word_list = FEATURES_DICT_VOCAB[condition]
 
         if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
                 feature = condition
