@@ -36,7 +36,12 @@ def greater_than(el1,el2,condition,alternative):
         return condition,[condition,alternative]
     else:
         return alternative,[condition,alternative]
+def is_number(input_string,condition,alternative):
 
+    if input_string.isdecimal():
+        return condition,[condition,alternative]
+    else:
+        return alternative,[condition,alternative]
 
 
 def flatten(l):
@@ -132,7 +137,10 @@ def feature_selector_split(input_string,selector):
             selector = selector.replace("@","")
             feature,temp_parsed_features = eval(selector)
             parsed_features = parsed_features + temp_parsed_features
-
+        elif "@is_number" in selector:
+            selector = selector.replace("@","")
+            feature,temp_parsed_features = eval(selector)
+            parsed_features = parsed_features + temp_parsed_features
             
     elif "none" in selector:
         feature = "none"
