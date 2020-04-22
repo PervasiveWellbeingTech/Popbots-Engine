@@ -95,7 +95,7 @@ try:
             r = re.compile(r'(?:[^,(]|\([^)]*\))+')
 
             if "(" in script.selectors or ")" in script.selectors:
-                selectors = script.selector
+                selectors = script.selectors
             else:
                 selectors = r.findall(script.selectors)
          
