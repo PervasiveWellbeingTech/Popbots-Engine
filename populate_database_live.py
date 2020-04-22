@@ -93,11 +93,16 @@ try:
 
             print(f"Added new content {new_content.content_finders_id}")
             r = re.compile(r'(?:[^,(]|\([^)]*\))+')
+
+            if "(" in script.selectors or ")" in script.selectors:
+                selectors = script.selector
+            else:
+                selectors = r.findall(script.selectors)
          
 
             ## adding features and selectors
             push_feature_list(session,features=r.findall(script.features),content_finder_id=new_content.content_finders_id)
-            push_selector_list(session,selectors=r.findall(script.selectors),content_finder_id=new_content.content_finders_id)
+            push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
             push_trigger_list(session,triggers=r.findall(script.triggers),content_finder_id=new_content.content_finders_id)
 
         print(f'Added all new contents for bot {user.name}')
