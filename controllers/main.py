@@ -259,6 +259,7 @@ def response_engine(session,user_id,user_message):
             log("DEBUG",f"Switching to a new bot with bot_id = {bot_id} and name {next_bot_name} ")
         else:
             log('ERROR',f"Trying to switch to a new bot but there is no ~something in triggers")
+            raise AuthoringError(bot_user.name,current_index,"Trying to switch to a new bot but there is no valid ~ tilda")
     
     elif bot_text == "<START>":
         command = {"skip":True,"stack":False}

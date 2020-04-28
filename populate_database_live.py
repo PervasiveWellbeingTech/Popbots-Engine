@@ -69,57 +69,62 @@ try:
             language_id = push_element(Language,script.language)
             language_type_id = push_element(LanguageTypes,script.language_type)
             keyboard_id = push_element(Keyboards,script.keyboard)
-                
-
-            new_content = ContentFinderJoin(
-
-                user_id = user.id,
-                source_message_index = None,
-                message_index = script.msg_index,
-                bot_content_index = script.msg_index,    
-                content_id = content.id,            
-                #features_index = features_index,
-                #selectors_index = selectors_index,
-                language_type_id = language_type_id,
-                language_id = language_id,
-                keyboard_id = keyboard_id
-                
-
-            )
             
-            session.add(new_content)
-            session.commit()
+            incoming_branch_option_list = script.incoming_branch_option.split(",")
+
+            for feature in incoming_branch_option_list:
+
+                new_content = ContentFinderJoin(
+
+                    user_id = user.id,
+                    source_message_index = None,
+                    message_index = script.msg_index,
+                    bot_content_index = script.msg_index,    
+                    content_id = content.id,            
+
+                    language_type_id = language_type_id,
+                    language_id = language_id,
+                    keyboard_id = keyboard_id
+                    
+
+                )
+            
+                session.add(new_content)
+                session.commit()
 
 
-            print(f"Added new content {new_content.content_finders_id}")
-            r = re.compile(r'(?:[^,(]|\([^)]*\))+')
+                print(f"Added new content {new_content.content_finders_id}")
+                r = re.compile(r'(?:[^,(]|\([^)]*\))+')
 
-            if "(" in script.selectors or ")" in script.selectors:
-                selectors = [script.selectors]
-            else:
-                selectors = r.findall(script.selectors)
-         
+                if "(" in script.branching_option or ")" in script.branching_option:
+                    branching_option = [script.branching_option]
+                else:
+                    branching_option = r.findall(script.branching_option)
 
-            ## adding features and selectors
-            push_feature_list(session,features=r.findall(script.features),content_finder_id=new_content.content_finders_id)
-            push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
-            push_trigger_list(session,triggers=r.findall(script.triggers),content_finder_id=new_content.content_finders_id)
+                user_input_tag = script.user_input_tag.split(",")
 
+                selectors = branching_option + user_input_tag
+                
+
+                ## adding incoming_branch_option and branching_options and next_actions
+                push_feature_list(session,features=r.findall(feature),content_finder_id=new_content.content_finders_id)
+                push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
+                push_trigger_list(session,triggers=r.findall(script.next_action),content_finder_id=new_content.content_finders_id)
+
+            for next_index in script.next_indexes.split(","):
+                if next_index != 'none':
+
+                    new_nmf = NextMessageFinders(
+                        user_id = user.id,
+                        source_message_index = script.msg_index,
+                        next_message_index = int(next_index)
+                    )
+                    session.add(new_nmf)
+                    session.commit()
+        
         print(f'Added all new contents for bot {user.name}')
 
-        bot_nmf = fetch_csv(SPREADSHEET_ID,"nmf_"+bot.split(" ")[0].lower())
-
-        for index,nmf in bot_nmf.iterrows():
-
-            new_nmf = NextMessageFinders(
-                user_id = user.id,
-                source_message_index = nmf['msg_index'],
-                next_message_index = nmf['next_msg_index']
-            )
-            session.add(new_nmf)
-            session.commit()
-            print(f'Added nmf contents with id: {new_nmf.id} for bot {user.name}')
-        print(f'Added nmf contents for bot {user.name}')
+      
 
 
 
