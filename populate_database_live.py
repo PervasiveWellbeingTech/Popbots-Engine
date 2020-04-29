@@ -100,10 +100,13 @@ try:
                     branching_option = [script.branching_option]
                 else:
                     branching_option = r.findall(script.branching_option)
-
+                
+                selectors = branching_option
                 user_input_tag = script.user_input_tag.split(",")
 
-                selectors = branching_option + user_input_tag
+                for tag in user_input_tag:
+                    if tag != 'none':
+                        selectors += tag
                 
 
                 ## adding incoming_branch_option and branching_options and next_actions
