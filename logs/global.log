@@ -22,3 +22,18 @@
 2020-04-22 19:17:26,064 ERROR :x: [FATAL AUTHORING ERROR] "Selector to feature mismatch possible feature from selector none , but given features at next index is no" authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
 2020-04-22 19:31:20,090 ERROR :x: [FATAL AUTHORING ERROR] Selector to feature mismatch. Possible feature from selector: none , but features given at next index is: no. This is an authoring error for bot named: "Checkin Bot"" at message_index: "9" the bot should be should be deacivated until this issue has been resolved
 2020-04-28 18:18:44,231 ERROR :x: [FATAL AUTHORING ERROR] Multiple responses and random is not in the feature space. This is an authoring error for bot named: "Sir Laughs A Bot"" at message_index: "3" the bot should be should be deacivated until this issue has been resolved
+2020-04-30 00:36:20,042 ERROR :loudspeaker: [FATAL ERROR]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 392, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 231, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 286, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 184, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 162, in feature_selector_split
+    raise BaseException
+

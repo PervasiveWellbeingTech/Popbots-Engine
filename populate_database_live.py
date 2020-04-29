@@ -102,12 +102,11 @@ try:
                     branching_option = r.findall(script.branching_option)
                 
                 selectors = branching_option
-                user_input_tag = script.user_input_tag.split(",")
+                user_input_tag = str(script.user_input_tag).split(",")
 
-                for tag in user_input_tag:
+                for index,tag in enumerate(user_input_tag):
                     if tag != 'none':
-                        selectors += tag
-                
+                        selectors +=  [str(tag)]
 
                 ## adding incoming_branch_option and branching_options and next_actions
                 push_feature_list(session,features=r.findall(feature),content_finder_id=new_content.content_finders_id)
