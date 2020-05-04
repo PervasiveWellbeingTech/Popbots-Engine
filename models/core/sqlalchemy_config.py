@@ -13,7 +13,7 @@ RUNNING_DEVSERVER = False
 metadata = MetaData()
 
 
-engine = create_engine(config_string())
+engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=20)
 session_factory = sessionmaker(bind=engine,autoflush=True)
 Session = scoped_session(session_factory)
 
