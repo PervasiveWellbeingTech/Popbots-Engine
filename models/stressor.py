@@ -35,7 +35,7 @@ class Stressor(Base):
 import requests
 import ast
 
-FLASK_CLASSIFIER_SERVER_URL = "http://18.191.63.187/classifier/stressor/"
+FLASK_CLASSIFIER_SERVER_URL = "http://3.21.127.11/classifier/stressor/"
 
 
 def get_pred_api(stressor):
