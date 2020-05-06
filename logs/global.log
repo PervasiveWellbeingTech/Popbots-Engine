@@ -37,3 +37,137 @@
   File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 162, in feature_selector_split
     raise BaseException
 
+2020-05-06 17:40:49,571 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object has no attribute 'id'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 392, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 215, in response_engine
+    content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
+
+2020-05-06 18:19:39,580 ERROR :loudspeaker: [FATAL ERROR]Can't determine join between 'users' and 'messages'; tables have more than one foreign key constraint relationship between them. Please specify the 'onclause' of this join explicitly.  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 367, in response_engine
+    latest_bot = session.query(Users).join(Message).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2288, in join
+    return self._join(
+  File "<string>", line 2, in _join
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/base.py", line 220, in generate
+    fn(self, *args[1:], **kw)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2471, in _join
+    self._join_left_to_right(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2547, in _join_left_to_right
+    orm_join(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/util.py", line 1144, in join
+    return _ORMJoin(left, right, onclause, isouter, full)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/util.py", line 1043, in __init__
+    expression.Join.__init__(self, left, right, onclause, isouter, full)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/selectable.py", line 744, in __init__
+    self.onclause = self._match_primaries(self.left, self.right)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/selectable.py", line 887, in _match_primaries
+    return self._join_condition(left, right, a_subset=left_right)
+  File "<string>", line 2, in _join_condition
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/deprecations.py", line 128, in warned
+    return fn(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/selectable.py", line 937, in _join_condition
+    cls._joincond_trim_constraints(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/selectable.py", line 1050, in _joincond_trim_constraints
+    raise exc.AmbiguousForeignKeysError(
+
+2020-05-06 18:23:26,723 ERROR :loudspeaker: [FATAL ERROR]type object 'Message' has no attribute 'user_id'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 367, in response_engine
+    latest_bot = session.query(Users).join(Message,on=Users.id==Message.user_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
+
+2020-05-06 18:24:38,864 ERROR :loudspeaker: [FATAL ERROR]unknown arguments: on  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 367, in response_engine
+    latest_bot = session.query(Users).join(Message,on=Users.id==Message.sender_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2285, in join
+    raise TypeError(
+
+2020-05-06 18:26:29,665 ERROR :loudspeaker: [FATAL ERROR]entity  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 367, in response_engine
+    latest_bot = session.query(Users).join(Message.sender_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2288, in join
+    return self._join(
+  File "<string>", line 2, in _join
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/base.py", line 220, in generate
+    fn(self, *args[1:], **kw)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2426, in _join
+    right = onclause.property.entity
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/langhelpers.py", line 977, in __getattr__
+    return self._fallback_getattr(key)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/langhelpers.py", line 951, in _fallback_getattr
+    raise AttributeError(key)
+
+2020-05-06 18:27:41,224 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object has no attribute 'name'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 369, in response_engine
+    bot_name = latest_bot.name
+
+2020-05-06 18:28:43,275 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object has no attribute 'name'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 369, in response_engine
+    bot_name = latest_bot.name
+
+2020-05-06 18:30:23,840 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.DatatypeMismatch) argument of NOT must be type boolean, not type integer
+LINE 3: ...users.name NOT LIKE '%' || 'Bot' || '%') AND (NOT messages.c...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users JOIN messages ON users.id = messages.sender_id 
+WHERE users.category_id = %(category_id_1)s AND (users.name NOT LIKE '%%' || %(name_1)s || '%%') AND (NOT messages.conversation_id) = %(param_1)s 
+ LIMIT %(param_2)s]
+[parameters: {'category_id_1': 2, 'name_1': 'Bot', 'param_1': 63, 'param_2': 1}]
+(Background on this error at: http://sqlalche.me/e/f405)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 367, in response_engine
+    latest_bot = session.query(Users).join(Message,Users.id==Message.sender_id).filter(Users.category_id==2,~Users.name.contains('Bot'),~Message.conversation_id == conversation.id).first()#.order_by(Message.id.desc()).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-06 18:31:36,038 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object has no attribute 'name'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 396, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 369, in response_engine
+    bot_name = latest_bot.name
+
+2020-05-06 18:39:19,002 ERROR :x: [FATAL AUTHORING ERROR] Multiple responses and random is not in the feature space. This is an authoring error for bot named: "Sherlock Bot"" at message_index: "7" the bot should be should be deacivated until this issue has been resolved

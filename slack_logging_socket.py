@@ -34,3 +34,4 @@ def callback(filename, lines):
 watcher = LogWatcher("logs/", callback)
 while 1:
     watcher.loop(blocking=False)
+    time.sleep(0.5)

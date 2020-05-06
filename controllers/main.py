@@ -6,6 +6,7 @@ import traceback
 
 from datetime import datetime
 
+import sqlalchemy,psycopg2 # import to get errors
 
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
@@ -330,7 +331,8 @@ def response_engine(session,user_id,user_message):
     
     # parsing the data before sending
     response_list = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\n")
-    
+    latest_bot = session.query(Users).join(Message,Users.id==Message.receiver_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
+
     # formatting the text with the neccessary info eg: user:name, etc...
     try: 
         templist = []
@@ -362,7 +364,12 @@ def response_engine(session,user_id,user_message):
     else:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #
         
-    bot_name = bot_user.name
+    
+    
+    if latest_bot is None:
+        bot_name = bot_user.name
+    else:
+        bot_name = latest_bot.name
 
 
     session.commit()
@@ -425,6 +432,19 @@ def dialog_flow_engine(user_id,user_message):
         delconv(session,user_id)
         return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
     
+
+    except (psycopg2.OperationalError,sqlalchemy.exc.InvalidRequestError) as error:
+
+        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
+        
+        tb = traceback.TracebackException.from_exception(error)
+        log('ERROR',":loudspeaker: [FATAL ERROR]" + str(error)+str(''.join(tb.stack.format())))
+        session.rollback()
+        delconv(session,user_id)
+        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot","error":error}
+
+        return response_dict
+
     except BaseException as error:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
