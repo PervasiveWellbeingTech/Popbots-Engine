@@ -72,6 +72,7 @@ def select_from(cur, table,column, *where):
     sql_query = f"SELECT {column} FROM {table} WHERE {conditions};"
     
     rows = None
+    print(sql_query)
     try:
         
         cur.execute(sql_query)
@@ -98,7 +99,6 @@ def select_from_join(cur,table,column,joins,wheres):
     sql_query = f"SELECT {column} FROM {table} {joins} WHERE {conditions};"
     #print(f"""This is the SQL QUERY:\n{sql_query}""")
     rows = None
-    print(sql_query)
     try:
       
         cur.execute(sql_query)

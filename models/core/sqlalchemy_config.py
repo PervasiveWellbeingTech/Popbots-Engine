@@ -8,6 +8,8 @@ from sqlalchemy.orm import sessionmaker,column_property,relationship
 from sqlalchemy.ext.declarative import declarative_base
 from models.core.config import config_string # this is the sqlalchemy formatted string
 
+from utils import log,timed
+
 RUNNING_DEVSERVER = False
 
 metadata = MetaData()
@@ -24,9 +26,7 @@ def get_base():
 
 class ThreadSessionRequest(object):
     def __init__(self): # , request, *args, **kwargs
-        engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=20)
-        session_factory = sessionmaker(bind=engine,autoflush=True)
-        Session = scoped_session(session_factory)
+
         self.s = Session()
 
     
@@ -34,11 +34,13 @@ class ThreadSessionRequest(object):
         if self.s:
             self.remove_session()
 
+
     def remove_session(self):
         if self.s:
             try:
                 self.safe_commit()
             finally:
+                self.s.close()
                 Session.remove()
                 del self.s
                 self.s = None
@@ -48,5 +50,6 @@ class ThreadSessionRequest(object):
             try:
                 self.s.commit()
             except:
+
                 self.s.rollback()
                 raise

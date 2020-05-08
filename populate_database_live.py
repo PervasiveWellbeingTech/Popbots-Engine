@@ -37,6 +37,8 @@ try:
     user_table = fetch_csv(SPREADSHEET_ID,RANGE_NAME)
     active_bots = [user['name'] for index,user in user_table[(user_table['active'] == '1') & (user_table['updated'] == '1')].iterrows() ]
     print(f'Actives Bot are: {active_bots}')
+    features_synonyms_regexes = fetch_csv(SPREADSHEET_ID,'branching_synonyms_regexes')
+
     for bot in active_bots:
 
         user = session.query(Users).filter_by(name=bot).first()
@@ -109,7 +111,7 @@ try:
                         selectors +=  [str(tag)]
 
                 ## adding incoming_branch_option and branching_options and next_actions
-                push_feature_list(session,features=r.findall(feature),content_finder_id=new_content.content_finders_id)
+                push_feature_list(session,features=r.findall(feature),content_finder_id=new_content.content_finders_id,synonyms_regexes=features_synonyms_regexes)
                 push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
                 push_trigger_list(session,triggers=r.findall(script.next_action),content_finder_id=new_content.content_finders_id)
 
@@ -124,7 +126,7 @@ try:
                     session.add(new_nmf)
                     session.commit()
         
-        print(f'Added all new contents for bot {user.name}')
+        print(f"Added all new contents for bot {user.name}")
 
       
 

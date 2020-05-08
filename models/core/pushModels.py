@@ -1,6 +1,8 @@
 
 from models.core.sqlalchemy_config import * #delete all the above and see if it works
 from models.user import Users
+import traceback
+import pandas as pd
 
 
 session = get_session()
@@ -47,6 +49,8 @@ class Features(Base):
     __tablename__='features'
     id = Column(Integer,primary_key=True)
     name = Column(String)
+    synonyms = Column(String)
+    regex=Column(String)
 
 class FeatureFinders(Base):
     __tablename__='feature_finders'
@@ -105,25 +109,52 @@ def push_selector_list(session,selectors,content_finder_id):
     except Exception as error:
         print(error)
 
-def push_feature_list(session,features,content_finder_id):
+def push_feature_list(session,features,content_finder_id,synonyms_regexes):
 
     try:
 
         for fea in features:
-            feature = session.query(Features).filter_by(name=fea).first()
 
-            if feature is None:
-                feature = Features(name=fea)
-                session.add(feature)
-                session.commit()
+            
+            row = synonyms_regexes.loc[synonyms_regexes['incoming_branch_option']==fea,:] 
+            if all(list(row.all().isnull().values)):
+                raise Exception(f"No synonyms nor regex has been found for incoming_branching_options {fea}")
+            else:
 
-            manytomany = FeatureFinders(index=content_finder_id,feature_id = feature.id)
-            session.add(manytomany)
+             
+                if row.regex.values == 'none':
+                    regex = None
+                else:
+                    regex = str(row.regex.values).strip("'")
+
+                if row.synonyms.values == 'none':
+                    synonyms = None
+                else:
+                    synonyms = str(row.synonyms.values).strip("][").strip("'")
+
+                if synonyms is None and regex is None and fea != 'none':
+                    raise Exception(f"Synonyms and regex together are none for incoming_branching_options(ICO) {fea} this is not allowed, the synonym should at least contain (if applies) the name of the ICO itself")
+                
+                feature = session.query(Features).filter_by(name=fea).first()
+
+                if feature is None:
+                    feature = Features(name=fea,synonyms=synonyms,regex=regex)
+                    session.add(feature)
+                    session.commit()
+                else:
+                    feature.synonyms = synonyms
+                    feature.regex = regex
+                    session.commit()
+
+                manytomany = FeatureFinders(index=content_finder_id,feature_id = feature.id)
+                session.add(manytomany)
         
         session.commit()
 
     except Exception as error:
         print(error)
+        tb = traceback.TracebackException.from_exception(error)
+        print(''.join(tb.stack.format()))
 
 def push_trigger_list(session,triggers,content_finder_id):
 
@@ -144,6 +175,8 @@ def push_trigger_list(session,triggers,content_finder_id):
 
     except Exception as error:
         print(error)
+        tb = traceback.TracebackException.from_exception(error)
+        print(''.join(tb.stack.format()))
 
 
 

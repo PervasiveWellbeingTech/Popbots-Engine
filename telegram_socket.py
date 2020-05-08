@@ -132,9 +132,13 @@ class TelegramBot():
                         self.process_message(message.chat_id, final_message)
                         message_queue.clear()
             
+            except (BaseException,Exception) as error:
+                log('ERROR',error)
             except:
                 exc_info = sys.exc_info()
+
             finally:
+
                 traceback.print_exception(*exc_info)
                 del exc_info
            
@@ -155,7 +159,7 @@ class TelegramBot():
         dp.add_handler(CommandHandler("start", self.callback_handler))
         dp.add_handler(CommandHandler("switch", self.callback_handler))
 
-        #dp.add_error_handler(self.error_callback)
+        dp.add_error_handler(self.error_callback)
         log('INFO',"Started telegram bot socket ... (Ctrl-C to exit)")
         updater.start_polling()
 

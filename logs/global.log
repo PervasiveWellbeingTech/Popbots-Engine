@@ -171,3 +171,682 @@ WHERE users.category_id = %(category_id_1)s AND (users.name NOT LIKE '%%' || %(n
     bot_name = latest_bot.name
 
 2020-05-06 18:39:19,002 ERROR :x: [FATAL AUTHORING ERROR] Multiple responses and random is not in the feature space. This is an authoring error for bot named: "Sherlock Bot"" at message_index: "7" the bot should be should be deacivated until this issue has been resolved
+2020-05-08 13:02:24,739 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object is not subscriptable  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 319, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms,regex = synonyms_regexes['synonyms'],synonyms_regexes['regex']
+
+2020-05-08 13:04:20,125 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object is not subscriptable  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 319, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms,regex = synonyms_regexes['synonyms'],synonyms_regexes['regex']
+
+2020-05-08 13:06:19,102 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object is not subscriptable  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 320, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms = synonyms_regexes['synonyms']
+
+2020-05-08 13:07:26,083 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object is not subscriptable  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 320, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms = synonyms_regexes['synonyms']
+
+2020-05-08 13:10:18,491 ERROR :loudspeaker: [FATAL ERROR]'NoneType' object is not subscriptable  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 320, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms = synonyms_regexes['synonyms']
+
+2020-05-08 13:14:28,683 ERROR :loudspeaker: [FATAL ERROR]list indices must be integers or slices, not str  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 320, in get_bot_response
+    log('DEBUG',fetch_synonyms_regex('greeting'))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 78, in fetch_synonyms_regex
+    synonyms = synonyms_regexes['synonyms']
+
+2020-05-08 16:45:55,445 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 16:46:23,557 ERROR :loudspeaker: [FATAL ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 220, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 16:53:47,617 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 16:54:28,187 ERROR :loudspeaker: [FATAL ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 17:02:29,886 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Greeting Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 220, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 17:02:55,314 ERROR :loudspeaker: [FATAL ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 17:04:33,245 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 17:04:49,392 ERROR :loudspeaker: [FATAL ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 17:07:04,079 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 17:09:00,791 ERROR :loudspeaker: [FATAL ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 17:10:57,391 ERROR :loudspeaker: [FATAL ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 17:12:09,210 ERROR :loudspeaker: [FATAL BASE ERROR]unbalanced parenthesis at position 81  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 300, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 205, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 147, in feature_selector_split
+    all_selectors.append(return_feature(input_string,fea,alternative))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 110, in return_feature
+    if find_keyword(input_string,synonyms) or re.match(rf"{regex}",input_string):#and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+  File "/usr/lib/python3.8/re.py", line 189, in match
+    return _compile(pattern, flags).match(string)
+  File "/usr/lib/python3.8/re.py", line 302, in _compile
+    p = sre_compile.compile(pattern, flags)
+  File "/usr/lib/python3.8/sre_compile.py", line 764, in compile
+    p = sre_parse.parse(p, flags)
+  File "/usr/lib/python3.8/sre_parse.py", line 962, in parse
+    raise source.error("unbalanced parenthesis")
+
+2020-05-08 17:15:42,094 ERROR :x: [FATAL AUTHORING ERROR] Selector to feature mismatch. Possible feature from selector: else and greeting , but features given at next index is: none. This is an authoring error for bot named: "Greeting Module"" at message_index: "4" the bot should be should be deacivated until this issue has been resolved
+2020-05-08 17:16:34,616 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Affirmation Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 287, in response_engine
+    current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 54, in change_bot
+    bot_id = get_user_id_from_name(destination_bot_name)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-08 17:17:00,391 ERROR :loudspeaker: [FATAL BASE ERROR](sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1177, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1173, in _execute_context
+    conn = self._revalidate_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 456, in _revalidate_connection
+    raise exc.InvalidRequestError(
+
+2020-05-08 17:45:28,805 ERROR :loudspeaker: [FATAL BASE ERROR]'NoneType' object has no attribute 'replace'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 303, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 208, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 150, in feature_selector_split
+    all_selectors.append(return_feature(input_string,fea,alternative))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 106, in return_feature
+    regex = regex.replace(" ","") #replacing empty spaces in case
+
+2020-05-08 17:48:41,820 ERROR :loudspeaker: [FATAL BASE ERROR]'NoneType' object has no attribute 'replace'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 263, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 303, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 208, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 150, in feature_selector_split
+    all_selectors.append(return_feature(input_string,fea,alternative))
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 106, in return_feature
+    regex = regex.replace(" ","") #replacing empty spaces in case
+

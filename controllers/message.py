@@ -1,5 +1,5 @@
-from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from
 import psycopg2
+import re
 from functools import partial
 import string
 import random
@@ -9,6 +9,8 @@ from utils import log,timed
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
+from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from
+
 
 from nltk.tokenize import word_tokenize
 
@@ -69,6 +71,21 @@ def find_keyword(input_str, word_list):
     input_str = input_str.lower()
     return any([str(each) in str(input_str) for each in word_list])
 
+def fetch_synonyms_regex(feature_name):
+
+    """
+    """
+    synonyms_regexes = connection_wrapper(select_from,True,"features","features.synonyms,features.regex",("features.name",feature_name),)
+    synonyms = synonyms_regexes[0]['synonyms']
+    regex = synonyms_regexes[0]['regex']
+
+    synonyms = synonyms.split(",")
+    
+    return synonyms,regex
+
+
+
+
 
 def return_feature(input_string,condition,alternative):
     """
@@ -83,11 +100,20 @@ def return_feature(input_string,condition,alternative):
         else:
             feature = alternative
     else:
-        word_list = FEATURES_DICT_VOCAB[condition]
-
-        if (find_keyword(input_string,word_list) and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
-                feature = condition
         
+
+        synonyms,regex = fetch_synonyms_regex(condition)
+
+        if regex is not None:
+            regex = regex.replace(" ","") #replacing empty spaces in case
+            if regex == "none":
+                regex = '.+'
+        else:
+            regex = '.+'
+        #and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
+
+        if find_keyword(input_string,synonyms) or re.match(rf"{regex}",input_string):
+            feature = condition
         else: 
             feature = alternative
     return feature
@@ -190,6 +216,8 @@ def selector_to_feature_or_trigger(selectors,input_string):
 
         possible_features += parsed_features 
 
+    
+
     return features,triggers,possible_features
 
 def fetch_selectors_name(message_index,bot_id):
@@ -270,32 +298,40 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
 
     bot_id = bot_user.id
     stressor = stressor_object
+
+
+    selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)] # fetching the selectors from the previous message
+    
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad selector pattern") from e
+
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
     if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index in next_message_finder")
     log('DEBUG',f'Possible indexes are : {next_indexes}')
     
-    next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot
+    next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot returns a dict
     
     log('DEBUG',f'Possible contents are : {next_contents}')
-    content_indexes = [content['id'] for content in next_contents] #3.1 getting all the possible feature from the current messages
+    content_indexes = [content['id'] for content in next_contents] # 2.0 putting all the indexes in a list
+    
+    #3.1 getting all the possible feature from the current messages
     
     features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] #3.1.1 getting all the possible feature names
-    selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)]
     
-    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
-    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad selector pattern") from e
-    
+
     log('DEBUG',f'Possible features are: {features_name}')
     log('DEBUG',f'All possible feature from selectors are {parsed_features}')
     log('DEBUG',f'Selectors are {selectors_name}')
     log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
 
+
+    log('DEBUG',fetch_synonyms_regex('greeting'))
     
     possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
     log('DEBUG',f'Possible indexes are { possible_answers_index}')
     
-    possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the previous index, it might still be longer than 2 if we need to random between two messages
+    possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the selected index, it might still be longer than 2 if we need to random between two messages
     
     
     if not bool(set(parsed_features).intersection(features_name)):
@@ -313,7 +349,7 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
     log('DEBUG',f'Possible answers are : {possible_answers}')
 
     if 'random!' not in triggers and len(possible_answers)>1:
-        raise AuthoringError(bot_user.name,next_index,"Multiple responses and random is not in the feature space")
+        raise AuthoringError(bot_user.name,next_index,"Multiple responses and random is not in the previous branching options (selector)")
         
     if len(possible_answers)>0:
         final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
