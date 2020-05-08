@@ -125,7 +125,7 @@ def push_feature_list(session,features,content_finder_id,synonyms_regexes):
                 if row.regex.values == 'none':
                     regex = None
                 else:
-                    regex = str(row.regex.values).strip("'")
+                    regex = str(row.regex.values[0]).strip("'")
 
                 if row.synonyms.values == 'none':
                     synonyms = None
