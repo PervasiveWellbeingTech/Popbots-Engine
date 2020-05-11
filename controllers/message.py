@@ -97,9 +97,9 @@ def return_feature(input_string,condition,alternative):
         if regex is not None:
             regex = regex.replace(" ","") #replacing empty spaces in case
             if regex == "none":
-                regex = '.+'
+                regex = 'a^'
         else:
-            regex = '.+'
+            regex = 'a^'
         #and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
 
         if find_keyword(input_string,synonyms) or re.match(rf"{regex}",input_string):
@@ -159,8 +159,7 @@ def feature_selector_split(input_string,selector):
             selector = selector.replace("@","")
             feature,temp_parsed_features = eval(selector)
             parsed_features = parsed_features + temp_parsed_features
-    
-            
+
     elif "none" in selector:
         feature = "none"
         parsed_features.append(feature)
