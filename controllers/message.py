@@ -15,16 +15,6 @@ from models.database_operations import connection_wrapper,insert_into,select_fro
 from nltk.tokenize import word_tokenize
 
 
-
-DEFAULT_YES = ['yes', 'ok', 'sure', 'right', 'yea', 'ye', 'yup', 'yeah', 'okay']
-DEFAULT_NO = ['no', 'not',  'neither', 'neg', 'don\'t', 'doesn\'', 'donnot', 'dont', '\'t', 'nothing', 'nah', 'na']
-DEFAULT_DK = ["dk", "dunno", "dno", "don't know", "idk"]
-GREETINGS = ['hi','hey', 'hello']
-ENJOYABLE = ['enjoyable']
-OTHER = ['other']
-FEATURES_DICT_VOCAB = {"no":DEFAULT_NO,"yes":DEFAULT_YES,"dk":DEFAULT_DK,"greeting":GREETINGS,'enjoyable':ENJOYABLE,'other':OTHER}
-
-
 def min_word(input_string,word_len,condition,alternative):
     
     if len(word_tokenize(input_string))>word_len:
@@ -132,7 +122,7 @@ def feature_selector_split(input_string,selector):
         (boolean) -- if keyword is found.
     """
 
-    #log("DEBUG",f"Analysed selector is {selector}")
+    log("DEBUG",f"Analysed selector is {selector}")
 
     parsed_features = []
     feature = None
@@ -165,18 +155,11 @@ def feature_selector_split(input_string,selector):
 
     elif "@" in selector:
 
-        if "@min_word" in selector:
+        if "@min_word" in selector or "@greater_than" in selector or "@is_number" in selector:
             selector = selector.replace("@","")
             feature,temp_parsed_features = eval(selector)
             parsed_features = parsed_features + temp_parsed_features
-        elif "@greater_than" in selector:
-            selector = selector.replace("@","")
-            feature,temp_parsed_features = eval(selector)
-            parsed_features = parsed_features + temp_parsed_features
-        elif "@is_number" in selector:
-            selector = selector.replace("@","")
-            feature,temp_parsed_features = eval(selector)
-            parsed_features = parsed_features + temp_parsed_features
+    
             
     elif "none" in selector:
         feature = "none"
@@ -303,11 +286,11 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)] # fetching the selectors from the previous message
     
     try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
-    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad selector pattern") from e
+    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad braching_options (selector) pattern ") from e
 
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
-    if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index in next_message_finder")
+    if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index provided")
     log('DEBUG',f'Possible indexes are : {next_indexes}')
     
     next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot returns a dict
@@ -335,7 +318,7 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
     
     
     if not bool(set(parsed_features).intersection(features_name)):
-        raise AuthoringError(bot_user.name,next_index,f"Selector to feature mismatch. Possible feature from selector: {' and '.join(set(parsed_features))} , but features given at next index is: {' and '.join(features_name)}")
+        raise AuthoringError(bot_user.name,next_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(parsed_features))} , but incoming_branch_option given at next index is/are: {' and '.join(features_name)}")
 
     if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
         raise BadKeywordInputError(features_name)
