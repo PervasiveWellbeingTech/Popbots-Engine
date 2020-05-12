@@ -5,6 +5,7 @@ from sqlalchemy.sql import func
 
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker,column_property,relationship
+from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.declarative import declarative_base
 from models.core.config import config_string # this is the sqlalchemy formatted string
 
@@ -15,7 +16,7 @@ RUNNING_DEVSERVER = False
 metadata = MetaData()
 
 
-engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=1)
+engine = create_engine(config_string(),poolclass=NullPool)#,pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=1)
 session_factory = sessionmaker(bind=engine,autoflush=True)
 Session = scoped_session(session_factory)
 
@@ -32,6 +33,7 @@ class ThreadSessionRequest(object):
     
     def __del__(self):
         if self.s:
+            log("INFO","Safely removing session")
             self.remove_session()
 
 
