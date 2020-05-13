@@ -850,3 +850,343 @@ WHERE users.name = %(name_1)s
   File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 106, in return_feature
     regex = regex.replace(" ","") #replacing empty spaces in case
 
+2020-05-12 22:59:20,305 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.OperationalError) could not connect to server: Connection refused
+	Is the server running on host "localhost" (127.0.0.1) and accepting
+	TCP/IP connections on port 5432?
+
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 161, in response_engine
+    user = session.query(HumanUser).filter_by(user_id=str(user_id)).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3424, in _execute_and_instances
+    conn = self._get_bind_args(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3439, in _get_bind_args
+    return fn(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3418, in _connection_from_session
+    conn = self.session.connection(**kw)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/session.py", line 1130, in connection
+    return self._connection_for_bind(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/session.py", line 1138, in _connection_for_bind
+    return self.transaction._connection_for_bind(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/session.py", line 432, in _connection_for_bind
+    conn = bind._contextual_connect()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 2251, in _contextual_connect
+    self._wrap_pool_connect(self.pool.connect, None),
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 2288, in _wrap_pool_connect
+    Connection._handle_dbapi_exception_noconnection(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1554, in _handle_dbapi_exception_noconnection
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 2285, in _wrap_pool_connect
+    return fn()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 773, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/impl.py", line 238, in _do_get
+    return self._create_connection()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 657, in __connect
+    pool.logger.debug("Error on connect(): %s", e)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/pool/base.py", line 652, in __connect
+    connection = pool._invoke_creator(self)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 488, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/psycopg2/__init__.py", line 126, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+
+2020-05-12 23:36:57,668 ERROR /!\ Database connection error: retrying Strategy => sleeping for 1s and will retry (attempt #1 of 3) 
+ Detailed query impacted: (psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Greeting Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)
+2020-05-12 23:38:59,232 ERROR /!\ Database connection error: retrying Strategy => sleeping for 1s and will retry (attempt #1 of 3) 
+ Detailed query impacted: (psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, human_users.user_id AS human_users_user_id, users.name AS users_name, users.category_id AS users_category_id, human_users.id AS human_users_id, human_users.subject_id AS human_users_subject_id, human_users.language_type_id AS human_users_language_type_id, human_users.language_id AS human_users_language_id 
+FROM users JOIN human_users ON users.id = human_users.user_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '384644196', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)
+2020-05-12 23:39:00,261 ERROR /!\ Database connection error: retrying Strategy => sleeping for 1s and will retry (attempt #1 of 3) 
+ Detailed query impacted: (psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Greeting Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)
+2020-05-12 23:42:53,284 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, human_users.user_id AS human_users_user_id, users.name AS users_name, users.category_id AS users_category_id, human_users.id AS human_users_id, human_users.subject_id AS human_users_subject_id, human_users.language_type_id AS human_users_language_type_id, human_users.language_id AS human_users_language_id 
+FROM users JOIN human_users ON users.id = human_users.user_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '384644196', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 161, in response_engine
+    user = session.query(HumanUser).filter_by(user_id=str(user_id)).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-12 23:43:07,876 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Greeting Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-12 23:46:45,691 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, human_users.user_id AS human_users_user_id, users.name AS users_name, users.category_id AS users_category_id, human_users.id AS human_users_id, human_users.subject_id AS human_users_subject_id, human_users.language_type_id AS human_users_language_type_id, human_users.language_id AS human_users_language_id 
+FROM users JOIN human_users ON users.id = human_users.user_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '384644196', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 161, in response_engine
+    user = session.query(HumanUser).filter_by(user_id=str(user_id)).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-12 23:46:45,693 ERROR (sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT conversations.id AS conversations_id, conversations.user_id AS conversations_user_id, conversations.datetime AS conversations_datetime, conversations.stressor AS conversations_stressor, conversations.closed AS conversations_closed 
+FROM conversations 
+WHERE conversations.user_id = %(user_id_1)s AND conversations.closed = false ORDER BY conversations.datetime DESC 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]
+2020-05-12 23:49:42,503 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, human_users.user_id AS human_users_user_id, users.name AS users_name, users.category_id AS users_category_id, human_users.id AS human_users_id, human_users.subject_id AS human_users_subject_id, human_users.language_type_id AS human_users_language_type_id, human_users.language_id AS human_users_language_id 
+FROM users JOIN human_users ON users.id = human_users.user_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '384644196', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 161, in response_engine
+    user = session.query(HumanUser).filter_by(user_id=str(user_id)).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-12 23:49:42,505 ERROR (sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT conversations.id AS conversations_id, conversations.user_id AS conversations_user_id, conversations.datetime AS conversations_datetime, conversations.stressor AS conversations_stressor, conversations.closed AS conversations_closed 
+FROM conversations 
+WHERE conversations.user_id = %(user_id_1)s AND conversations.closed = false ORDER BY conversations.datetime DESC 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]
+2020-05-12 23:50:47,137 ERROR :loudspeaker: [FATAL BASE ERROR](psycopg2.errors.AdminShutdown) terminating connection due to administrator command
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Greeting Module', 'param_1': 1}]
+(Background on this error at: http://sqlalche.me/e/e3q8)  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 437, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 196, in response_engine
+    bot_id = get_user_id_from_name("Greeting Module")
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/utils.py", line 10, in get_user_id_from_name
+    bot = session.query(Users).filter_by(name=name).first()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3298, in first
+    ret = list(self[0:1])
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3076, in __getitem__
+    return list(res)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/models/core/sqlalchemy_config.py", line 31, in __iter__
+    return super().__iter__()
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3403, in __iter__
+    return self._execute_and_instances(context)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 3428, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 984, in execute
+    return meth(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 293, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1097, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1287, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1481, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 178, in raise_
+    raise exception
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1247, in _execute_context
+    self.dialect.do_execute(
+  File "/home/thierry/Desktop/stanford_pwbt/popbots_venv/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 588, in do_execute
+    cursor.execute(statement, parameters)
+
+2020-05-12 23:52:07,015 ERROR (sqlalchemy.exc.InvalidRequestError) Can't reconnect until invalid transaction is rolled back
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.category_id AS users_category_id 
+FROM users 
+WHERE users.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: [immutabledict({})]]

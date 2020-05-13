@@ -43,13 +43,20 @@ class TelegramBot():
     @timed
     def send_message(self,user_id,text_response,keyboard,image):
         log('DEBUG',f"Trying to send a message block to user id {user_id} ")
+        len_text_response_no_image = len([value for value in text_response if not re.match('image',value)])
+        i=0
         for res in text_response:
-
+            
             if not re.match('image',res):
+                i+=1
             
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-                #sleep(min(len(res)/20,2.5))
-                self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
+                sleep(min(len(res)/25,1.5))
+                if i == len_text_response_no_image:
+                    self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
+
+                else:
+                    self.bot.send_message(chat_id=user_id, text=res, reply_markup = telegram.ReplyKeyboardRemove())
             else:
                 try: 
                     self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)

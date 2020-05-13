@@ -24,7 +24,7 @@ def min_word(input_string,word_len,condition,alternative):
 
 def greater_than(el1,el2,condition,alternative):
     
-    if int(el1)>int(el2):
+    if float(el1)>float(el2):
         return condition,[condition,alternative]
     else:
         return alternative,[condition,alternative]
@@ -156,6 +156,7 @@ def feature_selector_split(input_string,selector):
     elif "@" in selector:
 
         if "@min_word" in selector or "@greater_than" in selector or "@is_number" in selector:
+            print('Entered here')
             selector = selector.replace("@","")
             feature,temp_parsed_features = eval(selector)
             parsed_features = parsed_features + temp_parsed_features
@@ -307,8 +308,6 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
     log('DEBUG',f'Selectors are {selectors_name}')
     log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
 
-
-    log('DEBUG',fetch_synonyms_regex('greeting'))
     
     possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
     log('DEBUG',f'Possible indexes are { possible_answers_index}')
