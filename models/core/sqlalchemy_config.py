@@ -13,7 +13,7 @@ from utils import log,timed
 
 
 
-from sqlalchemy.exc import OperationalError, StatementError
+from sqlalchemy.exc import OperationalError, StatementError,InvalidRequestError
 from sqlalchemy.orm.query import Query as _Query
 from time import sleep
 
@@ -42,7 +42,7 @@ class RetryingQuery(_Query):
                     continue
                 else:
                     raise
-            except StatementError as ex:
+            except (StatementError,InvalidRequestError) as ex:
                 if "reconnect until invalid transaction is rolled back" not in str(ex):
                     raise
                 log('ERROR',str(ex))
@@ -53,7 +53,7 @@ RUNNING_DEVSERVER = False
 metadata = MetaData()
 
 
-engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=3600)
+engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=1800)
 session_factory = sessionmaker(bind=engine,query_cls=RetryingQuery,autoflush=True)
 Session = scoped_session(session_factory)
 

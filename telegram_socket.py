@@ -51,7 +51,7 @@ class TelegramBot():
                 i+=1
             
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-                sleep(min(len(res)/25,1.5))
+                #sleep(min(len(res)/25,1.5))
                 if i == len_text_response_no_image:
                     self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
 
