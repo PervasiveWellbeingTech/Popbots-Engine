@@ -31,7 +31,7 @@ class RetryingQuery(_Query):
             try:
                 return super().__iter__()
             except (OperationalError,IdleInTransactionSessionTimeout,AdminShutdown) as ex:
-                if "server closed the connection unexpectedly" not in str(ex):
+                if "connection has been closed unexpectedly" not in str(ex):
                     raise
                 if attempts <= self.__max_retry_count__:
                     sleep_for = 2 ** (attempts - 1)
@@ -48,9 +48,7 @@ class RetryingQuery(_Query):
                     raise
                 log('ERROR',str(ex))
                 self.session.rollback()
-            except BaseException as error:
-                tb = traceback.TracebackException.from_exception(error)
-                log('ERROR',":loudspeaker: [FATAL BASE ERROR]" + str(error)+str(''.join(tb.stack.format())))
+
 
 RUNNING_DEVSERVER = False
 
