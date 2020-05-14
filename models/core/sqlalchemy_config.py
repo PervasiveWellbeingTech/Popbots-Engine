@@ -14,6 +14,7 @@ from utils import log,timed
 
 
 from sqlalchemy.exc import OperationalError, StatementError,InvalidRequestError
+from psycopg2.errors import AdminShutdown,IdleInTransactionSessionTimeout
 from sqlalchemy.orm.query import Query as _Query
 from time import sleep
 
@@ -29,7 +30,7 @@ class RetryingQuery(_Query):
             attempts += 1
             try:
                 return super().__iter__()
-            except OperationalError as ex:
+            except (OperationalError,IdleInTransactionSessionTimeout,AdminShutdown) as ex:
                 if "server closed the connection unexpectedly" not in str(ex):
                     raise
                 if attempts <= self.__max_retry_count__:
