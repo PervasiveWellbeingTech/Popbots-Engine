@@ -10,7 +10,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from models.core.config import config_string # this is the sqlalchemy formatted string
 
 from utils import log,timed
-
+import traceback
 
 
 from sqlalchemy.exc import OperationalError, StatementError,InvalidRequestError
@@ -48,6 +48,9 @@ class RetryingQuery(_Query):
                     raise
                 log('ERROR',str(ex))
                 self.session.rollback()
+            except BaseException as error:
+                tb = traceback.TracebackException.from_exception(error)
+                log('ERROR',":loudspeaker: [FATAL BASE ERROR]" + str(error)+str(''.join(tb.stack.format())))
 
 RUNNING_DEVSERVER = False
 
