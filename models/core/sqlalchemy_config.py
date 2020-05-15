@@ -55,7 +55,7 @@ RUNNING_DEVSERVER = False
 metadata = MetaData()
 
 
-engine = create_engine(config_string(),pool_size=20,pool_pre_ping=True,pool_recycle=300,pool_timeout=1800)
+engine = create_engine(config_string(),pool_size=200,pool_pre_ping=True,pool_recycle=1800,pool_timeout=1800)
 session_factory = sessionmaker(bind=engine,query_cls=RetryingQuery,autoflush=True)
 Session = scoped_session(session_factory)
 
