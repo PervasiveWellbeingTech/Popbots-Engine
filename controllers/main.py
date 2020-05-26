@@ -71,6 +71,8 @@ def create_human_user(session,user_id,user_message):
     user.language_id = 1 # for english
     user.language_type_id = 1 # for formal 
     user.category_id = 1
+    possible_group = ["Group","Moderator"]
+    user.experiment_group = possible_group[random.randint(0,1)]
     
     user.name = "Human" # this is the default
     session.add(user)
@@ -152,6 +154,7 @@ def response_engine(session,user_id,user_message):
     tag = None
     image = None
     command = {"skip":False,"stack":True}
+    onboarding_module = "OnboardingModerator Module"
     
     
     #1. Fetching the active user or create one if needed
@@ -202,7 +205,17 @@ def response_engine(session,user_id,user_message):
             conversation.closed = True
             session.commit()
             conversation = create_conversation(session,user_id)
-        bot_id = get_user_id_from_name("OnboardingModerator Module")
+
+
+        if user.experiment_group == "Moderator" or "moderator" in user_message:
+            log("INFO","User has been rolled in Moderator Group")
+            onboarding_module = "OnboardingModerator Module"
+        elif user.experiment_group == "Group" or "group" in user_message:
+            log("INFO","User has been rolled in Group Group")
+            onboarding_module = "OnboardingGroup Module"
+        
+        bot_id = get_user_id_from_name(onboarding_module)
+
         next_index = 0
         message = None
 

@@ -1244,3 +1244,5 @@ WHERE users.name = %(name_1)s
 2020-05-26 19:06:29,565 ERROR Image fail image: <_io.BufferedReader name='./img/sherlock.png'> to send to user id 384644196 with error Timed out
 2020-05-26 19:07:22,818 ERROR [ERROR] Bad input, the user should have responded with: twopossible,noother,yes
 2020-05-26 19:09:26,011 ERROR :loudspeaker: [FATAL ERROR]No possible answer for bot_id: 3 at message index: [9, 15, 16]
+2020-05-26 20:52:43,419 ERROR Keyboard interpolation for 13,OnboardingGroup Module failed due to: invalid syntax (<string>, line 1)
+2020-05-26 20:52:43,419 ERROR :x: [FATAL AUTHORING ERROR] Interpolation problem for keyboard for Nice to meet you all|Oh, so I'm talking to a group of Bots, not just one variable.. This is an authoring error for bot named: "OnboardingGroup Module"" at message_index: "1" the bot should be should be deacivated until this issue has been resolved

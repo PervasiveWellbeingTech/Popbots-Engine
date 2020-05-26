@@ -42,6 +42,7 @@ def create_tables():
             subject_id VARCHAR(255) NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
+            experiment_group VARCHAR(255) NULL,
             FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))

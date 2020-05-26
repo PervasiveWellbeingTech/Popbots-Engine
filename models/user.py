@@ -39,6 +39,7 @@ class HumanUsers(Base):
     subject_id = Column(String)
     language_type_id = Column(Integer)
     language_id = Column(Integer)
+    experiment_group = Column(String)
         
 human_users_join = join(Users,HumanUsers)
 class HumanUser(Base):
@@ -48,6 +49,7 @@ class HumanUser(Base):
     human_users_id = HumanUsers.id
     name = Users.name
 
+    experiment_group = HumanUsers.experiment_group
     subject_id = HumanUsers.subject_id
     language_id= HumanUsers.language_id
     language_type_id = HumanUsers.language_type_id
