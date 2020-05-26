@@ -72,7 +72,7 @@ try:
             language_type_id = push_element(LanguageTypes,script.language_type)
             keyboard_id = push_element(Keyboards,script.keyboard)
             
-            incoming_branch_option_list = script.incoming_branch_option.split(",")
+            incoming_branch_option_list = script.incoming_branch_option.split("|")
 
             for feature in incoming_branch_option_list:
 
@@ -96,26 +96,23 @@ try:
 
 
                 print(f"Added new content {new_content.content_finders_id}")
-                r = re.compile(r'(?:[^,(]|\([^)]*\))+')
 
-                if "(" in script.branching_option or ")" in script.branching_option:
-                    branching_option = [script.branching_option]
-                else:
-                    branching_option = r.findall(script.branching_option)
+                
+                branching_option = script.branching_option.split("|")
                 
                 selectors = branching_option
-                user_input_tag = str(script.user_input_tag).split(",")
+                user_input_tag = str(script.user_input_tag).split("|")
 
                 for index,tag in enumerate(user_input_tag):
                     if tag != 'none':
                         selectors +=  [str(tag)]
 
                 ## adding incoming_branch_option and branching_options and next_actions
-                push_feature_list(session,features=r.findall(feature),content_finder_id=new_content.content_finders_id,synonyms_regexes=features_synonyms_regexes)
+                push_feature_list(session,features=feature.split("|"),content_finder_id=new_content.content_finders_id,synonyms_regexes=features_synonyms_regexes)
                 push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
-                push_trigger_list(session,triggers=r.findall(script.next_action),content_finder_id=new_content.content_finders_id)
+                push_trigger_list(session,triggers=script.next_action.split("|"),content_finder_id=new_content.content_finders_id)
 
-            for next_index in script.next_indexes.split(","):
+            for next_index in script.next_indexes.split("|"):
                 if next_index != 'none':
 
                     new_nmf = NextMessageFinders(

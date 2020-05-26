@@ -46,12 +46,13 @@ class TelegramBot():
         len_text_response_no_image = len([value for value in text_response if not re.match('image',value)])
         i=0
         for res in text_response:
+            self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
+            #sleep(min(len(res)/25,1.5))
             
             if not re.match('image',res):
                 i+=1
             
-                self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-                #sleep(min(len(res)/25,1.5))
+                
                 if i == len_text_response_no_image:
                     self.bot.send_message(chat_id=user_id, text=res, reply_markup = keyboard)
 
@@ -73,9 +74,9 @@ class TelegramBot():
             return telegram.ReplyKeyboardRemove()
         elif(reply_markup['type']=='inlineButton'):
             print('Inline button')
-            buttons = reply_markup['text'].split(",")
+            buttons = reply_markup['text'].split("|")
 
-            keyboards =[telegram.InlineKeyboardButton(name) for name in buttons]
+            keyboards =[telegram.KeyboardButton(name) for name in buttons]
             keyboards_formatted = [ [x,y] for x,y in zip(keyboards[0::2], keyboards[1::2]) ] #cut the list to make sure two by two buttons appears
             
             if len(keyboards)%2 ==1:

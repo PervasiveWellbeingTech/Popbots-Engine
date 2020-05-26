@@ -48,7 +48,7 @@ def delconv(session,user_id):
 def change_bot(session,current_bot_id,destination_bot_name):
     next_index=0
     if destination_bot_name is None:
-        possible_bot = get_bot_ids(session,current_bot_id,"Greeting Module") #### Replace with the correct module
+        possible_bot = get_bot_ids(session,current_bot_id,"Affirmation Module") #### Replace with the correct module
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
     else:
         bot_id = get_user_id_from_name(destination_bot_name)
@@ -85,9 +85,6 @@ def create_conversation(session,user_id):
     _ = database_push(session,conversation)
 
     return conversation
-
-
-
 
 
 def get_bot_ids(session,exclude_id,exclude_name):
@@ -156,7 +153,7 @@ def response_engine(session,user_id,user_message):
     image = None
     command = {"skip":False,"stack":True}
     
-
+    
     #1. Fetching the active user or create one if needed
     user = session.query(HumanUser).filter_by(user_id=str(user_id)).first() 
     if user is not None:
@@ -166,7 +163,7 @@ def response_engine(session,user_id,user_message):
         log('DEBUG',f"User with id: {user.id} has been created")
         
         # since we know that the user is unknown, we can directly push them to the onboarding Module
-        bot_id = get_user_id_from_name("Greeting Module") # needs to be replaced with onboarding when design team is done with it
+        bot_id = get_user_id_from_name("Affirmation Module") # needs to be replaced with onboarding when design team is done with it
         next_index = 0 
         message = None
         
@@ -184,7 +181,7 @@ def response_engine(session,user_id,user_message):
             conversation = create_conversation(session,user_id)
             CONVERSATION_INIT = True
 
-            bot_id = get_user_id_from_name("Greeting Module")
+            bot_id = get_user_id_from_name("Affirmation Module")
             next_index = 0
             message = None
 
@@ -193,7 +190,7 @@ def response_engine(session,user_id,user_message):
         conversation = create_conversation(session,user_id)
         CONVERSATION_INIT = True
 
-        bot_id = get_user_id_from_name("Greeting Module")
+        bot_id = get_user_id_from_name("Affirmation Module")
         next_index = 0
         message = None
 
@@ -205,7 +202,7 @@ def response_engine(session,user_id,user_message):
             conversation.closed = True
             session.commit()
             conversation = create_conversation(session,user_id)
-        bot_id = get_user_id_from_name("Onboarding Module")
+        bot_id = get_user_id_from_name("OnboardingModerator Module")
         next_index = 0
         message = None
 
@@ -217,7 +214,7 @@ def response_engine(session,user_id,user_message):
             session.commit()
             conversation = create_conversation(session,user_id)
         
-        bot_id = get_user_id_from_name("Greeting Module")
+        bot_id = get_user_id_from_name("Affirmation Module")
         next_index = 0
         message = None
 
@@ -258,9 +255,12 @@ def response_engine(session,user_id,user_message):
     
     #fetching the bot_user object
     bot_user = session.query(Users).filter_by(id = bot_id).first() 
+    
+    # create a dict of variables to be used to do the next message selection process
+    selector_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,user_response=user_message,content_index=content_index,stressor_object=stressor)
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,content_index=content_index,selector_kwargs=selector_kwargs)
     
 
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
@@ -387,7 +387,7 @@ def response_engine(session,user_id,user_message):
 
         possible_bot = get_bot_names(session,None,None) #### Replace with the correct module
         possible_bot.insert(0,"Choose for me")
-        keyboard = ','.join(possible_bot)
+        keyboard = '|'.join(possible_bot)
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}
     else:
         reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #

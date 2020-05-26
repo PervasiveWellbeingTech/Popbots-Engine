@@ -9,10 +9,73 @@ from utils import log,timed
 from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
-from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from
+from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from,custom_sql
 
 
 from nltk.tokenize import word_tokenize
+
+
+
+def stressor_pass(stressor):
+    try:
+        nb_of_stressor = connection_wrapper(custom_sql,True,f"SELECT count(id) FROM stressor s WHERE s.conversation_id ={stressor.conversation_id}")[0]['count']
+
+        log("INFO",f"Number of stressor found is {nb_of_stressor}")
+    except:
+        nb_of_stressor = 0
+
+    if nb_of_stressor > 1:
+        return "yes",["yes","no"]
+    else:
+        return "no",["yes","no"]
+
+
+def engagement(user):
+
+    try:
+        browsed_bots = [bot['name'] for bot in connection_wrapper(custom_sql,True,f"select distinct (u.name) from users u inner join messages m on m.sender_id =u.id where m.receiver_id = {user.user_id} and u.name like '%Bot';")]
+        all_bots = [bot['name'] for bot in connection_wrapper(custom_sql,True,f"select distinct (u.name) from users u where u.name like '%Bot';")]
+
+        inter = set(all_bots)-set(browsed_bots)
+
+        log('INFO',f"user has interacted with {len(browsed_bots)} therefore he has {len(list(inter))} to explore ")
+        if len(list(inter)) > 0:
+            feature = "no"
+        else:
+            feature = "yes"
+
+        
+    except BaseException as error:
+        log('ERROR',error)
+        feature = "no"
+
+
+    return feature,["yes","no"] 
+
+def other_and_threshold(stressor):
+    
+    if stressor.category0.lower()=="other" or float(stressor.probability0)<0.2:
+        feature = "other_or_threshold"
+
+    elif False:
+        feature = "none"
+    
+    else:
+        feature = "yes"
+
+    return feature,["yes","none","other_or_threshold"]
+
+def two_cat_other(stressor):
+
+    if stressor.probability0 - stressor.probability1 >0.2:
+        feature = "yes" 
+    else:
+        if stressor.category1 == "Other":
+            feature = "noother"
+        else:
+            feature = "two_possible"
+
+    return feature,["yes","noother","two_possible"]
 
 
 def min_word(input_string,word_len,condition,alternative):
@@ -59,7 +122,7 @@ def find_keyword(input_str, word_list):
     """
 
     input_str = input_str.lower()
-    return any([str(each) in str(input_str) for each in word_list])
+    return any([str(each).lower() in str(input_str)for each in word_list])
 
 def fetch_synonyms_regex(feature_name):
 
@@ -69,7 +132,7 @@ def fetch_synonyms_regex(feature_name):
     synonyms = synonyms_regexes[0]['synonyms']
     regex = synonyms_regexes[0]['regex']
 
-    synonyms = synonyms.split(",")
+    synonyms = synonyms.split("|")
     
     return synonyms,regex
 
@@ -101,14 +164,14 @@ def return_feature(input_string,condition,alternative):
         else:
             regex = 'a^'
         #and (len(input_string.split(" ")) <= 5 and len(input_string) <= 25)): # the second condition is to make sure that the no is not contained in a long sentence
-
+       
         if find_keyword(input_string,synonyms) or re.match(rf"{regex}",input_string):
             feature = condition
         else: 
             feature = alternative
     return feature
 
-def feature_selector_split(input_string,selector):
+def feature_selector_split(selector,selector_kwargs):
     """
     
     Take an input selector and parse it and 
@@ -127,10 +190,9 @@ def feature_selector_split(input_string,selector):
     parsed_features = []
     feature = None
     trigger = None
-    print(selector)
-    if "?" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
+    if "/" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         # these condition are formatted as ?keyword,alternative
-        features = selector.split("?")
+        features = selector.split("/")
         parsed_features = features.copy()
 
         alternative = features[-1]
@@ -138,11 +200,10 @@ def feature_selector_split(input_string,selector):
         del features[-1]
 
         for fea in features:
-
-            all_selectors.append(return_feature(input_string,fea,alternative))
+            all_selectors.append(return_feature(selector_kwargs['user_response'],fea,alternative))
         
         feature_set = set(all_selectors) # sum all unique elements
-
+        print(all_selectors)
         if len(feature_set)>1:
             if alternative in feature_set:
                 feature_set.remove(alternative)
@@ -154,12 +215,10 @@ def feature_selector_split(input_string,selector):
         feature = list(feature_set)[0]
 
     elif "@" in selector:
-
-        if "@min_word" in selector or "@greater_than" in selector or "@is_number" in selector:
-            print('Entered here')
-            selector = selector.replace("@","")
-            feature,temp_parsed_features = eval(selector)
-            parsed_features = parsed_features + temp_parsed_features
+        print('Entered here')
+        selector = selector.replace("@","")
+        feature,temp_parsed_features = eval(selector)
+        parsed_features = parsed_features + temp_parsed_features
 
     elif "none" in selector:
         feature = "none"
@@ -176,7 +235,7 @@ def feature_selector_split(input_string,selector):
 
 
 
-def selector_to_feature_or_trigger(selectors,input_string):
+def selector_to_feature_or_trigger(selectors,selector_kwargs):
 
     """
 
@@ -190,7 +249,7 @@ def selector_to_feature_or_trigger(selectors,input_string):
     possible_features = []
 
     for selector in selectors:
-        feature,trigger,parsed_features = feature_selector_split(input_string,selector)
+        feature,trigger,parsed_features = feature_selector_split(selector,selector_kwargs)
         
         if feature is not None: features.append(feature)
         elif trigger is not None: triggers.append(trigger)
@@ -276,16 +335,12 @@ def fetch_next_contents(bot_id,next_indexes):
     return content_list
 
 @timed 
-def get_bot_response(bot_user,next_index,user_response,content_index,stressor_object):
-    global stressor
+def get_bot_response(bot_user,next_index,content_index,selector_kwargs):
 
     bot_id = bot_user.id
-    stressor = stressor_object
-
-
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)] # fetching the selectors from the previous message
     
-    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,input_string=user_response)
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)
     except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad braching_options (selector) pattern ") from e
 
     next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
@@ -318,8 +373,8 @@ def get_bot_response(bot_user,next_index,user_response,content_index,stressor_ob
     if not bool(set(parsed_features).intersection(features_name)):
         raise AuthoringError(bot_user.name,next_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(parsed_features))} , but incoming_branch_option given at next index is/are: {' and '.join(features_name)}")
 
-    if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
-        raise BadKeywordInputError(features_name)
+    #if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
+    #    raise BadKeywordInputError(features_name)
     
     # user error or script 
 
@@ -360,6 +415,7 @@ if __name__ == "__main__":
         print("Bot reply: " + bot_text)
         print(" Next index is "+str(next_index))
     """
+
     
 
 

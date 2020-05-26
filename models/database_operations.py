@@ -110,6 +110,23 @@ def select_from_join(cur,table,column,joins,wheres):
  
     return rows
 
+def custom_sql(cur,sql_query):
+    """
+    
+    """
+    rows = None
+    print(sql_query)
+    try:
+      
+        cur.execute(sql_query)
+        
+        rows = cur.fetchall()
+        cur.close()  # close communication with the database
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+ 
+    return rows
+
 def connection_wrapper(func,bool_json,*fparams):
         """
         dbfunc is either insert_into or select_from from the database operation function
