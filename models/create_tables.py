@@ -131,6 +131,8 @@ def create_tables():
         """
         CREATE TABLE features (
             id SERIAL PRIMARY KEY,
+            synonyms VARCHAR,
+            regex VARCHAR,
             name VARCHAR(255) NOT NULL)
         """,
         """
