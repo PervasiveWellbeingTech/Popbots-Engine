@@ -67,7 +67,11 @@ def create_human_user(session,user_id,user_message):
 
     """
     user = HumanUser(user_id=user_id)
-    user.subject_id = re.findall(r'\d+', user_message)
+    subject_id = re.findall(r'\d+', user_message)
+    if subject_id:
+        user.subject_id = subject_id[0]
+    else:
+        user.subject_id = "0000"
     user.language_id = 1 # for english
     user.language_type_id = 1 # for formal 
     user.category_id = 1
@@ -207,7 +211,7 @@ def response_engine(session,user_id,user_message):
             conversation = create_conversation(session,user_id)
 
         if re.findall(r'\d+',user_message):
-            user.subject_id = re.findall(r'\d+',user_message)
+            user.subject_id = re.findall(r'\d+',user_message)[0]
             session.commit()
 
 
