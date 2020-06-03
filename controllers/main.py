@@ -239,6 +239,7 @@ def response_engine(session,user_id,user_message):
         bot_id = get_user_id_from_name("Greeting Module")
         next_index = 0
         message = None
+        
 
     # handle the special switch case, if switch, we change the bot, else we find the latest active bot. 
     if re.match(r'/switch', user_message): #switch
@@ -425,8 +426,11 @@ def response_engine(session,user_id,user_message):
     session.commit()
     log('DEBUG','------------------------END OF MESSAGE ENGINE------------------------')
 
+    if re.match(r'/start',user_message) or re.match(r'Hi',user_message):
+        user_message = "user_greeting"
+        
 
-    return command,response_list,image,bot_name,reply_markup
+    return command,response_list,image,bot_name,reply_markup,user_message
 
 
 
@@ -456,7 +460,7 @@ def dialog_flow_engine(user_id,user_message):
         while command["skip"]==True: # loop and does not send the message until skip == False
 
 
-            command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+            command,response_list,image,bot_name,reply_markup,user_message  = response_engine(session,user_id,user_message)
 
             if command["stack"] == True: # handles two message in a row
                 if image is not None:
