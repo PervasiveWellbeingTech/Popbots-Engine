@@ -1246,3 +1246,41 @@ WHERE users.name = %(name_1)s
 2020-05-26 19:09:26,011 ERROR :loudspeaker: [FATAL ERROR]No possible answer for bot_id: 3 at message index: [9, 15, 16]
 2020-05-26 20:52:43,419 ERROR Keyboard interpolation for 13,OnboardingGroup Module failed due to: invalid syntax (<string>, line 1)
 2020-05-26 20:52:43,419 ERROR :x: [FATAL AUTHORING ERROR] Interpolation problem for keyboard for Nice to meet you all|Oh, so I'm talking to a group of Bots, not just one variable.. This is an authoring error for bot named: "OnboardingGroup Module"" at message_index: "1" the bot should be should be deacivated until this issue has been resolved
+2020-06-03 23:19:06,994 ERROR Trigger errorHTTPConnectionPool(host='18.222.100.233', port=80): Max retries exceeded with url: /classifier/stressor/?stressor= (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f707181ef70>: Failed to establish a new connection: [Errno 110] Connection timed out'))
+2020-06-03 23:19:07,133 ERROR :loudspeaker: [FATAL BASE ERROR]'NoneType' object has no attribute 'category0'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 459, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 285, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,content_index=content_index,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 343, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 252, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(selector,selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 220, in feature_selector_split
+    feature,temp_parsed_features = eval(selector)
+  File "<string>", line 1, in <module>
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 57, in other_and_threshold
+    if stressor.category0.lower()=="other" or float(stressor.probability0)<0.2:
+
+2020-06-03 23:30:02,354 ERROR Trigger errorHTTPConnectionPool(host='18.222.100.233', port=80): Max retries exceeded with url: /classifier/stressor/?stressor=chocolate+chip+cookie (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f6b7a215550>: Failed to establish a new connection: [Errno 110] Connection timed out'))
+2020-06-03 23:30:02,514 ERROR :loudspeaker: [FATAL BASE ERROR]'NoneType' object has no attribute 'category0'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 459, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 285, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,content_index=content_index,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 343, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 252, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(selector,selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 220, in feature_selector_split
+    feature,temp_parsed_features = eval(selector)
+  File "<string>", line 1, in <module>
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 57, in other_and_threshold
+    if stressor.category0.lower()=="other" or float(stressor.probability0)<0.2:
+

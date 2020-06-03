@@ -48,7 +48,7 @@ def delconv(session,user_id):
 def change_bot(session,current_bot_id,destination_bot_name):
     next_index=0
     if destination_bot_name is None:
-        possible_bot = get_bot_ids(session,current_bot_id,"Affirmation Module") #### Replace with the correct module
+        possible_bot = get_bot_ids(session,current_bot_id,"Greeting Module") #### Replace with the correct module
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
     else:
         bot_id = get_user_id_from_name(destination_bot_name)
@@ -170,7 +170,7 @@ def response_engine(session,user_id,user_message):
         log('DEBUG',f"User with id: {user.id} has been created")
         
         # since we know that the user is unknown, we can directly push them to the onboarding Module
-        bot_id = get_user_id_from_name("Affirmation Module") # needs to be replaced with onboarding when design team is done with it
+        bot_id = get_user_id_from_name("Greeting Module") # needs to be replaced with onboarding when design team is done with it
         next_index = 0 
         message = None
         
@@ -188,7 +188,7 @@ def response_engine(session,user_id,user_message):
             conversation = create_conversation(session,user_id)
             CONVERSATION_INIT = True
 
-            bot_id = get_user_id_from_name("Affirmation Module")
+            bot_id = get_user_id_from_name("Greeting Module")
             next_index = 0
             message = None
 
@@ -197,7 +197,7 @@ def response_engine(session,user_id,user_message):
         conversation = create_conversation(session,user_id)
         CONVERSATION_INIT = True
 
-        bot_id = get_user_id_from_name("Affirmation Module")
+        bot_id = get_user_id_from_name("Greeting Module")
         next_index = 0
         message = None
 
@@ -236,7 +236,7 @@ def response_engine(session,user_id,user_message):
             session.commit()
             conversation = create_conversation(session,user_id)
         
-        bot_id = get_user_id_from_name("Affirmation Module")
+        bot_id = get_user_id_from_name("Greeting Module")
         next_index = 0
         message = None
 
