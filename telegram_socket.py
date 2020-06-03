@@ -69,6 +69,7 @@ class TelegramBot():
             if not i == len_text_response_no_image:
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
                 #sleep(min(len(res)/25,1.5))
+                log('DEBUG',f"Delaying the next message")
                 sleep(2) if len(res)>25 else sleep(1)
 
 
