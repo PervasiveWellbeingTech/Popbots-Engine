@@ -67,6 +67,7 @@ class TelegramBot():
                 log('DEBUG',f"Image sent to user id {user_id}")
             
             if not i == len_text_response_no_image:
+                
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
                 #sleep(min(len(res)/25,1.5))
                 log('DEBUG',f"Delaying the next message")
