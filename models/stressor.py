@@ -1,4 +1,5 @@
 
+import os
 from models.core.sqlalchemy_config import * #delete all the above and see if it works
 from models.conversation import Conversation
 session = get_session()
@@ -35,7 +36,8 @@ class Stressor(Base):
 import requests
 import ast
 
-FLASK_CLASSIFIER_SERVER_URL = "http://18.222.100.233/classifier/stressor/"
+CLASSIFIER_IP_ADDRESS = os.environ['CLASSIFIER_IP_ADDRESS']
+FLASK_CLASSIFIER_SERVER_URL = f"http://{CLASSIFIER_IP_ADDRESS}/classifier/stressor/"
 
 
 def get_pred_api(stressor):
