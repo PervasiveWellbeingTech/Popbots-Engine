@@ -47,7 +47,7 @@ class TelegramBot():
         i=0
         for res in text_response:
             self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
-            #sleep(min(len(res)/25,1.5))
+            #
             
             if not re.match('image',res):
                 i+=1
@@ -65,6 +65,10 @@ class TelegramBot():
                     log('ERROR',f"Image fail image: {image} to send to user id {user_id} with error {error}")
                     
                 log('DEBUG',f"Image sent to user id {user_id}")
+            self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
+            #sleep(min(len(res)/25,1.5))
+            sleep(2) if len(res)>25 else sleep(1)
+
 
         log('DEBUG',f"Message block sent to user id {user_id}")
     
