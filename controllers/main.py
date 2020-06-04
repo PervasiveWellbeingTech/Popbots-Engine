@@ -219,9 +219,11 @@ def response_engine(session,user_id,user_message):
         if user.experiment_group == "Moderator" or "moderator" in user_message:
             log("INFO","User has been rolled in Moderator Group")
             onboarding_module = "OnboardingModerator Module"
-        elif user.experiment_group == "Group" or "group" in user_message:
+            user.experiment_group = onboarding_module
+        if user.experiment_group == "Group" or "group" in user_message:
             log("INFO","User has been rolled in Group Group")
             onboarding_module = "OnboardingGroup Module"
+            user.experiment_group = onboarding_module
         
         bot_id = get_user_id_from_name(onboarding_module)
 
