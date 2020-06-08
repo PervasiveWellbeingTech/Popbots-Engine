@@ -25,6 +25,28 @@ from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequ
 from utils import log,timed
 from threading import Thread, current_thread
 
+import string
+
+
+
+def find_name(input_str):
+    """
+    A simple algorithm to extract names.
+    Parameters:
+        input_str(str) -- string containing the name
+    """
+
+    for each in ['i am', 'i\'m', 'this is', 'name is', 'my name is','it is','you can call me','i am named after']:
+        _index = input_str.lower().find(each)
+        if _index != -1:
+            result = input_str.lower()[_index + len(each)+1:]
+            result = result.split()[0]
+            for each_punc in list(string.punctuation):
+                result = result.replace(each_punc,"")
+            if len(result) > 0 and len(result) < 20:
+                return result.capitalize()
+    return input_str.capitalize().split()[0]
+
 
 def database_push(session,element):
     session.add(element)
@@ -345,8 +367,12 @@ def response_engine(session,user_id,user_message):
 
         if len(triggers)>0:
             for trigger in triggers:
-                if "#" in trigger:
-                    trigger = trigger.replace("#","") 
+                if trigger == "#user.name":
+                    user.name = find_name(user_message)
+
+                elif "#" in trigger:
+                    trigger = trigger.replace("#","")
+ 
 
                     if len(trigger.split(".")) ==2:
                         class_name,class_variable = trigger.split(".")
