@@ -36,7 +36,7 @@ def find_name(input_str):
         input_str(str) -- string containing the name
     """
 
-    for each in ['i am', 'i\'m', 'this is', 'name is', 'my name is','it is','you can call me','i am named after']:
+    for each in ['i am', 'i\'m',"i’m",'this is', 'name is', 'my name is','it is','you can call me','i am named after']:
         _index = input_str.lower().find(each)
         if _index != -1:
             result = input_str.lower()[_index + len(each)+1:]
