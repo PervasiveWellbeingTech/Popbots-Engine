@@ -81,14 +81,16 @@ class TelegramBot():
         if(reply_markup['type'] == 'choice'):
             return telegram.ReplyKeyboardRemove()
         elif(reply_markup['type']=='inlineButton'):
-            print('Inline button')
             buttons = reply_markup['text'].split("|")
-
             keyboards =[telegram.KeyboardButton(name) for name in buttons]
-            keyboards_formatted = [ [x,y] for x,y in zip(keyboards[0::2], keyboards[1::2]) ] #cut the list to make sure two by two buttons appears
             
-            if len(keyboards)%2 ==1:
-                keyboards_formatted.append([keyboards[-1]]) # add the first button in one line
+            if (any([True if len(x)>20 else False for x in buttons])):
+                keyboards_formatted = [[x] for x in keyboards]
+            else:
+                keyboards_formatted = [ [x,y] for x,y in zip(keyboards[0::2], keyboards[1::2]) ] #cut the list to make sure two by two buttons appears
+                
+                if len(keyboards)%2 ==1:
+                    keyboards_formatted.append([keyboards[-1]]) # add the first button in one line
 
             return telegram.ReplyKeyboardMarkup(keyboards_formatted, resize_keyboard= reply_markup['resize_keyboard'])
         elif(reply_markup['type']=='default'):

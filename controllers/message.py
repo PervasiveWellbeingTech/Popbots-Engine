@@ -10,6 +10,7 @@ from exceptions.badinput import BadKeywordInputError
 from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
 from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from,custom_sql
+from models.conversation import Conversation,Message,Content,ContentFinders,MessageContent
 
 
 from nltk.tokenize import word_tokenize
@@ -335,9 +336,10 @@ def fetch_next_contents(bot_id,next_indexes):
     return content_list
 
 @timed 
-def get_bot_response(bot_user,next_index,content_index,selector_kwargs):
+def get_bot_response(session,bot_user,next_index,selector_kwargs):
 
     bot_id = bot_user.id
+    content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
     selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)] # fetching the selectors from the previous message
     
     try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)

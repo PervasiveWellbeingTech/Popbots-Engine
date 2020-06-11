@@ -67,8 +67,7 @@ def delconv(session,user_id):
         session.commit()
 
 
-def change_bot(session,current_bot_id,destination_bot_name):
-    next_index=0
+def change_bot(session,current_bot_id,destination_bot_name,next_index=0):
     if destination_bot_name is None:
         possible_bot = get_bot_ids(session,current_bot_id,"Greeting Module") #### Replace with the correct module
         bot_id =  possible_bot[random.randint(0,len(possible_bot)-1)] 
@@ -78,9 +77,8 @@ def change_bot(session,current_bot_id,destination_bot_name):
         if bot_id == current_bot_id:
             log('INFO',f'You are switching to the exact same bot with bot_id: {bot_id} ')
     
-    content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
 
-    return next_index,bot_id,content_index
+    return next_index,bot_id
 
 @timed
 def create_human_user(session,user_id,user_message):
@@ -268,7 +266,7 @@ def response_engine(session,user_id,user_message):
     # handle the special switch case, if switch, we change the bot, else we find the latest active bot. 
     if re.match(r'/switch', user_message): #switch
         
-        next_index,bot_id,content_index = change_bot(session,bot_id,'Switch Module')
+        next_index,bot_id = change_bot(session,bot_id,'Switch Module')
     else:
 
         #4. Fetching the lastest active message in the conversation 
@@ -284,16 +282,16 @@ def response_engine(session,user_id,user_message):
         # we dont have a last bot message and latest_index is none. (safeguard) is switches bot to recover. (could throw an error instead)
         elif message is None and next_index is None: # there is no message 
             log('DEBUG',f"Should not have entered in the no message, no in itialized scenario but did")
-            next_index,bot_id,content_index = change_bot(session,bot_id,None)
+            next_index,bot_id = change_bot(session,bot_id,None)
 
         #next_index could be none because of bad storage of the previous_index in the last message
         # SHOULD ADD LOG messages here
-        if next_index is not None: 
+        if next_index is not None:
+            pass 
 
-            content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
         else:
 
-            next_index,bot_id,content_index = change_bot(session,bot_id,None)  # could throw an error here instead of switching to another bot
+            next_index,bot_id = change_bot(session,bot_id,None)  # could throw an error here instead of switching to another bot
 
     
 
@@ -307,7 +305,7 @@ def response_engine(session,user_id,user_message):
     selector_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,current_index,keyboard,triggers = get_bot_response(bot_user=bot_user,next_index=next_index,content_index=content_index,selector_kwargs=selector_kwargs)
+    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,next_index=next_index,selector_kwargs=selector_kwargs)
     
 
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
@@ -321,17 +319,23 @@ def response_engine(session,user_id,user_message):
         if any(bool_trigger):
             
             next_bot_name = [x for x in triggers if "~" in x][0].replace("~","")
+            next_index = re.findall(r'\d+',next_bot_name)
+            next_bot_name = result = re.sub(r"\d+", "", next_bot_name)
             
             if next_bot_name == "choose_bot" or user_message=="Choose for me":
                 log('INFO',f"Switching to bot or module {next_bot_name}, from id {bot_id}")
-                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=None)
+                current_index,bot_id = change_bot(session,current_bot_id=bot_id,destination_bot_name=None)
             
             elif next_bot_name == "user_input":
                 log('INFO',f"Switching to bot or module {next_bot_name}, from id {bot_id}")
-                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=user_message)
-            
+                current_index,bot_id = change_bot(session,current_bot_id=bot_id,destination_bot_name=user_message)
+            elif next_index != []:
+
+                current_index,bot_id = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name,next_index=next_index[0])
+
             else:
-                current_index,bot_id,content_index = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
+                 
+                current_index,bot_id = change_bot(session,current_bot_id=bot_id,destination_bot_name=next_bot_name)
 
             log("DEBUG",f"Switching to a new bot with bot_id = {bot_id} and name {next_bot_name} ")
         else:
@@ -354,7 +358,7 @@ def response_engine(session,user_id,user_message):
     # if the response is empty switch bot, add the message to db but keep
     if bot_text == "" or bot_text is None:
         log("ERROR" ,f"bot_text was empty or None, forcing jump to a new bot")
-        current_index,bot_id,content_index = change_bot(session,bot_id,None)
+        current_index,bot_id = change_bot(session,bot_id,None)
         command = {"skip":True,"stack":False}
         
     
