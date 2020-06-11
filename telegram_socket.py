@@ -73,12 +73,13 @@ class TelegramBot():
                 log('DEBUG',f"Delaying the next message")
                 
                 if len(res)<25:
-                    sleep(1.5)
-                elif len(res) > 25 and len(res)<50:
-                    sleep(2.5) 
+                    sleep(1)
+                elif len(res) > 25 and len(res)<75:
+                    sleep(2)
+                elif len(res) > 75 and len(res)<125:
+                    sleep(3)
                 else:
-                    sleep(3.5)
-
+                    sleep(4)
 
         log('DEBUG',f"Message block sent to user id {user_id}")
     
