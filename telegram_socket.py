@@ -71,7 +71,13 @@ class TelegramBot():
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
                 #sleep(min(len(res)/25,1.5))
                 log('DEBUG',f"Delaying the next message")
-                sleep(2) if len(res)>25 else sleep(1)
+                
+                if len(res)<25:
+                    sleep(1.5)
+                elif len(res) > 25 and len(res)<50:
+                    sleep(2.5) 
+                else:
+                    sleep(3.5)
 
 
         log('DEBUG',f"Message block sent to user id {user_id}")
