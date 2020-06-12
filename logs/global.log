@@ -1284,3 +1284,22 @@ WHERE users.name = %(name_1)s
   File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 57, in other_and_threshold
     if stressor.category0.lower()=="other" or float(stressor.probability0)<0.2:
 
+2020-06-12 16:15:25,712 ERROR Trigger errorHTTPConnectionPool(host='18.222.100.233', port=80): Max retries exceeded with url: /classifier/stressor/?stressor=work+is+getting+more+and+more+routine (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f3aec268880>: Failed to establish a new connection: [Errno 110] Connection timed out'))
+2020-06-12 16:15:25,836 ERROR :loudspeaker: [FATAL BASE ERROR]'NoneType' object has no attribute 'category0'  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 495, in dialog_flow_engine
+    command,response_list,image,bot_name,reply_markup,user_message  = response_engine(session,user_id,user_message)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/main.py", line 308, in response_engine
+    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,next_index=next_index,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/utils.py", line 66, in wrapper
+    result = func(*args, **kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 345, in get_bot_response
+    try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 253, in selector_to_feature_or_trigger
+    feature,trigger,parsed_features = feature_selector_split(selector,selector_kwargs)
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 221, in feature_selector_split
+    feature,temp_parsed_features = eval(selector)
+  File "<string>", line 1, in <module>
+  File "/home/thierry/Desktop/stanford_pwbt/popbots-refactor/controllers/message.py", line 58, in other_and_threshold
+    if stressor.category0.lower()=="other" or float(stressor.probability0)<0.2:
+

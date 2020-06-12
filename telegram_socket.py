@@ -49,16 +49,7 @@ class TelegramBot():
             self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
             #
             #sleep(min(len(res)/25,1.5))
-            log('DEBUG',f"Delaying the next message")
             
-            if len(res)<25:
-                sleep(1)
-            elif len(res) > 25 and len(res)<75:
-                sleep(2)
-            elif len(res) > 75 and len(res)<125:
-                sleep(3)
-            else:
-                sleep(4)
             
             if not re.match('image',res):
                 i+=1
@@ -77,6 +68,20 @@ class TelegramBot():
                     
                 log('DEBUG',f"Image sent to user id {user_id}")
             
+            log('DEBUG',f"Delaying the next message")
+
+            if not i == len_text_response_no_image:
+                
+                self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
+
+                if len(res)<25:
+                    sleep(1)
+                elif len(res) > 25 and len(res)<75:
+                    sleep(2)
+                elif len(res) > 75 and len(res)<125:
+                    sleep(3)
+                else:
+                    sleep(4)
 
         log('DEBUG',f"Message block sent to user id {user_id}")
     
