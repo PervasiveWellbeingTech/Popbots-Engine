@@ -116,7 +116,7 @@ def push_feature_list(session,features,content_finder_id,synonyms_regexes):
         for fea in features:
 
             
-            row = synonyms_regexes.loc[synonyms_regexes['incoming_branch_option']==fea,:] 
+            row = synonyms_regexes.loc[synonyms_regexes['incoming_branch_option'].lower()==fea,:] 
             if all(list(row.all().isnull().values)):
                 raise Exception(f"No synonyms nor regex has been found for incoming_branching_options {fea}")
             else:
