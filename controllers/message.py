@@ -121,7 +121,6 @@ def find_keyword(input_str, word_list):
     Returns:
         (boolean) -- true if keyword is found.
     """
-
     input_str = input_str.lower()
     return any([str(each).lower() in str(input_str)for each in word_list])
 
@@ -129,6 +128,7 @@ def fetch_synonyms_regex(feature_name):
 
     """
     """
+
     synonyms_regexes = connection_wrapper(select_from,True,"features","features.synonyms,features.regex",("features.name",feature_name),)
     synonyms = synonyms_regexes[0]['synonyms']
     regex = synonyms_regexes[0]['regex']
@@ -155,7 +155,7 @@ def return_feature(input_string,condition):
             feature=condition
     else:
 
-        synonyms,regex = fetch_synonyms_regex(condition)
+        synonyms,regex = fetch_synonyms_regex(condition.replace("'","''"))
 
         if regex is not None:
             regex = regex.replace(" ","") #replacing empty spaces in case
