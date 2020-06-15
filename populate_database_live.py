@@ -72,7 +72,7 @@ try:
             language_type_id = push_element(LanguageTypes,script.language_type)
             keyboard_id = push_element(Keyboards,script.keyboard)
             
-            incoming_branch_option_list = script.incoming_branch_option.split("|")
+            incoming_branch_option_list = [x.lower() for x in script.incoming_branch_option.split("|")]
 
             for feature in incoming_branch_option_list:
 
@@ -98,7 +98,7 @@ try:
                 print(f"Added new content {new_content.content_finders_id}")
 
                 
-                branching_option = script.branching_option.split("|")
+                branching_option = [x.lower() for x in script.branching_option.split("|")]
                 
                 selectors = branching_option
                 user_input_tag = str(script.user_input_tag).split("|")
@@ -106,9 +106,9 @@ try:
                 for index,tag in enumerate(user_input_tag):
                     if tag != 'none':
                         selectors +=  [str(tag)]
-
+                features = [x.lower() for x in feature.split("|")]
                 ## adding incoming_branch_option and branching_options and next_actions
-                push_feature_list(session,features=feature.split("|"),content_finder_id=new_content.content_finders_id,synonyms_regexes=features_synonyms_regexes)
+                push_feature_list(session,features=features,content_finder_id=new_content.content_finders_id,synonyms_regexes=features_synonyms_regexes)
                 push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
                 push_trigger_list(session,triggers=script.next_action.split("|"),content_finder_id=new_content.content_finders_id)
 

@@ -141,20 +141,19 @@ def fetch_synonyms_regex(feature_name):
 
 
 
-def return_feature(input_string,condition,alternative):
+def return_feature(input_string,condition):
     """
     Fetch the synonyms of the condition and return condition if input_string contains one the words or alternative. 
     """    
-    
+    feature = None
     if "^" in condition:
         condition = condition.replace("^", "")
 
         if input_string == condition:
             feature = condition
-        else:
-            feature = alternative
+    elif condition == "other" or condition=="else": # will always enter in those as general alternative 
+            feature=condition
     else:
-        
 
         synonyms,regex = fetch_synonyms_regex(condition)
 
@@ -168,8 +167,7 @@ def return_feature(input_string,condition,alternative):
        
         if find_keyword(input_string,synonyms) or re.match(rf"{regex}",input_string):
             feature = condition
-        else: 
-            feature = alternative
+
     return feature
 
 def feature_selector_split(selector,selector_kwargs):
@@ -193,27 +191,31 @@ def feature_selector_split(selector,selector_kwargs):
     trigger = None
     if "/" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
         # these condition are formatted as ?keyword,alternative
+        alternative = "fallback"
+
         features = selector.split("/")
         parsed_features = features.copy()
+        parsed_features.append(alternative)
 
-        alternative = features[-1]
+        
+
         all_selectors = []
-        del features[-1]
-
         for fea in features:
-            all_selectors.append(return_feature(selector_kwargs['user_response'],fea,alternative))
+            all_selectors.append(return_feature(selector_kwargs['user_response'],fea))
         
-        feature_set = set(all_selectors) # sum all unique elements
-        print(all_selectors)
-        if len(feature_set)>1:
-            if alternative in feature_set:
-                feature_set.remove(alternative)
-                if len(feature_set)>1:
-                    feature_set = {alternative} # there is an ambiguity between two selectors folding back to else                
+        feature_set = set([x for x in all_selectors if x]) # take elements which as not "None" make a set to keep unique
+        
+        feature_no_systematic = list(feature_set - set(["else","other"]))
+
+
+        if len(list(feature_set))>0:
+                        
+            if len(feature_no_systematic)>0:
+                feature = feature_no_systematic[0]
             else:
-                feature_set = {alternative}
-        
-        feature = list(feature_set)[0]
+                feature = "else" if "else" in list(feature_set) else "other"
+        else:
+            feature=alternative
 
     elif "@" in selector:
         print('Entered here')
@@ -335,88 +337,93 @@ def fetch_next_contents(bot_id,next_indexes):
     content_list = flatten(content_list)
     return content_list
 
+def fetch_keyboard(bot_id,index):
+    
+    keyboards = connection_wrapper(select_from_join,True,"content_finders","distinct on (content_finders.id) keyboards.name",
+            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
+            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",index)))
+    return keyboards[0]['name']
+
+
+
+
 @timed 
 def get_bot_response(session,bot_user,next_index,selector_kwargs):
 
     bot_id = bot_user.id
-    content_index = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first().id
-    selectors_name = [selector["name"] for selector in fetch_selectors_name(content_index,bot_id)] # fetching the selectors from the previous message
+    content_finders = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = next_index).first()
+
+    selectors_name = [selector["name"] for selector in fetch_selectors_name(content_finders.id,bot_id)] # fetching the selectors from the previous message
     
     try:selected_feature,triggers,parsed_features= selector_to_feature_or_trigger(selectors=selectors_name,selector_kwargs=selector_kwargs)
     except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,next_index,"bad braching_options (selector) pattern ") from e
 
-    next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
     
-    if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index provided")
-    log('DEBUG',f'Possible indexes are : {next_indexes}')
-    
-    next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot returns a dict
-    
-    log('DEBUG',f'Possible contents are : {next_contents}')
-    content_indexes = [content['id'] for content in next_contents] # 2.0 putting all the indexes in a list
-    
-    #3.1 getting all the possible feature from the current messages
-    
-    features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] #3.1.1 getting all the possible feature names
-    
+    if "fallback" in selected_feature:
+        keyboard = fetch_keyboard(bot_id,next_index)
 
-    log('DEBUG',f'Possible features are: {features_name}')
-    log('DEBUG',f'All possible feature from selectors are {parsed_features}')
-    log('DEBUG',f'Selectors are {selectors_name}')
-    log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
-
+        final_answers = {"text":"Hmm... I\'m just a bot so I don\'t know how to respond to that here yet (but I hope one day I will!) \\n In the meantime, please use these buttons to respond 😊",
+                        "name":keyboard,"next_indexes":next_index}
     
-    possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
-    log('DEBUG',f'Possible indexes are { possible_answers_index}')
-    
-    possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the selected index, it might still be longer than 2 if we need to random between two messages
-    
-    
-    if not bool(set(parsed_features).intersection(features_name)):
-        raise AuthoringError(bot_user.name,next_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(parsed_features))} , but incoming_branch_option given at next index is/are: {' and '.join(features_name)}")
-
-    #if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
-    #    raise BadKeywordInputError(features_name)
-    
-    # user error or script 
-
-    elif len(possible_answers) < 1:
-        raise NoPossibleAnswer(bot_id,next_indexes)
-
-
-    log('DEBUG',f'Possible answers are : {possible_answers}')
-
-    if 'random!' not in triggers and len(possible_answers)>1:
-        raise AuthoringError(bot_user.name,next_index,"Multiple responses and random is not in the previous branching options (selector)")
-        
-    if len(possible_answers)>0:
-        final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
-        final_answers['next_indexes'] = final_answers['index']
-         
     else:
-        raise NoPossibleAnswer(bot_id,next_indexes)
     
-    message_local_trigger = [trigger['name'] for trigger in fetch_triggers_name(message_index=final_answers['id'],bot_id=bot_id)] 
-    triggers += message_local_trigger # concatening triggers coming from the previous message selector and the new message "triggers". 
+        next_indexes = fetch_next_indexes(bot_id,next_index) #for index in next_indexes]#1 fetching all the possible next index of the message for the given bot
+        
+        if len(next_indexes)<1:raise AuthoringError(bot_user.name,next_index,"no next index provided")
+        log('DEBUG',f'Possible indexes are : {next_indexes}')
+        
+        next_contents = fetch_next_contents(bot_id,next_indexes) #2 fetching all the next possible content for the given bot returns a dict
+        
+        log('DEBUG',f'Possible contents are : {next_contents}')
+        content_indexes = [content['id'] for content in next_contents] # 2.0 putting all the indexes in a list
+        
+        #3.1 getting all the possible feature from the current messages
+        
+        features_name = [fetch_feature_name(index,bot_id)['name'] for index in content_indexes] #3.1.1 getting all the possible feature names
+        
+
+        log('DEBUG',f'Possible features are: {features_name}')
+        log('DEBUG',f'All possible feature from selectors are {parsed_features}')
+        log('DEBUG',f'Selectors are {selectors_name}')
+        log("DEBUG",f'Selected features and triggers are : {selected_feature}, {triggers}')
+
+        
+        possible_answers_index = find_index_in_feature_list(features=features_name,selectors=selected_feature) #4 matching the content index with the correct feature
+        log('DEBUG',f'Possible indexes are { possible_answers_index}')
+        
+        possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the selected index, it might still be longer than 2 if we need to random between two messages
+        
+        
+        if not bool(set(parsed_features).intersection(features_name)):
+            raise AuthoringError(bot_user.name,next_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(parsed_features))} , but incoming_branch_option given at next index is/are: {' and '.join(features_name)}")
+
+        #if not bool(set(selected_feature).intersection(features_name)):#selected_feature not in features_name:len(set(features_name) - set(selected_feature)) > 1:
+        #    raise BadKeywordInputError(features_name)
+        
+        # user error or script 
+
+        elif len(possible_answers) < 1:
+            raise NoPossibleAnswer(bot_id,next_indexes)
+
+
+        log('DEBUG',f'Possible answers are : {possible_answers}')
+
+        if 'random!' not in triggers and len(possible_answers)>1:
+            raise AuthoringError(bot_user.name,next_index,"Multiple responses and random is not in the previous branching options (selector)")
+            
+        if len(possible_answers)>0:
+            final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
+            final_answers['next_indexes'] = final_answers['index']
+            
+        else:
+            raise NoPossibleAnswer(bot_id,next_indexes)
+        
+        message_local_trigger = [trigger['name'] for trigger in fetch_triggers_name(message_index=final_answers['id'],bot_id=bot_id)] 
+        triggers += message_local_trigger # concatening triggers coming from the previous message selector and the new message "triggers". 
 
     return final_answers['text'],final_answers['next_indexes'],final_answers['name'],triggers
 
 
-
-if __name__ == "__main__":
-    
-    """
-    bot_text = ""
-    bot_id = 1
-    next_index = 0
-    
-
-    while bot_text != "<CONVERSATION_END>":
-        user_response = input("My  input: ")
-        bot_text,next_index,keyboard,triggers = get_bot_response(bot_id=bot_id,next_index=next_index,user_response=user_response,content_index=59)
-        print("Bot reply: " + bot_text)
-        print(" Next index is "+str(next_index))
-    """
 
     
 
