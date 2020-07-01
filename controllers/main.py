@@ -173,7 +173,7 @@ def response_engine(session,user_id,user_message):
     log('DEBUG',f"Incoming message is: "+str(user_message))
     
     #initializes some variables
-    next_index = None
+    latest_bot_index = None
     bot_id = None
     tag = None
     image = None
@@ -191,8 +191,8 @@ def response_engine(session,user_id,user_message):
         
         # since we know that the user is unknown, we can directly push them to the onboarding Module
         bot_id = get_user_id_from_name("Greeting Module") # needs to be replaced with onboarding when design team is done with it
-        next_index = 0 
-        message = None
+        latest_bot_index = 0 
+        latest_bot_message = None
         
     #2. Fetching the lastest active conversations 
     conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
@@ -209,8 +209,8 @@ def response_engine(session,user_id,user_message):
             CONVERSATION_INIT = True
 
             bot_id = get_user_id_from_name("Greeting Module")
-            next_index = 0
-            message = None
+            latest_bot_index = 0
+            latest_bot_message = None
 
     else: 
         log('DEBUG',f"Warning the conversation id is none and the message is {user_message}")
@@ -218,8 +218,8 @@ def response_engine(session,user_id,user_message):
         CONVERSATION_INIT = True
 
         bot_id = get_user_id_from_name("Greeting Module")
-        next_index = 0
-        message = None
+        latest_bot_index = 0
+        latest_bot_message = None
 
     # 3.0  Handling special cases ( Hi , /start)
     # handling /start, the user wants to restart the onboarding process
@@ -247,8 +247,8 @@ def response_engine(session,user_id,user_message):
         
         bot_id = get_user_id_from_name(onboarding_module)
 
-        next_index = 0
-        message = None
+        latest_bot_index = 0
+        latest_bot_message = None
 
     #handling Hi the user want to force restart a conversation
     elif re.match(r'Hi',user_message): 
@@ -259,39 +259,39 @@ def response_engine(session,user_id,user_message):
             conversation = create_conversation(session,user_id)
         
         bot_id = get_user_id_from_name("Greeting Module")
-        next_index = 0
-        message = None
+        latest_bot_index = 0
+        latest_bot_message = None
         
 
     # handle the special switch case, if switch, we change the bot, else we find the latest active bot. 
     if re.match(r'/switch', user_message): #switch
         
-        next_index,bot_id = change_bot(session,bot_id,'Switch Module')
+        latest_bot_index,bot_id = change_bot(session,bot_id,'Switch Module')
     else:
 
         #4. Fetching the lastest active message in the conversation 
-        message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation.id).order_by(Message.id.desc()).first() # finding the lastest message
+        latest_bot_message = session.query(Message).filter_by(receiver_id=user_id,conversation_id=conversation.id).order_by(Message.id.desc()).first() # finding the lastest message
         
 
         # general case, means that we did not enter in /start or Hi
-        if message is not None and next_index is None:
-            next_index = message.index 
-            bot_id = message.sender_id
-            log('DEBUG',f"Found a previous message pointing to {next_index} and was send by bot_id {bot_id}")
+        if latest_bot_message is not None and latest_bot_index is None:
+            latest_bot_index = latest_bot_message.index 
+            bot_id = latest_bot_message.sender_id
+            log('DEBUG',f"Found a previous message pointing to {latest_bot_index} and was send by bot_id {bot_id}")
 
         # we dont have a last bot message and latest_index is none. (safeguard) is switches bot to recover. (could throw an error instead)
-        elif message is None and next_index is None: # there is no message 
+        elif latest_bot_message is None and latest_bot_index is None: # there is no message 
             log('DEBUG',f"Should not have entered in the no message, no in itialized scenario but did")
-            next_index,bot_id = change_bot(session,bot_id,None)
+            latest_bot_index,bot_id = change_bot(session,bot_id,None)
 
-        #next_index could be none because of bad storage of the previous_index in the last message
+        #latest_bot_index could be none because of bad storage of the previous_index in the last message
         # SHOULD ADD LOG messages here
-        if next_index is not None:
+        if latest_bot_index is not None:
             pass 
 
         else:
 
-            next_index,bot_id = change_bot(session,bot_id,None)  # could throw an error here instead of switching to another bot
+            latest_bot_index,bot_id = change_bot(session,bot_id,None)  # could throw an error here instead of switching to another bot
 
     
 
@@ -305,7 +305,7 @@ def response_engine(session,user_id,user_message):
     selector_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,next_index=next_index,selector_kwargs=selector_kwargs)
+    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,latest_bot_index=latest_bot_index,selector_kwargs=selector_kwargs)
     
 
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
@@ -436,16 +436,16 @@ def response_engine(session,user_id,user_message):
 
     #handle keyboards add reply markup
     if keyboard=="default":
-        reply_markup = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
+        keyboard_object = {'type':'default','resize_keyboard':True,'text':""} #no keyboard
     
     elif keyboard == "all_bots":
 
         possible_bot = get_bot_names(session,None,None) #### Replace with the correct module
         possible_bot.insert(0,"Choose for me")
         keyboard = '|'.join(possible_bot)
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}
+        keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}
     else:
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #
+        keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':keyboard}  #
         
     
     
@@ -462,7 +462,7 @@ def response_engine(session,user_id,user_message):
         user_message = "user_greeting"
         
 
-    return command,response_list,image,bot_name,reply_markup,user_message
+    return command,response_list,image,bot_name,keyboard_object,user_message
 
 
 
@@ -483,8 +483,8 @@ def dialog_flow_engine(user_id,user_message):
     session = thread_session.s # sql alchemy session one per thread
 
     # define empty dict for telegram_sockets
-    reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-    response_dict={'response_list':[],'img':None,'reply_markup':reply_markup,'bot_name':""}
+    keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
+    response_dict={'response_list':[],'img':None,'reply_markup':keyboard_object,'bot_name':""}
 
     try:
         command = {"skip":True,"stack":False} # initialize the command parameter, which is update by response_engine after
@@ -492,7 +492,7 @@ def dialog_flow_engine(user_id,user_message):
         while command["skip"]==True: # loop and does not send the message until skip == False
 
 
-            command,response_list,image,bot_name,reply_markup,user_message  = response_engine(session,user_id,user_message)
+            command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,user_message)
 
             if command["stack"] == True: # handles two message in a row
                 if image is not None:
@@ -502,33 +502,33 @@ def dialog_flow_engine(user_id,user_message):
 
             
             
-            response_dict['reply_markup'] = reply_markup
+            response_dict['reply_markup'] = keyboard_object
             response_dict['bot_name'] = bot_name
         return response_dict
     
     except BadKeywordInputError as error:
         log('ERROR',error)
-        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
         delconv(session,user_id)
         return response_dict
 
     except AuthoringError as error:
         log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
-        response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
         delconv(session,user_id)
         return response_dict
 
     except NoPossibleAnswer as error:
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
+        keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
         log('ERROR',":loudspeaker: [FATAL ERROR]" +str(error))
         delconv(session,user_id)
 
   
-        return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
     
     except BaseException as error:
-        reply_markup = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':reply_markup,'bot_name':"Onboarding Bot"}
+        keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
+        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
         
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL BASE ERROR]" + str(error)+str(''.join(tb.stack.format())))
