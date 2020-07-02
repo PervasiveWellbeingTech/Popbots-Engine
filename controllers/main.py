@@ -394,7 +394,7 @@ def response_engine(session,user_id,user_message):
 
 
     except Exception as error:
-        b = traceback.TracebackException.from_exception(error)
+        tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL Trigger ERROR]" + str(error)+str(''.join(tb.stack.format())))
 
     # handle images if required
