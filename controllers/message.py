@@ -78,6 +78,18 @@ def two_cat_other(stressor):
 
     return feature,["yes","noother","two_possible"]
 
+def is_financial(stressor):
+    if stressor.category0 == "financial issues":
+        return 'yes'
+    else:
+        return 'no'
+def is_covid(stressor):
+    if stressor.covid_category == "covid":
+        if stressor.covid_probability > 0.99:
+            return 'yes'
+        else: return 'no' 
+    else:
+        return 'no'
 
 def min_word(input_string,word_len,condition,alternative):
     

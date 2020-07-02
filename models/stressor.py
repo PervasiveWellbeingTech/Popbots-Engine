@@ -21,6 +21,7 @@ class Stressor(Base):
     category4 = Column(String)
     category5 = Column(String)
     category6 = Column(String)
+    covid_category = Column(String)
 
     probability0 = Column(Float(6))
 
@@ -29,19 +30,17 @@ class Stressor(Base):
     probability3 = Column(Float(6))
     probability4 = Column(Float(6))
     probability5 = Column(Float(6))
-
-
+    covid_probability = Column(Float(6))
 
 
 import requests
 import ast
 
 CLASSIFIER_IP_ADDRESS = os.environ['CLASSIFIER_IP_ADDRESS']
-FLASK_CLASSIFIER_SERVER_URL = f"http://{CLASSIFIER_IP_ADDRESS}/classifier/stressor/"
+FLASK_CLASSIFIER_SERVER_URL = f"http://{CLASSIFIER_IP_ADDRESS}/classifier/"
 
 
-def get_pred_api(stressor):
-    url = FLASK_CLASSIFIER_SERVER_URL
+def get_pred_api(stressor,url):
     headers = {
     'Content-Type': "application/json"
     }
@@ -60,7 +59,8 @@ def get_pred_api(stressor):
 
 def populated_stressor(stressor,conv_id):
 
-    result = get_pred_api(stressor)
+    result = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"stressor/")
+    covid_results = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"covid/")
 
     stressor = Stressor( # added as a dummy for now
 
@@ -73,7 +73,9 @@ def populated_stressor(stressor,conv_id):
         category4 = result['raw']['category4'],
         category5 = result['raw']['category5'],
         category6 = "Other",
-
+        covid_category = covid_results['category'],
+        
+        covid_propability = round(covid_results['probability'],4),
         probability0 = round(result['raw']['probability0'],4),
         probability1 = round(result['raw']['probability1'],4),
         probability2 = round(result['raw']['probability2'],4),

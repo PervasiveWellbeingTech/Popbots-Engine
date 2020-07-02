@@ -71,7 +71,9 @@ def create_tables():
             category4 text NULL,
             category5 text NULL,
             category6 text NULL,
-
+            covid_category text NULL,
+            
+            covid_probability float(6),
             probability0 float(6),
             probability1 float(6),
             probability2 float(6),
