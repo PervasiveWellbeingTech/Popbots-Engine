@@ -59,8 +59,8 @@ def get_pred_api(stressor,url):
 
 def populated_stressor(stressor,conv_id):
 
-    result = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"stressor/")
-    covid_results = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"covid/")
+    result = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"stressor")
+    covid_results = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"covid")
 
     stressor = Stressor( # added as a dummy for now
 
@@ -75,7 +75,7 @@ def populated_stressor(stressor,conv_id):
         category6 = "Other",
         covid_category = covid_results['category'],
         
-        covid_propability = round(covid_results['probability'],4),
+        covid_probability = round(float(covid_results['probability']),4),
         probability0 = round(result['raw']['probability0'],4),
         probability1 = round(result['raw']['probability1'],4),
         probability2 = round(result['raw']['probability2'],4),
