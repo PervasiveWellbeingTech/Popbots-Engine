@@ -194,12 +194,9 @@ class TelegramBot():
 if __name__ == '__main__':
     # Telegram Bot Authorization Token Must be set in env variables 
 
-    ENV = 'debug'
-    if ENV=='prod':
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
-    else:
-        token = os.getenv("TELEGRAM_TEST_BOT_TOKEN")
-
+    
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    
     if token is None:
         log('ERROR','Not token has been found, telegram socket cannot be launched')
         raise ValueError
