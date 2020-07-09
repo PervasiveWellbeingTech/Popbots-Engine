@@ -245,6 +245,7 @@ def response_engine(session,user_id,user_message):
             onboarding_module = "OnboardingGroup Module"
             user.experiment_group = "Group"
         
+        session.commit()
         bot_id = get_user_id_from_name(onboarding_module)
 
         latest_bot_index = 0
