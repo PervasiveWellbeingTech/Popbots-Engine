@@ -140,7 +140,7 @@ def push_stressor(session,conv_id):
     print(stressor1)
     stressor_list = [stressor1,stressor2,stressor3]
     print(stressor_list)
-    stressor_text = ' '.join(x.text for x in stressor_list if x)
+    stressor_text = '. '.join(x.text for x in stressor_list if x)
 
     stressor = populated_stressor(stressor_text,conv_id = conv_id)
 
@@ -239,11 +239,11 @@ def response_engine(session,user_id,user_message):
         if user.experiment_group == "Moderator" or "moderator" in user_message:
             log("INFO","User has been rolled in Moderator Group")
             onboarding_module = "OnboardingModerator Module"
-            user.experiment_group = onboarding_module
+            user.experiment_group = "Moderator"
         if user.experiment_group == "Group" or "group" in user_message:
             log("INFO","User has been rolled in Group Group")
             onboarding_module = "OnboardingGroup Module"
-            user.experiment_group = onboarding_module
+            user.experiment_group = "Group"
         
         bot_id = get_user_id_from_name(onboarding_module)
 
