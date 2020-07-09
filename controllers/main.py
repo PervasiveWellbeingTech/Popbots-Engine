@@ -296,7 +296,7 @@ def response_engine(session,user_id,user_message):
     
 
 
-    stressor = session.query(Stressor).filter_by(conversation_id = conversation.id).first() # fetching the stressor in the conversation if exists. 
+    stressor = session.query(Stressor).filter_by(conversation_id = conversation.id).order_by(Stressor.conversation_id.desc()).first() # fetching the stressor in the conversation if exists. 
     
     #fetching the bot_user object
     bot_user = session.query(Users).filter_by(id = bot_id).first() 
