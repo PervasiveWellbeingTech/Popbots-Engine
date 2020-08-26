@@ -25,14 +25,14 @@ INSERT_QUERIES = {
         language_type_id, language_id) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
     "messages": "INSERT INTO messages (index, sender_id, receiver_id, content_id, \
         conversation_id, stressor) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
-    "features": "INSERT INTO features (name) VALUES (%s) RETURNING id;",
-    "feature_finders": "INSERT INTO feature_finders (index, feature_id) \
+    "intents": "INSERT INTO intents (name) VALUES (%s) RETURNING id;",
+    "intent_finders": "INSERT INTO intent_finders (index, intent_id) \
         VALUES (%s, %s) RETURNING id;",
     "selectors": "INSERT INTO selectors (name) VALUES (%s) RETURNING id;",
     "selector_finders": "INSERT INTO selector_finders (index, selector_id) \
         VALUES (%s, %s) RETURNING id;",
     "content_finders": "INSERT INTO content_finders (user_id, source_message_index, \
-        message_index, bot_content_index, features_index, selectors_index) \
+        message_index, bot_content_index, intents_index, selectors_index) \
         VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
     "next_message_finders":"INSERT INTO next_message_finders (source_message_index, \
         next_message_index,user_id) VALUES (%s,%s,%s) RETURNING id;"

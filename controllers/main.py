@@ -512,7 +512,7 @@ def dialog_flow_engine(user_id,user_message):
     
     except BadKeywordInputError as error:
         log('ERROR',error)
-        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.features))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.intents))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
         delconv(session,user_id)
         return response_dict
 

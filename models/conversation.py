@@ -104,33 +104,7 @@ class MessageContent(Base):
     text = Content.text
 
 
-if __name__ == "__main__":
 
-    a  = Content(text="something",user_id = 50)
-    session.add(a)
-    session.commit()
-
-    print(a.id)
-
-    """
-    b = ContentFinderJoin(
-
-        user_id = 50,
-        source_message_index = None,
-        message_index = 0,
-        bot_content_index = 0,    
-        features_index = 1,
-        selectors_index = 1,
-        
-        #Bot contents
-        content_id = a.id,
-        language_type_id = 1,
-        language_id = 1,
-        keyboard_id = 1 )
-    session.add(b)
-    session.commit()
-    print(b)
-    """
 
 
 

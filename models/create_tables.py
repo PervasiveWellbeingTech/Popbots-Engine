@@ -131,7 +131,7 @@ def create_tables():
             FOREIGN KEY (conversation_id) REFERENCES conversations (id))
         """,
         """
-        CREATE TABLE features (
+        CREATE TABLE intents (
             id SERIAL PRIMARY KEY,
             synonyms VARCHAR,
             regex VARCHAR,
@@ -159,9 +159,9 @@ def create_tables():
             FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
             )
         """,
-        #features_index INTEGER NOT NULL,
+        #intents_index INTEGER NOT NULL,
         #selectors_index INTEGER NOT NULL,
-        #FOREIGN KEY (features_index) REFERENCES feature_finders (id),
+        #FOREIGN KEY (intents_index) REFERENCES intent_finders (id),
         #FOREIGN KEY (selectors_index) REFERENCES selector_finders (id)
         """
         CREATE TABLE selector_finders (
@@ -172,18 +172,19 @@ def create_tables():
             FOREIGN KEY (selector_id) REFERENCES selectors (id) on delete cascade)
         """,
         """
-        CREATE TABLE feature_finders (
+        CREATE TABLE intent_finders (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
-            feature_id INTEGER NOT NULL,
+            intent_id INTEGER NOT NULL,
             FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
-            FOREIGN KEY (feature_id) REFERENCES features (id) on delete cascade)
+            FOREIGN KEY (intent_id) REFERENCES intents (id) on delete cascade)
         """,
         """
         CREATE TABLE trigger_finders (
             id SERIAL PRIMARY KEY,
             index INTEGER NOT NULL,
             trigger_id INTEGER NOT NULL,
+            outbound BOOLEAN NOT NULL,
             FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (trigger_id) REFERENCES triggers (id) on delete cascade)
         """,

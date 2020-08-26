@@ -75,6 +75,14 @@ def timed(func):
 
     return wrapper
 
+def flatten(l):
+    """
+    Parameters:
+        l (list) -- input list 2d array list
+    Returns:
+        (list) -- output list flatten
+    """
+    return [item for sublist in l for item in sublist]
 
 if __name__ == "__main__":
     log("AUTHORING ERROR",'@Thierry Lincoln Test')
