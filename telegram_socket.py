@@ -45,6 +45,7 @@ class TelegramBot():
         log('DEBUG',f"Trying to send a message block to user id {user_id} ")
         len_text_response_no_image = len([value for value in text_response if not re.match('image',value)])
         i=0
+        log('DEBUG',text_response)
         for res in text_response:
             self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
             #
@@ -62,7 +63,10 @@ class TelegramBot():
                     self.bot.send_message(chat_id=user_id, text=res, reply_markup = telegram.ReplyKeyboardRemove())
             else:
                 try: 
-                    self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)
+                    if "png" in image.name:
+                        self.bot.send_photo(chat_id=user_id, photo=image,timeout=10)
+                    elif "gif" in image.name:
+                        self.bot.send_animation(chat_id=user_id,animation=image, timeout=10)
                 except Exception as error:
                     log('ERROR',f"Image fail image: {image} to send to user id {user_id} with error {error}")
                     

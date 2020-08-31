@@ -3,6 +3,7 @@ import random
 import time
 import sys
 import traceback
+import os
 
 from datetime import datetime
 
@@ -124,10 +125,13 @@ def image_fetcher(bot_text):
     start = bot_text.find("$img$") + len("$img$")
     end = bot_text.find("$img$",start)
     substring = bot_text[start:end]
-    
+    img = None
     bot_text = bot_text.replace("$img$"+substring+"$img$","")
+    if os.path.exists('./img/{}.png'.format(substring)):
+        img = open('./img/{}.png'.format(substring), 'rb')
+    elif os.path.exists('./img/{}'.format(substring)):
+        img = open('./img/{}'.format(substring), 'rb')
 
-    img = open('./img/{}.png'.format(substring), 'rb')
     
     return bot_text,img
 
@@ -176,6 +180,7 @@ def response_engine(session,user_id,user_message):
     latest_bot_index = None
     bot_id = None
     tag = None
+    bot_tag = None
     image = None
     command = {"skip":False,"stack":True}
     onboarding_module = "OnboardingModerator Module"
@@ -316,7 +321,7 @@ def response_engine(session,user_id,user_message):
     ## handle special flag in bot scrips 
 
     if "<SWITCH>" in bot_text:
-        command = {"skip":True,"stack":False}
+        command = {"skip":True,"stack":False} 
         bool_trigger = [True if "~" in x else False for x in triggers]
 
         if any(bool_trigger):
@@ -390,6 +395,8 @@ def response_engine(session,user_id,user_message):
                         locals()[trigger]=user_message
                 elif "tag:" in trigger:
                     tag = re.sub('tag:','',trigger)
+                elif "bot_tag" in trigger:
+                    bot_tag = re.sub('bot_tag:','',trigger)
                 elif "!stressor" in trigger:
                     push_stressor(session = session,conv_id = conversation.id)#conversation.id)
                 elif "!skip_response" in trigger:
@@ -400,21 +407,24 @@ def response_engine(session,user_id,user_message):
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL Trigger ERROR]" + str(error)+str(''.join(tb.stack.format())))
 
-    # handle images if required
-    if "$img$" in bot_text:
-        bot_text,image = image_fetcher(bot_text)
-        
+      
 
     #pushing messages in database
     push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
-    push_message(session,text=bot_text,user_id=bot_id,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=None) # pushing the bot response
+    push_message(session,text=bot_text,user_id=bot_id,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=bot_tag) # pushing the bot response
 
     # fetching lastest bot/intervention entity of a conversation 
     latest_bot = session.query(Users).join(Message,Users.id==Message.receiver_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
 
     # parsing the data before sending
     response_list = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\n")
-    
+    log('DEBUG', response_list)
+    # handle images if required
+    for index,text in enumerate(response_list):
+        if "$img$" in text:
+            response_list[index],image = image_fetcher(text)
+            response_list.insert(max(0,index),'image')
+            
 
     # formatting the text with the neccessary info eg: user:name, etc...
     try: 
@@ -497,11 +507,10 @@ def dialog_flow_engine(user_id,user_message):
 
 
             command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,user_message)
-
+            if image is not None:
+                response_dict['img']= image
             if command["stack"] == True: # handles two message in a row
-                if image is not None:
-                    response_dict['response_list'].append("image")
-                    response_dict['img'] = image
+                
                 response_dict['response_list'] = response_dict['response_list'] + response_list
 
             

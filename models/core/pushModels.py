@@ -1,5 +1,8 @@
 
 from models.core.sqlalchemy_config import * #delete all the above and see if it works
+
+from models.conversation import NextMessageFinders
+
 from models.user import Users
 import traceback
 import pandas as pd
@@ -24,13 +27,6 @@ class LanguageTypes(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
-"""
-selector_finders_table = Table('selector_finders', Base.metadata,
-    Column('id',Integer,primary_key=True),
-    Column('index', Integer, ForeignKey('content_finders.id')),
-    Column('selectors_id', Integer, ForeignKey('selectors.id'))
-)
-"""
 
 
 class Selectors(Base):
@@ -42,7 +38,7 @@ class Selectors(Base):
 class SelectorFinders(Base):
     __tablename__='selector_finders'
     id = Column(Integer,primary_key=True)
-    index =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
     selector_id = Column(Integer, ForeignKey('selectors.id'))
 
 class Intents(Base):
@@ -55,39 +51,32 @@ class Intents(Base):
 class IntentFinders(Base):
     __tablename__='intent_finders'
     id = Column(Integer,primary_key=True)
-    index =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
     intent_id = Column(Integer, ForeignKey('intents.id'))
 
 class Trigger(Base):
     __tablename__='triggers'
     id = Column(Integer,primary_key=True)
     name = Column(String)
-    outbound = Column(Boolean)
+    
 
 class TriggerFinders(Base):
     __tablename__='trigger_finders'
     id = Column(Integer,primary_key=True)
-    index =  Column(Integer, ForeignKey('trigger_finders.id', ondelete='CASCADE'))
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
     trigger_id = Column(Integer, ForeignKey('triggers.id'))
+    outbound = Column(Boolean)
 
 
 class ContentFinders(Base):
     __tablename__='content_finders'
     id = Column(Integer,primary_key=True)
     user_id = Column(Integer,ForeignKey(Users.id))
-    source_message_index = Column(Integer)
     message_index = Column(Integer)
-    bot_content_index = Column(Integer)
     selectorFinders = relationship(SelectorFinders,cascade='all,delete',passive_deletes=True)
     intentFinders = relationship(IntentFinders,cascade='all,delete',passive_deletes=True)
 
-    #intents_index = Column(Integer)
-    #selectors_index = relationship("Selectors",secondary=selector_finders_table,backref='contents',lazy='dynamic')
 
-
-
-#print(Base.metadata)
-#Base.metadata.create_all(engine)
 
 
 def push_selector_list(session,selectors,content_finder_id):
@@ -102,7 +91,7 @@ def push_selector_list(session,selectors,content_finder_id):
                 session.add(selector)
                 session.commit()
 
-            manytomany = SelectorFinders(index=content_finder_id,selector_id = selector.id)
+            manytomany = SelectorFinders(content_finders_id=content_finder_id,selector_id = selector.id)
             session.add(manytomany)
         
         session.commit()
@@ -149,7 +138,7 @@ def push_intent_list(session,intents,content_finder_id,synonyms_regexes):
                     intent.regex = regex
                     session.commit()
 
-                manytomany = IntentFinders(index=content_finder_id,intent_id = intent.id)
+                manytomany = IntentFinders(content_finders_id=content_finder_id,intent_id = intent.id)
                 session.add(manytomany)
         
         session.commit()
@@ -164,14 +153,14 @@ def push_trigger_list(session,triggers,content_finder_id):
     try:
 
         for trig,outbound in triggers:
-            trigger = session.query(Trigger).filter_by(name=trig,outbound=outbound).first()
+            trigger = session.query(Trigger).filter_by(name=trig).first()
 
             if trigger is None:
-                trigger = Trigger(name=trig,outbound=outbound)
+                trigger = Trigger(name=trig)
                 session.add(trigger)
                 session.commit()
 
-            manytomany = TriggerFinders(index=content_finder_id,trigger_id = trigger.id)
+            manytomany = TriggerFinders(content_finders_id=content_finder_id,trigger_id = trigger.id,outbound=outbound)
             session.add(manytomany)
         
         session.commit()

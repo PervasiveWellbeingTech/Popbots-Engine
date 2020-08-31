@@ -16,7 +16,20 @@ engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
 
-SPREADSHEET_ID = "1xRTnHL9jpNsNbfC8qNEbrSIqDT0JCdkQmAE9xSKWsEg"
-RANGE_NAME = "Users"
 
-input("Name of the bot to delete":"")
+
+bot  = input("Name of the bot to delete: ")
+
+user = session.query(Users).filter_by(name=bot).first()
+if user is None: # if the user does not exist create it
+    print("Bot does not exist")
+elif user:
+
+    session.query(ContentFinders).filter_by(user_id=user.id).delete()
+    
+    #session.query(BotContents).filter_by(user_id=user.id).delete()
+    session.query(NextMessageFinders).filter_by(user_id=user.id).delete()
+
+    session.commit()
+    print(f'Deleted all contents for bot {user.name}')
+    

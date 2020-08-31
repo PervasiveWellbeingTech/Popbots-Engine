@@ -41,7 +41,7 @@ def fetch_selectors_name(message_index):
     #we need to actualize the selectors to the lastest state
     selectors = connection_wrapper(select_from_join,True,"selector_finders","ALL selectors.name",
         (("selectors","selector_finders.selector_id","selectors.id"),),
-        (("selector_finders.index",message_index),))
+        (("selector_finders.content_finders_id",message_index),))
     return selectors
 
 def fetch_triggers_name(message_index,outbound):
@@ -57,7 +57,7 @@ def fetch_triggers_name(message_index,outbound):
     #we need to actualize the triggers to the lastest state
     triggers = connection_wrapper(select_from_join,True,"trigger_finders","ALL triggers.name",
         (("triggers","trigger_finders.trigger_id","triggers.id"),),
-        (("trigger_finders.index",message_index),("triggers.outbound",outbound),))
+        (("trigger_finders.content_finders_id",message_index),("trigger_finders.outbound",outbound),))
     
     return triggers
 
@@ -65,7 +65,7 @@ def fetch_intent_name(message_index):
     #we need to actualize the selectors to the lastest state
     intents = connection_wrapper(select_from_join,True,"intent_finders","ALL intents.name",
         (("intents","intent_finders.intent_id","intents.id"),),
-        (("intent_finders.index",message_index),))
+        (("intent_finders.content_finders_id",message_index),))
     return intents[0]
 
 
@@ -84,8 +84,8 @@ def fetch_next_contents(bot_id,next_indexes):
     content_list=[]
     for next_index in next_indexes:
         content_list.append(connection_wrapper(select_from_join,True,"content_finders","distinct on (content_finders.id) content_finders.id,contents.text,keyboards.name",
-            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
-            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",next_index)))) # removed that ,("content_finders.intents_index",intent)
+            (("bot_contents","content_finders.id","bot_contents.content_finders_id"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
+            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("message_index",next_index)))) # removed that ,("content_finders.intents_index",intent)
         
         #content_list[-1]['index']=next_index
         for index in range(len(content_list[-1])):
@@ -99,8 +99,8 @@ def fetch_keyboard(bot_id,index):
     """
     
     keyboards = connection_wrapper(select_from_join,True,"content_finders","distinct on (content_finders.id) keyboards.name",
-            (("bot_contents","content_finders.bot_content_index","bot_contents.index"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
-            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("bot_content_index",index)))
+            (("bot_contents","content_finders.id","bot_contents.content_finders_id"),("contents","bot_contents.content_id","contents.id"),("keyboards","bot_contents.keyboard_id","keyboards.id")),
+            (("content_finders.user_id",bot_id),("contents.user_id",bot_id),("message_index",index)))
     return keyboards[0]['name']
 
 

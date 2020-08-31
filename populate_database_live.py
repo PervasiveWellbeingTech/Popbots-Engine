@@ -66,6 +66,8 @@ def rasa_process(selectors,intents_synonyms_regexes):
 try:
     user_table = fetch_csv(SPREADSHEET_ID,RANGE_NAME)
     active_bots = [user['name'] for index,user in user_table[(user_table['active'] == '1') & (user_table['updated'] == '1')].iterrows() ]
+    #must_delete_bots = [user['name'] for index,user in user_table[(user_table['delete'] == '1') & (user_table['updated'] == '1')].iterrows() ]
+
     print(f'Actives Bot are: {active_bots}')
     intents_synonyms_regexes = fetch_csv(SPREADSHEET_ID,'branching_synonyms_regexes')
 
@@ -83,7 +85,7 @@ try:
 
             session.query(ContentFinders).filter_by(user_id=user.id).delete()
             
-            session.query(BotContents).filter_by(user_id=user.id).delete()
+            #session.query(BotContents).filter_by(user_id=user.id).delete()
             session.query(NextMessageFinders).filter_by(user_id=user.id).delete()
 
             session.commit()
@@ -97,6 +99,17 @@ try:
             session.add(content)
             session.commit()
 
+            for next_index in script.next_indexes.split("|"):
+                if next_index != 'none':
+
+                    new_nmf = NextMessageFinders(
+                        user_id = user.id,
+                        source_message_index = script.msg_index,
+                        next_message_index = int(next_index)
+                    )
+                    session.add(new_nmf)
+                    session.commit()
+
             
             language_id = push_element(Language,script.language)
             language_type_id = push_element(LanguageTypes,script.language_type)
@@ -105,13 +118,22 @@ try:
             incoming_branch_option_list = [x.lower() for x in script.incoming_branch_option.split("|")]
 
             for intent in incoming_branch_option_list:
+                
+                
+                
 
-                new_content = ContentFinderJoin(
-
+                content_finders = ContentFinders(
                     user_id = user.id,
-                    source_message_index = None,
-                    message_index = script.msg_index,
-                    bot_content_index = script.msg_index,    
+                    message_index = script.msg_index
+                )
+                session.add(content_finders)
+                session.commit()
+            
+
+
+                new_bot_content = BotContents(
+
+                    content_finders_id = content_finders.id,
                     content_id = content.id,            
 
                     language_type_id = language_type_id,
@@ -121,11 +143,11 @@ try:
 
                 )
             
-                session.add(new_content)
+                session.add(new_bot_content)
                 session.commit()
 
 
-                print(f"Added new content {new_content.content_finders_id}")
+                print(f"Added new content at index {content_finders.message_index}")
 
                 
                 branching_option = [x.lower() for x in script.branching_option.split("|")]
@@ -149,20 +171,11 @@ try:
                 rasa_process(selectors,intents_synonyms_regexes)
 
 
-                push_intent_list(session,intents=intents,content_finder_id=new_content.content_finders_id,synonyms_regexes=intents_synonyms_regexes)
-                push_selector_list(session,selectors=selectors,content_finder_id=new_content.content_finders_id)
-                push_trigger_list(session,triggers=triggers,content_finder_id=new_content.content_finders_id)
+                push_intent_list(session,intents=intents,content_finder_id=content_finders.id,synonyms_regexes=intents_synonyms_regexes)
+                push_selector_list(session,selectors=selectors,content_finder_id=content_finders.id)
+                push_trigger_list(session,triggers=triggers,content_finder_id=content_finders.id)
 
-            for next_index in script.next_indexes.split("|"):
-                if next_index != 'none':
-
-                    new_nmf = NextMessageFinders(
-                        user_id = user.id,
-                        source_message_index = script.msg_index,
-                        next_message_index = int(next_index)
-                    )
-                    session.add(new_nmf)
-                    session.commit()
+            
         
         print(f"Added all new contents for bot {user.name}")
 

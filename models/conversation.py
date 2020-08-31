@@ -13,6 +13,42 @@ class Conversation(Base):
     stressor = Column(String)
     closed = Column(Boolean)
     
+class Selectors(Base):
+    __tablename__='selectors'
+    id = Column(Integer,primary_key=True)
+    name = Column(String)
+
+
+class SelectorFinders(Base):
+    __tablename__='selector_finders'
+    id = Column(Integer,primary_key=True)
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
+    selector_id = Column(Integer, ForeignKey('selectors.id'))
+
+class Intents(Base):
+    __tablename__='intents'
+    id = Column(Integer,primary_key=True)
+    name = Column(String)
+    synonyms = Column(String)
+    regex=Column(String)
+
+class IntentFinders(Base):
+    __tablename__='intent_finders'
+    id = Column(Integer,primary_key=True)
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
+    intent_id = Column(Integer, ForeignKey('intents.id'))
+
+class Trigger(Base):
+    __tablename__='triggers'
+    id = Column(Integer,primary_key=True)
+    name = Column(String)
+    outbound = Column(Boolean)
+
+class TriggerFinders(Base):
+    __tablename__='trigger_finders'
+    id = Column(Integer,primary_key=True)
+    content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
+    trigger_id = Column(Integer, ForeignKey('triggers.id'))
 
 
 
@@ -47,45 +83,42 @@ class ContentFinders(Base):
     __tablename__='content_finders'
     id = Column(Integer,primary_key=True)
     user_id = Column(Integer,ForeignKey(Users.id))
-    source_message_index = Column(Integer)
     message_index = Column(Integer)
-    bot_content_index = Column(Integer)
+    selectorFinders = relationship(SelectorFinders,cascade='all,delete',passive_deletes=True)
+    intentFinders = relationship(IntentFinders,cascade='all,delete',passive_deletes=True)
+
+
 
 
 class BotContents(Base):
     __tablename__ = 'bot_contents'
     
     id = Column(Integer,primary_key=True)
-    index = Column(Integer)
     content_id = Column(Integer,ForeignKey(Content.id))
     language_type_id = Column(Integer)
     language_id = Column(Integer)
     keyboard_id = Column(Integer)
-    user_id = Column(Integer,ForeignKey(Users.id))
+    content_finders_id = Column(Integer,ForeignKey(ContentFinders.id))
    
 
 
-bot_contents_join = join(ContentFinders,BotContents,ContentFinders.bot_content_index == BotContents.index)
+bot_contents_join = join(ContentFinders,BotContents,ContentFinders.id == BotContents.content_finders_id)
 # join(BotContents,Content,BotContents.content_id == Content.id).
 
 class ContentFinderJoin(Base):
     __table__ = bot_contents_join
     
-    #content finders
-    content_finders_id = column_property(ContentFinders.id)
-    bot_content_id = column_property(BotContents.id)
-
-    
-    user_id = column_property(ContentFinders.user_id,BotContents.user_id)
-    source_message_index = ContentFinders.source_message_index
     message_index = ContentFinders.message_index
-    bot_content_index = column_property(ContentFinders.bot_content_index,BotContents.index)    
-    #features_index = ContentFinders.features_index
-    #selectors_index = ContentFinders.selectors_index
+
+    user_id = ContentFinders.user_id
+    #content finders
+    content_finders_id = column_property(ContentFinders.id,BotContents.content_finders_id)
+    bot_content_id = BotContents.id
+
     
     #Bot contents
     content_id = BotContents.content_id
-    
+
     language_type_id = BotContents.language_type_id
     language_id = BotContents.language_id
     keyboard_id = BotContents.keyboard_id

@@ -60,6 +60,8 @@ The database design is centered on the user, users can be Humans or Bot. This de
 
 Users if they are human have some more properties references in the table human_users
 
+To make authoring the bots scripts convienient, each bot has a 0-N index. This arbitraly given numbers are limiting the use of normal key-pair relationships since these requires unique ids. This explains why there is no relationships between next_message_finders and content_finders
+
 
 
 ## 2.2. Functionnality descriptions

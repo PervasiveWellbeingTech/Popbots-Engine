@@ -33,6 +33,7 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             category_id INTEGER NOT NULL,
+            desactivated BOOLEAN NOT NULL,
             FOREIGN KEY (category_id) REFERENCES user_categories (id))
         """,
         """
@@ -97,20 +98,36 @@ def create_tables():
             ) 
         """,
         """
+        CREATE TABLE next_message_finders (
+            id SERIAL PRIMARY KEY,
+            source_message_index INTEGER NOT NULL,
+            next_message_index INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
+            )
+        """,
+        """
         CREATE TABLE keyboards (
             id SERIAL PRIMARY KEY,
             name TEXT NOT NULL)
         """,
         """
+        CREATE TABLE content_finders (
+            id SERIAL PRIMARY KEY,
+            message_index INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
+            )
+        """,
+        """
         CREATE TABLE bot_contents (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
             content_id INTEGER NOT NULL REFERENCES contents (id),
             keyboard_id INTEGER NOT NULL,
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
+            content_finders_id INTEGER NOT NULL,
+            FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (keyboard_id) REFERENCES keyboards (id),
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
@@ -149,54 +166,34 @@ def create_tables():
             name VARCHAR(255) NOT NULL)
         """,
         
-        """
-        CREATE TABLE content_finders (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            source_message_index INTEGER,
-            message_index INTEGER NOT NULL,
-            bot_content_index INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
-            )
-        """,
-        #intents_index INTEGER NOT NULL,
-        #selectors_index INTEGER NOT NULL,
-        #FOREIGN KEY (intents_index) REFERENCES intent_finders (id),
-        #FOREIGN KEY (selectors_index) REFERENCES selector_finders (id)
+        
+       
         """
         CREATE TABLE selector_finders (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
+            content_finders_id INTEGER NOT NULL,
             selector_id INTEGER NOT NULL,
-            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (selector_id) REFERENCES selectors (id) on delete cascade)
         """,
         """
         CREATE TABLE intent_finders (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
+            content_finders_id INTEGER NOT NULL,
             intent_id INTEGER NOT NULL,
-            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (intent_id) REFERENCES intents (id) on delete cascade)
         """,
         """
         CREATE TABLE trigger_finders (
             id SERIAL PRIMARY KEY,
-            index INTEGER NOT NULL,
+            content_finders_id INTEGER NOT NULL,
             trigger_id INTEGER NOT NULL,
             outbound BOOLEAN NOT NULL,
-            FOREIGN KEY (index) REFERENCES content_finders (id) on delete cascade,
+            FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (trigger_id) REFERENCES triggers (id) on delete cascade)
         """,
-        """
-        CREATE TABLE next_message_finders (
-            id SERIAL PRIMARY KEY,
-            source_message_index INTEGER NOT NULL,
-            next_message_index INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
-            )
-        """,
+
         """
             INSERT INTO "public"."user_categories" ("id", "name") VALUES ('1', 'Human');
             INSERT INTO "public"."user_categories" ("id", "name") VALUES ('2', 'Bot');
