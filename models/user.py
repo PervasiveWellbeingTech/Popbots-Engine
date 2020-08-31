@@ -30,7 +30,7 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     category_id = Column(Integer)
-    deactivated = Column(Boolean)
+    desactivated = Column(Boolean)
 
 class HumanUsers(Base):
     __tablename__ = 'human_users'
