@@ -75,7 +75,7 @@ try:
 
         user = session.query(Users).filter_by(name=bot).first()
         if user is None: # if the user does not exist create it
-            user = Users(name=bot,category_id = 2) # create the new user
+            user = Users(name=bot,category_id = 2,deactivated = False) # create the new user
             session.add(user)
             session.commit()
             print(f'Succesfully added bot {user.name} ')
