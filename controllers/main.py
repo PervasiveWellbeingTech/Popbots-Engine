@@ -394,10 +394,11 @@ def response_engine(session,user_id,user_message):
                     else: # we assume that it is one
                     
                         locals()[trigger]=user_message
+                elif "bot_tag:" in trigger:
+                    bot_tag = re.sub('bot_tag:','',trigger)
                 elif "tag:" in trigger:
                     tag = re.sub('tag:','',trigger)
-                elif "bot_tag" in trigger:
-                    bot_tag = re.sub('bot_tag:','',trigger)
+                
                 elif "!stressor" in trigger:
                     push_stressor(session = session,conv_id = conversation.id)#conversation.id)
                 elif "!skip_response" in trigger:
