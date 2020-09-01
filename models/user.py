@@ -49,6 +49,8 @@ class HumanUser(Base):
     human_users_id = HumanUsers.id
     name = Users.name
 
+
+    desactivated = Users.desactivated
     experiment_group = HumanUsers.experiment_group
     subject_id = HumanUsers.subject_id
     language_id= HumanUsers.language_id
