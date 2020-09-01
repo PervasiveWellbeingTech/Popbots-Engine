@@ -96,6 +96,7 @@ def create_human_user(session,user_id,user_message):
     user.language_id = 1 # for english
     user.language_type_id = 1 # for formal 
     user.category_id = 1
+    user.desactivated = False
     possible_group = ["Group","Moderator"]
     user.experiment_group = possible_group[random.randint(0,1)]
     
@@ -424,7 +425,7 @@ def response_engine(session,user_id,user_message):
         if "$img$" in text:
             response_list[index],image = image_fetcher(text)
             response_list.insert(max(0,index),'image')
-            
+    
 
     # formatting the text with the neccessary info eg: user:name, etc...
     try: 
