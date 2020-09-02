@@ -8,7 +8,9 @@ import sys
 import traceback
 from time import sleep
 from collections import defaultdict
-
+from time import time
+import datetime
+import pytz
 
 from controllers.main import dialog_flow_engine
 from utils import log,timed
@@ -28,17 +30,10 @@ QUEUE_TIME_THRESHOLD = 2
 
 class TelegramBot():
 
-    def __init__(self, token): #, reply_dict, **kwargs):
-        #initialize telegram bot
+    def __init__(self, token): 
+        
         self.bot = telegram.Bot(token)
         self.message_queues = {}
-
-
-        #keyboards =[telegram.InlineKeyboardButton("Choose for me")]+[
-        #                        telegram.InlineKeyboardButton(name) for idx, name in enumerate(self.params.bot_name_list) if idx not in {4,7}]
-        #self.bots_keyboard = [ [x,y] for x,y in zip(keyboards[0::2], keyboards[1::2]) ]
-        #if len(keyboards)%2 ==1:
-        #    self.bots_keyboard.append([keyboards[-1]])
 
     @timed
     def send_message(self,user_id,text_response,keyboard,image):
@@ -172,7 +167,7 @@ class TelegramBot():
 
                 traceback.print_exception(*exc_info)
                 del exc_info
-           
+    
 
     def error_callback(self,bot, update, error):
         raise error
@@ -186,13 +181,16 @@ class TelegramBot():
         dp = updater.dispatcher # Get the dispatcher to register handlers 
         dp.run_async(self.callback_handler)
         dp.run_async(self.process_message)
-        dp.add_handler(MessageHandler(Filters.text, self.callback_handler))
+        
         dp.add_handler(CommandHandler("start", self.callback_handler))
+
+        dp.add_handler(MessageHandler(Filters.text, self.callback_handler))
         dp.add_handler(CommandHandler("switch", self.callback_handler))
 
         dp.add_error_handler(self.error_callback)
         log('INFO',"Started telegram bot socket ... (Ctrl-C to exit)")
         updater.start_polling()
+        updater.idle()
 
 
 if __name__ == '__main__':

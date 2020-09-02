@@ -40,6 +40,7 @@ class HumanUsers(Base):
     language_type_id = Column(Integer)
     language_id = Column(Integer)
     experiment_group = Column(String)
+    timezone = Column(String)
         
 human_users_join = join(Users,HumanUsers)
 class HumanUser(Base):
@@ -55,6 +56,7 @@ class HumanUser(Base):
     subject_id = HumanUsers.subject_id
     language_id= HumanUsers.language_id
     language_type_id = HumanUsers.language_type_id
+    timezone = HumanUsers.timezone
 
 
 

@@ -22,6 +22,7 @@ from models.conversation import Conversation,Message,Content,ContentFinders,Mess
 from models.stressor import Stressor,populated_stressor
 from models.core.sqlalchemy_config import get_session,get_base,ThreadSessionRequest
 
+from models.main import push_message, database_push,delconv,create_human_user,create_conversation,push_stressor
 
 from utils import log,timed
 from threading import Thread, current_thread
@@ -49,23 +50,8 @@ def find_name(input_str):
     return input_str.capitalize().split()[0]
 
 
-def database_push(session,element):
-    session.add(element)
-    session.commit()
-    return element.id
 
-@timed
-def push_message(session,text,user_id,index,receiver_id,sender_id,conversation_id,tag):
-    content_user = Content(text=text,user_id=user_id)
-    content_id_user  = database_push(session,content_user)
-    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,datetime=datetime.now(),tag=tag)
-    _ = database_push(session,message_user) 
 
-def delconv(session,user_id):
-    conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
-    if conversation:
-        conversation.closed = True
-        session.commit()
 
 
 def change_bot(session,current_bot_id,destination_bot_name,next_index=0):
@@ -81,38 +67,8 @@ def change_bot(session,current_bot_id,destination_bot_name,next_index=0):
 
     return next_index,bot_id
 
-@timed
-def create_human_user(session,user_id,user_message):
-    """
-        Create user object, binds subject id to it (to be completed), set the language, language_type, initializes the user_name
 
-    """
-    user = HumanUser(user_id=user_id)
-    subject_id = re.findall(r'\d+', user_message)
-    if subject_id:
-        user.subject_id = subject_id[0]
-    else:
-        user.subject_id = "0000"
-    user.language_id = 1 # for english
-    user.language_type_id = 1 # for formal 
-    user.category_id = 1
-    user.desactivated = False
-    possible_group = ["Group","Moderator"]
-    user.experiment_group = possible_group[random.randint(0,1)]
-    
-    user.name = "Human" # this is the default
-    session.add(user)
-    session.commit()
 
-    return user
-
-@timed
-def create_conversation(session,user_id):
-    dt = datetime.now()
-    conversation = Conversation(user_id=user_id,datetime=dt,closed=False)
-    _ = database_push(session,conversation)
-
-    return conversation
 
 
 def get_bot_ids(session,exclude_id,exclude_name):
@@ -136,23 +92,6 @@ def image_fetcher(bot_text):
     
     return bot_text,img
 
-def push_stressor(session,conv_id):
-    print(conv_id)
-    stressor1 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor1').first()
-    stressor2 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor2').first()
-    stressor3 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor3').first()
-
-    print(stressor1)
-    stressor_list = [stressor1,stressor2,stressor3]
-    print(stressor_list)
-    stressor_text = '. '.join(x.text for x in stressor_list if x)
-
-    stressor = populated_stressor(stressor_text,conv_id = conv_id)
-
-    session.add(stressor)
-    session.commit()
-
-    log('INFO',f'Stressor: {stressor_text} sucessfully added to conversation id {conv_id}')
 
     
 def find_string_between_tag(string,start,end):
@@ -248,6 +187,13 @@ def response_engine(session,user_id,user_message):
         elif "group" in user_message:
             log("INFO","User has been rolled in Group Group")
             user.experiment_group = "Group"
+
+        start_params = user_message.split("-")
+
+        if len(start_params) > 1:## this indicated that we have passed the timezone
+            user.timezone = start_params[2].replace("_","/")
+        print(f"Timezone is {user.timezone}")
+
         
         session.commit()
         onboarding_module = "Onboarding"+user.experiment_group+" Module"
@@ -523,13 +469,13 @@ def dialog_flow_engine(user_id,user_message):
     
     except BadKeywordInputError as error:
         log('ERROR',error)
-        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.intents))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["Oops, sorry for being not precise enought...","I expected: '"+ "' or '".join(set(error.intents))+"' as an answer for the latest question","Can you answer again please?"],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Module"}
         delconv(session,user_id)
         return response_dict
 
     except AuthoringError as error:
         log('ERROR',":x: [FATAL AUTHORING ERROR] "+str(error))
-        response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':["My creators left me short of answer for this one","I'll probably go to sleep until they fix my issue",'Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Module"}
         delconv(session,user_id)
         return response_dict
 
@@ -539,11 +485,11 @@ def dialog_flow_engine(user_id,user_message):
         delconv(session,user_id)
 
   
-        return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
+        return {'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Module"}
     
     except BaseException as error:
         keyboard_object = {'type':'inlineButton','resize_keyboard':True,'text':"Hi"}
-        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Bot"}
+        response_dict={'response_list':['It seems that my bot brain lost itself in the flow...','Sorry for that, say "Hi" to start a new conversation'],'img':None,'command':None,'reply_markup':keyboard_object,'bot_name':"Onboarding Module"}
         
         tb = traceback.TracebackException.from_exception(error)
         log('ERROR',":loudspeaker: [FATAL BASE ERROR]" + str(error)+str(''.join(tb.stack.format())))

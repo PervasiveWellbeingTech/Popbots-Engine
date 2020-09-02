@@ -2,6 +2,7 @@
 
 
 import os
+import re
 from slack import RTMClient
 import ssl
 import certifi
@@ -27,63 +28,75 @@ def slack_socket(**payload):
         user_id = "".join(str(ord(x)) for x in user)#re.sub("[^0-9]", "",user )
         response  = dialog_flow_engine(int(user_id[0:9]),user_message=query)
         
-        command  = response['command']
+        
 
-        if command != "pass":
+        
 
-            """if response['img'] is not None:
-                web_client.files_upload(
-                    channels=channel_id,
-                    file=response['img'],
-                    title="Test upload",
-                    
-                )"""
-            reply_markup = response['reply_markup']
-            attachments = None
-            if reply_markup is not None:
+        
+        reply_markup = response['reply_markup']
+        attachments = None
+        
 
-                if reply_markup['type'] == 'inlineButton':
+            
 
-                    buttons = reply_markup['text'].split(",")
-                    actions = []
-                    for button in buttons:
-                        actions.append({
-                                "name": f"{button}",
-                                "text": f"{button}",
-                                "type": "button",
-                                "value": f"{button}"
-                                })
 
-                    attachments= [{
+        username =  response['bot_name'] if "Bot" in response['bot_name'] else "The Popbots"
+        emoji_name = username.split(" ")[0].lower()
+        len_text_response_no_image = len([value for value in response['response_list'] if not re.match('image',value)])
+        i=0
 
-                                            "text" : "Choose or type an answer",
-                                            "fallback" : "You can still type an answer",
-                                            "callback_id" : "popbots",
-                                            "color" : "#3AA3E3",
-                                            "attachment_type" : "default",
-                                            "actions" : actions
-                                        }
-                                    ] 
+        for res in response['response_list']:
+            i+=1
 
-            emoji_name = response['bot_name'].split(" ")[0].lower()
-            for res in response['response_list']:
-                try:
-                    
+            try:
+                if reply_markup is not None:
+                    if reply_markup['type'] == 'inlineButton' and i == len_text_response_no_image:
+
+                        buttons = reply_markup['text'].split("|")
+                        actions = []
+                        for button in buttons:
+                            actions.append({
+                                    "name": f"{button}",
+                                    "text": f"{button}",
+                                    "type": "button",
+                                    "value": f"{button}"
+                                    })
+
+                        attachments= [{
+
+                                                "text" : "Choose or type an answer",
+                                                "fallback" : "You can still type an answer",
+                                                "callback_id" : "popbots",
+                                                "color" : "#3AA3E3",
+                                                "attachment_type" : "default",
+                                                "actions" : actions
+                                            }
+                                        ] 
+
+                if response['img'] is not None and res=="image":
+                    web_client.files_upload(
+                        channels=channel_id,
+                        file=response['img'],
+                        username  = username,
+                        title="img",
+                        
+                    )
+                
+                else:
                     web_client.chat_postMessage(
                         channel=channel_id,
                         text=res,
                         #icon_url='https://ibb.co/HhVt0cc',
                         icon_emoji  = ":{}:".format(emoji_name),
-                        username  = response['bot_name'],
+                        username  = username,
                         as_user = False,
                         attachments = attachments
                         
                     )
-                except BaseException as error:
-                    print("[ERROR] The message is empty or invalid")
-            
-        else:
-            pass
+            except BaseException as error:
+                print("[ERROR] The message is empty or invalid")
+        
+    
     else:
         channel_id = data['channel']
         print(data)
