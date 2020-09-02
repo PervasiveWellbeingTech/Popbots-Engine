@@ -8,6 +8,7 @@ import ssl
 import certifi
 import re
 import sqlalchemy
+from time import sleep 
 
 from controllers.main import dialog_flow_engine
 
@@ -73,7 +74,7 @@ def slack_socket(**payload):
                                             }
                                         ] 
 
-                if response['img'] is not None and res=="image":
+                if False: #response['img'] is not None and res=="image":
                     web_client.files_upload(
                         channels=channel_id,
                         file=response['img'],
@@ -93,6 +94,17 @@ def slack_socket(**payload):
                         attachments = attachments
                         
                     )
+               
+                if not i == len_text_response_no_image:
+                    
+                    if len(res)<25:
+                        sleep(1)
+                    elif len(res) > 25 and len(res)<75:
+                        sleep(2)
+                    elif len(res) > 75 and len(res)<125:
+                        sleep(3)
+                    else:
+                        sleep(4)
             except BaseException as error:
                 print("[ERROR] The message is empty or invalid")
         
