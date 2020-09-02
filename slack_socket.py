@@ -74,14 +74,15 @@ def slack_socket(**payload):
                                             }
                                         ] 
 
-                if False: #response['img'] is not None and res=="image":
-                    web_client.files_upload(
-                        channels=channel_id,
-                        file=response['img'],
-                        username  = username,
-                        title="img",
-                        
-                    )
+                if response['img'] is not None and res=="image":
+                    #web_client.files_upload(
+                    #    channels=channel_id,
+                    #    file=response['img'],
+                    #    username  = username,
+                    #    title="img",
+                    #    
+                    #)
+                    pass
                 
                 else:
                     web_client.chat_postMessage(
