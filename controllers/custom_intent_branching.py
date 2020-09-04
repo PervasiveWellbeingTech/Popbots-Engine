@@ -19,6 +19,22 @@ def stressor_pass(stressor):
         return "no",["yes","no"]
 
 
+def stressor_no_repeat(stressor):
+    try:
+        query = connection_wrapper(custom_sql,True,f"SELECT s.category0 FROM stressor s WHERE s.conversation_id ={stressor.conversation_id}")
+        print(f"query stressor is: {query}")
+        categories = [x['category0'] for x in query]
+        nb_of_stressor = len(categories)
+        log("INFO",f"Number of stressor found is {nb_of_stressor}")
+    except:
+        nb_of_stressor = 0
+        categories = []
+
+    if nb_of_stressor > 1 and len(list(set(categories)))==1:
+        return "yes",["yes","no"]
+    else:
+        return "no",["yes","no"]
+
 def engagement(user):
 
     try:

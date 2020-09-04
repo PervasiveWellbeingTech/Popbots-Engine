@@ -31,9 +31,10 @@ QUEUE_TIME_THRESHOLD = 2
 class TelegramBot():
 
     def __init__(self, token): 
-        
+
         self.bot = telegram.Bot(token)
         self.message_queues = {}
+        self.is_replying = {}
 
     @timed
     def send_message(self,user_id,text_response,keyboard,image):
@@ -68,7 +69,6 @@ class TelegramBot():
                 log('DEBUG',f"Image sent to user id {user_id}")
             
             log('DEBUG',f"Delaying the next message")
-
             if not i == len_text_response_no_image:
                 
                 self.bot.sendChatAction(chat_id=user_id, action = telegram.ChatAction.TYPING)
@@ -81,8 +81,9 @@ class TelegramBot():
                     sleep(3)
                 else:
                     sleep(4)
-
         log('DEBUG',f"Message block sent to user id {user_id}")
+
+        self.is_replying[user_id] = False
     
     def get_keyboard(self,reply_markup):
 
@@ -119,6 +120,8 @@ class TelegramBot():
         if len(response['response_list'])>0:
             self.send_message(user_id,response['response_list'],keyboard,image)
 
+        
+
 
             
     @run_async
@@ -133,15 +136,28 @@ class TelegramBot():
 
 
             try:
+                
+                
                 message = update.message
 
                 incoming_delta = datetime.datetime.utcnow() - message.date
 
                 log('DEBUG',f"Message received and was sent at {message.date}, delay to receive is {incoming_delta.seconds} ")
                 log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
+                
+                if message.chat_id not in self.is_replying:
+                    self.is_replying[message.chat_id] = False
+                    
+
+
+                
                 if message.chat_id in self.message_queues:
-                    message_queue = self.message_queues[message.chat_id] 
-                    message_queue.append({'text':message.text,'date':datetime.datetime.utcnow()}) 
+                    message_queue = self.message_queues[message.chat_id]
+
+                    if not self.is_replying[message.chat_id] == True: 
+                        message_queue.append({'text':message.text,'date':datetime.datetime.utcnow()}) 
+                    else:
+                        log('INFO',f"We just completely ignored user's message {message.text}")
                 else :
                     self.message_queues[message.chat_id] = [{'text':message.text,'date':datetime.datetime.utcnow()}]
                     message_queue = self.message_queues[message.chat_id]
@@ -152,14 +168,18 @@ class TelegramBot():
                         break
                     self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
                     delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
-                    if delta.seconds > QUEUE_TIME_THRESHOLD:
+                    if delta.seconds > QUEUE_TIME_THRESHOLD and not self.is_replying[message.chat_id] == True :
                         final_message = ""
                         final_message = " ".join([element['text'] for element in message_queue])
+                        self.is_replying[message.chat_id] = True
                         self.process_message(message.chat_id, final_message)
                         message_queue.clear()
+                        
             
             except (BaseException,Exception) as error:
-                log('ERROR',error)
+                log('ERROR',''.join(traceback.TracebackException.from_exception(error).stack.format()))
+                
+      
             except:
                 exc_info = sys.exc_info()
 
@@ -190,7 +210,7 @@ class TelegramBot():
         dp.add_error_handler(self.error_callback)
         log('INFO',"Started telegram bot socket ... (Ctrl-C to exit)")
         updater.start_polling()
-        updater.idle()
+        #updater.idle()
 
 
 if __name__ == '__main__':

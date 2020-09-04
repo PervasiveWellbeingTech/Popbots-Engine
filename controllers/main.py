@@ -98,7 +98,7 @@ def find_string_between_tag(string,start,end):
     return string[string.find(start)+len(start):string.rfind(end)]
 
 @timed
-def response_engine(session,user_id,user_message):
+def response_engine(session,user_id,user_message,looped):
     """
         Given a user_id and user_message, response engine fetches the latest message from the bot given branching options.
         Handles special commands (Hi, \switch, \start ), handle active conversations. Records the interactions If needed calls the classifier. Choose the bot. 
@@ -147,7 +147,9 @@ def response_engine(session,user_id,user_message):
 
         CONVERSATION_INIT = False
 
-        if (datetime.now() - conversation.datetime).seconds > 3600 : #Time out We should create an error that is send the user ? 
+        conversation_timeout = conversation.timeout_threshold if conversation.timeout_threshold is not None else 3600 # default timeout is 1h, but can be dynamically set
+
+        if (datetime.now() - conversation.datetime).seconds > conversation_timeout : #Time out We should create an error that is send the user ? 
             conversation.closed = True
             session.commit()
             conversation = create_conversation(session,user_id)
@@ -262,13 +264,13 @@ def response_engine(session,user_id,user_message):
     #fetching the bot text response, the keyboards and eventual triggers
     bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,latest_bot_index=latest_bot_index,selector_kwargs=selector_kwargs)
     
-
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
 
     ## handle special flag in bot scrips 
 
     if "<SWITCH>" in bot_text:
         command = {"skip":True,"stack":False} 
+        bot_tag = "skip"
         bool_trigger = [True if "~" in x else False for x in triggers]
 
         if any(bool_trigger):
@@ -299,9 +301,11 @@ def response_engine(session,user_id,user_message):
     
     elif bot_text == "<START>":
         command = {"skip":True,"stack":False}
+        bot_tag = "skip"
     
     elif bot_text == "<SKIP>":
         command = {"skip":True,"stack":False}
+        bot_tag = "skip"
     
     #closing the conversation if needed
     if "<CONVERSATION_END>" in bot_text: 
@@ -309,6 +313,7 @@ def response_engine(session,user_id,user_message):
         conversation.closed = True
         session.commit()
         command = {"skip":False,"stack":False}
+        bot_tag = "skip"
     
     # if the response is empty switch bot, add the message to db but keep
     if bot_text == "" or bot_text is None:
@@ -340,6 +345,14 @@ def response_engine(session,user_id,user_message):
                     else: # we assume that it is one
                     
                         locals()[trigger]=user_message
+                elif "@" in trigger:
+
+                    trigger = trigger.replace("@","")
+                    try:
+                        exec(trigger)
+                    except BaseException as e:
+                        log('ERROR',f"The trigger with an @ eval flag experienced an error: {''.join(traceback.TracebackException.from_exception(e).stack.format())}")
+
                 elif "bot_tag:" in trigger:
                     bot_tag = re.sub('bot_tag:','',trigger)
                 elif "tag:" in trigger:
@@ -349,6 +362,7 @@ def response_engine(session,user_id,user_message):
                     push_stressor(session = session,conv_id = conversation.id)#conversation.id)
                 elif "!skip_response" in trigger:
                     command = {"skip":True,"stack":True}
+                    
 
 
     except Exception as error:
@@ -358,7 +372,9 @@ def response_engine(session,user_id,user_message):
       
 
     #pushing messages in database
-    push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
+    if not looped: #would not log if it's the skip_reponse which cause the call of this function again , meaning the user did not enter anything new
+        push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
+    
     push_message(session,text=bot_text,user_id=bot_id,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=bot_tag) # pushing the bot response
 
     # fetching lastest bot/intervention entity of a conversation 
@@ -450,11 +466,13 @@ def dialog_flow_engine(user_id,user_message):
 
     try:
         command = {"skip":True,"stack":False} # initialize the command parameter, which is update by response_engine after
+        looped = False 
         
         while command["skip"]==True: # loop and does not send the message until skip == False
 
 
-            command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,user_message)
+            command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,user_message,looped)
+            looped = True #if we enter in this loop again, we will know that we have been there already
             if image is not None:
                 response_dict['img']= image
             if command["stack"] == True: # handles two message in a row
