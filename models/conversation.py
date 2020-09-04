@@ -13,6 +13,7 @@ class Conversation(Base):
     stressor = Column(String)
     closed = Column(Boolean)
     timeout_threshold = Column(Integer)
+    conversational_state = Column(String)
     
 class Selectors(Base):
     __tablename__='selectors'

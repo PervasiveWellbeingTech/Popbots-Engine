@@ -123,7 +123,9 @@ def response_engine(session,user_id,user_message,looped):
     bot_tag = None
     image = None
     command = {"skip":False,"stack":True}
-    onboarding_module = "OnboardingModerator Module"
+    onboarding_module = "OnboardingGroup Module"
+    hi_compatible_list = ["Farewell Module", "Greeting Module"]
+
     
     
     #1. Fetching the active user or create one if needed
@@ -135,9 +137,10 @@ def response_engine(session,user_id,user_message,looped):
         log('DEBUG',f"User with id: {user.id} has been created")
         
         # since we know that the user is unknown, we can directly push them to the onboarding Module
-        bot_id = get_user_id_from_name("Greeting Module") # needs to be replaced with onboarding when design team is done with it
+        bot_id = get_user_id_from_name(onboarding_module) # needs to be replaced with onboarding when design team is done with it
         latest_bot_index = 0 
         latest_bot_message = None
+        
         
     #2. Fetching the lastest active conversations 
     conversation = session.query(Conversation).filter_by(user_id=user_id,closed = False).order_by(Conversation.datetime.desc()).first()
@@ -158,6 +161,7 @@ def response_engine(session,user_id,user_message,looped):
             bot_id = get_user_id_from_name("Greeting Module")
             latest_bot_index = 0
             latest_bot_message = None
+            conversation.conversational_state = "Greeting Module"
 
     else: 
         log('DEBUG',f"Warning the conversation id is none and the message is {user_message}")
@@ -167,6 +171,7 @@ def response_engine(session,user_id,user_message,looped):
         bot_id = get_user_id_from_name("Greeting Module")
         latest_bot_index = 0
         latest_bot_message = None
+        conversation.conversational_state = "Greeting Module"
 
     # 3.0  Handling special cases ( Hi , /start)
     # handling /start, the user wants to restart the onboarding process
@@ -206,9 +211,10 @@ def response_engine(session,user_id,user_message,looped):
 
         latest_bot_index = 0
         latest_bot_message = None
+        conversation.conversational_state = onboarding_module
 
     #handling Hi the user want to force restart a conversation
-    elif re.match(r'Hi',user_message): 
+    elif re.match(r'Hi',user_message) and (conversation.conversational_state in hi_compatible_list): 
 
         if conversation and not CONVERSATION_INIT: # closing the previous conversation
             conversation.closed = True
@@ -218,7 +224,8 @@ def response_engine(session,user_id,user_message,looped):
         bot_id = get_user_id_from_name("Greeting Module")
         latest_bot_index = 0
         latest_bot_message = None
-        
+        conversation.conversational_state = "Greeting Module"
+    
 
     # handle the special switch case, if switch, we change the bot, else we find the latest active bot. 
     if re.match(r'/switch', user_message): #switch
@@ -257,6 +264,7 @@ def response_engine(session,user_id,user_message,looped):
     
     #fetching the bot_user object
     bot_user = session.query(Users).filter_by(id = bot_id).first() 
+
     
     # create a dict of variables to be used to do the next message selection process
     selector_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
@@ -324,6 +332,7 @@ def response_engine(session,user_id,user_message,looped):
     
     #fetching the bot_user
     bot_user = session.query(Users).filter_by(id = bot_id).first()
+    conversation.conversational_state = bot_user.name
 
     
     #handle triggers
