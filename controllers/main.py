@@ -198,7 +198,7 @@ def response_engine(session,user_id,user_message,looped):
         start_params = user_message.split("-")
 
         if len(start_params) > 1:## this indicated that we have passed the timezone
-            user.timezone = start_params[2].replace("_","/")
+            user.timezone = start_params[2].replace("|","/")
         print(f"Timezone is {user.timezone}")
 
         
