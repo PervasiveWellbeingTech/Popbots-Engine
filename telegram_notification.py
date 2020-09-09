@@ -141,9 +141,9 @@ while True:
                             text_evening = str(random.choice(small_talk) +"\nm"+ str(random.choice(reminders_list)))
 
                             # 2.1 add these content to the database
-                            content_day = Content(text=text_day)
+                            content_day = Content(text=text_day,user_id=user_id)
                             session.add(content_day)
-                            content_evening = Content(text=text_evening)
+                            content_evening = Content(text=text_evening,user_id=user_id)
                             session.add(content_evening)
 
                             session.commit()
