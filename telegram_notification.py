@@ -61,7 +61,8 @@ reminders_list = ["We are here if you need us.","We are always here for you."
 def send_reminder_message(reminder,session):
 
     text_raw = session.query(Content).filter_by(id =reminder.content_id).first().text
-    response_list = text_raw.replace("\xa0"," ").strip().replace("'","\\'").split("\\nm")
+    response_list = text_raw.replace("\xa0"," ").strip().replace("'","\\'").split("\nm")
+    print(response_list)
     
     response_list = [eval(f""" f'{text}'""") for text in response_list]
 
