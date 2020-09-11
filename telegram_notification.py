@@ -48,14 +48,12 @@ bot = telegram.Bot(token)
 
 thread_session = ThreadSessionRequest() # thread safe SQL Alchemy session
 session = thread_session.s # sql alchemy session one per thread
-small_talk = ["{user.name}, we miss you!","{user.name}, it's a long day.","{user.name}, stress slowly builds up over the day."
-    ,"{user.name}, let's keep stress away.","{user.name}, let's have a sweet moment!" 
-    ,"{user.name}, ready for a sweet moment?","{user.name}, how are you feeling?"]
+small_talk = ["Hi","Hello","Hey there"]
 
-reminders_list = ["We are here if you need us.","We are always here for you." 
-    ,"We are 24/7.","You know where to find us 😊" 
-    ,"Check in with us before bed." ,"Check in with us when you can." 
-    ,"Make sure to find 3 minutes to relax with us.","Take 3 minutes to relax with us."]
+reminders_list = ["Just reminding you that you can talk to us when you feeling stressed","We are here whenever you need us to talk about what's bothering you", "It's good to regularly check on your stress. We are here when you need us."]
+
+current_user_id = [1069201240,666742053,384644196,886580524,583828528]
+
 
 
 def send_reminder_message(reminder,session):
@@ -120,7 +118,7 @@ while True:
                 evening_in_utc,evening_out_utc = evening_in.astimezone(utc),evening_out.astimezone(utc)
 
                 
-                if user.name == "Thierry": #limiting this to the user Thierry Right now
+                if user.user_id in current_user_id: #limiting this to the user list Right now
                     
                     todays_reminder = session.query(Reminders).filter(and_(Reminders.user_id==user.user_id,Reminders.reminder_time.between(today,tomorrow))).all()
                     
