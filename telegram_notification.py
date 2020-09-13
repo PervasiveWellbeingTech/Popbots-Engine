@@ -108,6 +108,9 @@ while True:
                 
                 today =str(now_local.strftime('%Y-%m-%d'))
                 tomorrow = str((now_local+timedelta(days=1)).strftime('%Y-%m-%d'))
+                
+                log("INFO", f"Today's date for user {user.user_id} is {today}")
+                log("INFO", f"Tomorrow's date for user {user.user_id} is {tomorrow}")
 
                 # setting up the two time interval we would want to send reminders: 9-16h (day) and another time 17-22h ( evening )
                 day_in,day_out = now_local.replace(hour=9,minute=0),now_local.replace(hour=16,minute=0)
@@ -125,15 +128,21 @@ while True:
                     
                     # schedule reminders before 9 am every day 
                     if now_local.hour < 9: 
+                        log('DEBUG', "Local time for participant {user.user_id} is less than 9 at {now_local.hour} ")
 
                         todays_reminder = session.query(Reminders).filter(and_(Reminders.user_id==user.user_id,Reminders.reminder_time.between(today,tomorrow))).all()
 
                         if len(todays_reminder) <2:
+                            
                             # we need to create the reminders one for the day and one for the evening
                             
                             # 1 pick a random time from between 9-16h (day) and another time 17-22h ( evening )  for the intervention nudges
                             day_time = random_date(day_in,day_out)
                             evening_time = random_date(evening_in,evening_out)
+                            
+                            log('INFO',f'It is now {now_local} locally for user {user.user_id}')
+                            log('INFO',f'A day reminder will be set at {day_time} for user {user.user_id}')
+                            log('INFO',f'A evening time reminder will be set at {evening_time} for user {user.user_id}')
 
                             # 2 Create the reminder by assembling a random combination of small_talk and reminder
                             text_day = str(random.choice(small_talk) +"\nm" + str(random.choice(reminders_list)))
@@ -158,6 +167,7 @@ while True:
                         elif len(todays_reminder) > 2:
                             log('DEBUG',f'ERROR {len(todays_reminder)} reminders has been set for this user for date {today}')
                         else:
+                            log('DEBUG',f'{len(todays_reminder)} reminders has been set for this user for date {today} ')
                             pass # we are not supposed to do anything before 9 am, since no reminders can be set at that particular time
                     else: #after 9 am, if reminder for the user hasn't been set during that particular time frame, well the user won't be reminded this day
 
