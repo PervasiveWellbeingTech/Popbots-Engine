@@ -128,7 +128,7 @@ while True:
                     
                     # schedule reminders before 9 am every day 
                     if now_local.hour < 9: 
-                        log('DEBUG', "Local time for participant {user.user_id} is less than 9 at {now_local.hour} ")
+                        log('DEBUG', f"Local time for participant {user.user_id} is less than 9 at {now_local.hour} ")
 
                         todays_reminder = session.query(Reminders).filter(and_(Reminders.user_id==user.user_id,Reminders.reminder_time.between(today,tomorrow))).all()
 
