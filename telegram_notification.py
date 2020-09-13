@@ -157,8 +157,8 @@ while True:
                             session.commit()
                             
                             # Create the reminder for the following content
-                            day_reminder = Reminders(user_id=user.user_id,content_id=content_day.id,creation_date = now_local, reminder_time = day_time,reminder_type='Day',executed=False,expired=False)
-                            evening_reminder = Reminders(user_id=user.user_id,content_id=content_evening.id,creation_date = now_local,reminder_time = evening_time,reminder_type='Evening',executed=False,expired=False)
+                            day_reminder = Reminders(user_id=user.user_id,content_id=content_day.id,creation_date = now_local.replace(tzinfo=None), reminder_time = day_time.replace(tzinfo=None),reminder_type='Day',executed=False,expired=False)
+                            evening_reminder = Reminders(user_id=user.user_id,content_id=content_evening.id,creation_date = now_local.replace(tzinfo=None),reminder_time = evening_time.replace(tzinfo=None),reminder_type='Evening',executed=False,expired=False)
                             
                             session.add(day_reminder)
                             session.add(evening_reminder)
