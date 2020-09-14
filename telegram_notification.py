@@ -50,7 +50,7 @@ thread_session = ThreadSessionRequest() # thread safe SQL Alchemy session
 session = thread_session.s # sql alchemy session one per thread
 small_talk = ["Hi","Hello","Hey there"]
 
-reminders_list = ["Just reminding you that you can talk to us when you feeling stressed","We are here whenever you need us to talk about what's bothering you", "It's good to regularly check on your stress. We are here when you need us."]
+reminders_list = ["Just reminding you that you can talk to us when you feeling stressed.","We are here whenever you need us to talk about what's bothering you.", "It's good to regularly check on your stress. We are here when you need us."]
 
 current_user_id = [1069201240,666742053,384644196,886580524,583828528]
 
@@ -68,7 +68,7 @@ def send_reminder_message(reminder,session):
 
     new_conversation = create_conversation(session,reminder.user_id)
 
-    push_message(session," \n ".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,tag = "reminder")
+    push_message(session,".".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,tag = "reminder")
 
     new_conversation.closed = True
     session.commit()
@@ -145,8 +145,8 @@ while True:
                             log('INFO',f'A evening time reminder will be set at {evening_time} for user {user.user_id}')
 
                             # 2 Create the reminder by assembling a random combination of small_talk and reminder
-                            text_day = str(random.choice(small_talk) +"\nm" + str(random.choice(reminders_list)))
-                            text_evening = str(random.choice(small_talk) +"\nm"+ str(random.choice(reminders_list)))
+                            text_day = str(random.choice(small_talk) +". " + str(random.choice(reminders_list)))
+                            text_evening = str(random.choice(small_talk) +". "+ str(random.choice(reminders_list)))
 
                             # 2.1 add these content to the database
                             content_day = Content(text=text_day,user_id=user_id)
