@@ -390,7 +390,7 @@ def response_engine(session,user_id,user_message,looped):
     latest_bot = session.query(Users).join(Message,Users.id==Message.receiver_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
 
     # parsing the data before sending
-    response_list = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split(" \nm ")
+    response_list = bot_text.replace("\xa0"," ").strip().replace("'","\\'").split("\\nm")
     log('DEBUG', response_list)
     # handle images if required
     for index,text in enumerate(response_list):
