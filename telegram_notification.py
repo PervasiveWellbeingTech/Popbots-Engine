@@ -48,7 +48,7 @@ bot = telegram.Bot(token)
 
 thread_session = ThreadSessionRequest() # thread safe SQL Alchemy session
 session = thread_session.s # sql alchemy session one per thread
-small_talk = ["Hi","Hello","Hey there"]
+small_talk = ["Hi,","Hello,","Hey there,"]
 
 reminders_list = ["Just reminding you that you can talk to us when you feeling stressed.","We are here whenever you need us to talk about what's bothering you.", "It's good to regularly check on your stress. We are here when you need us."]
 
