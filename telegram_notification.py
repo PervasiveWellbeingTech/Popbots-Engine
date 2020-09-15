@@ -68,7 +68,7 @@ def send_reminder_message(reminder,session):
 
     new_conversation = create_conversation(session,reminder.user_id)
 
-    push_message(session,".".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,tag = "reminder")
+    push_message(session,"".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,tag = "reminder")
 
     new_conversation.closed = True
     session.commit()
@@ -145,8 +145,8 @@ while True:
                             log('INFO',f'A evening time reminder will be set at {evening_time} for user {user.user_id}')
 
                             # 2 Create the reminder by assembling a random combination of small_talk and reminder
-                            text_day = str(random.choice(small_talk) +". " + str(random.choice(reminders_list)))
-                            text_evening = str(random.choice(small_talk) +". "+ str(random.choice(reminders_list)))
+                            text_day = str(random.choice(small_talk) +" " + str(random.choice(reminders_list)))
+                            text_evening = str(random.choice(small_talk) +" "+ str(random.choice(reminders_list)))
 
                             # 2.1 add these content to the database
                             content_day = Content(text=text_day,user_id=user_id)
