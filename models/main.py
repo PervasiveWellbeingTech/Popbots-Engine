@@ -18,10 +18,10 @@ def database_push(session,element):
     return element.id
 
 @timed
-def push_message(session,text,user_id,index,receiver_id,sender_id,conversation_id,tag):
+def push_message(session,text,user_id,datetime,answering_time,index,receiver_id,sender_id,conversation_id,tag):
     content_user = Content(text=text,user_id=user_id)
     content_id_user  = database_push(session,content_user)
-    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,datetime=datetime.now(),tag=tag)
+    message_user = Message(index=index,receiver_id=receiver_id,sender_id=sender_id,content_id=content_id_user,conversation_id = conversation_id,datetime=datetime,answering_time=answering_time,tag=tag)
     _ = database_push(session,message_user) 
 
 
@@ -72,12 +72,14 @@ def push_stressor(session,conv_id):
     stressor2 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor2').first()
     stressor3 = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stressor3').first()
 
+    stress_level = session.query(MessageContent).filter_by(conversation_id = conv_id,tag = 'stress_level').first().text
+
     print(stressor1)
     stressor_list = [stressor1,stressor2,stressor3]
     print(stressor_list)
     stressor_text = '. '.join(x.text for x in stressor_list if x)
 
-    stressor = populated_stressor(stressor_text,conv_id = conv_id)
+    stressor = populated_stressor(stressor_text,stress_level,conv_id = conv_id)
 
     session.add(stressor)
     session.commit()

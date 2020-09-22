@@ -12,6 +12,7 @@ class Stressor(Base):
 
     id = Column(Integer, primary_key=True)
     stressor_text = Column(String)
+    stress_level = Column(String)
     conversation_id = Column(Integer,ForeignKey(Conversation.id))
 	
     category0 = Column(String)
@@ -57,7 +58,7 @@ def get_pred_api(stressor,url):
     return response.json()
 
 
-def populated_stressor(stressor,conv_id):
+def populated_stressor(stressor,stress_level,conv_id):
 
     result = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"stressor")
     covid_results = get_pred_api(stressor,FLASK_CLASSIFIER_SERVER_URL+"covid")
@@ -66,6 +67,7 @@ def populated_stressor(stressor,conv_id):
 
         conversation_id = conv_id,
         stressor_text = stressor,
+        stress_level = stress_level,
         category0 = result['raw']['category0'],
         category1 = result['raw']['category1'],
         category2 = result['raw']['category2'],

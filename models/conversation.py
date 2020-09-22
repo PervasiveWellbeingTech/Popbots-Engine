@@ -72,6 +72,7 @@ class Message(Base):
     content_id = Column(Integer,ForeignKey(Content.id))
     conversation_id = Column(Integer)
     datetime = Column(DateTime)
+    answering_time = Column(Integer)
     tag = Column(String)
 
 class NextMessageFinders(Base):
@@ -136,6 +137,7 @@ class MessageContent(Base):
     content_ids = column_property(Content.id,Message.content_id)
     conversation_id = Message.conversation_id
     tag = Message.tag
+    answering_time = Message.answering_time
     text = Content.text
 
 

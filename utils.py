@@ -41,6 +41,9 @@ time_logger.addHandler(stream_handler)
 time_logger.addHandler(file_handler_time)
 
 
+
+
+
 def log(log_type,string):
 
     if log_type=="AUTHORING ERROR" or log_type=="FATAL ERROR":

@@ -108,10 +108,10 @@ class TelegramBot():
             return telegram.ReplyKeyboardRemove()
     
     @run_async
-    def process_message(self, user_id, query):
+    def process_message(self, user_id, datetime_info,query):
         """
         """
-        response  = dialog_flow_engine(user_id,user_message=query)
+        response  = dialog_flow_engine(user_id,datetime_info,user_message=query)
         keyboard = self.get_keyboard(response['reply_markup'])
         image = response['img']
 
@@ -141,6 +141,8 @@ class TelegramBot():
                 message = update.message
 
                 incoming_delta = datetime.datetime.utcnow() - message.date
+
+                datetime_info = {"incoming_delta":incoming_delta,"sent_datetime":message.date}
 
                 log('DEBUG',f"Message received and was sent at {message.date}, delay to receive is {incoming_delta.seconds} ")
                 log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
@@ -172,7 +174,7 @@ class TelegramBot():
                         final_message = ""
                         final_message = " ".join([element['text'] for element in message_queue])
                         self.is_replying[message.chat_id] = True
-                        self.process_message(message.chat_id, final_message)
+                        self.process_message(message.chat_id,datetime_info, final_message)
                         message_queue.clear()
                         
             

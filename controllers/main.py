@@ -98,7 +98,7 @@ def find_string_between_tag(string,start,end):
     return string[string.find(start)+len(start):string.rfind(end)]
 
 @timed
-def response_engine(session,user_id,user_message,looped):
+def response_engine(session,user_id,datetime_info,user_message,looped):
     """
         Given a user_id and user_message, response engine fetches the latest message from the bot given branching options.
         Handles special commands (Hi, \switch, \start ), handle active conversations. Records the interactions If needed calls the classifier. Choose the bot. 
@@ -381,10 +381,13 @@ def response_engine(session,user_id,user_message,looped):
       
 
     #pushing messages in database
-    if not looped: #would not log if it's the skip_reponse which cause the call of this function again , meaning the user did not enter anything new
-        push_message(session,text=user_message,user_id=user_id,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
     
-    push_message(session,text=bot_text,user_id=bot_id,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=bot_tag) # pushing the bot response
+    user_answering_time = (datetime.now() - latest_bot_message.datetime - datetime_info['incoming_delta']).seconds if latest_bot_message is not None else None
+    bot_answering_time  = (datetime.now() - datetime_info['sent_datetime']).seconds
+    if not looped: #would not log if it's the skip_reponse which cause the call of this function again , meaning the user did not enter anything new
+        push_message(session,text=user_message,user_id=user_id,datetime = datetime_info['sent_datetime'],answering_time=user_answering_time,index=None,receiver_id=bot_id,sender_id=user_id,conversation_id=conversation.id,tag=tag) # pushing user message
+    
+    push_message(session,text=bot_text,user_id=bot_id,datetime = datetime.now(),answering_time=bot_answering_time,index=current_index,receiver_id=user_id,sender_id=bot_id,conversation_id=conversation.id,tag=bot_tag) # pushing the bot response
 
     # fetching lastest bot/intervention entity of a conversation 
     latest_bot = session.query(Users).join(Message,Users.id==Message.receiver_id).filter(Users.category_id==2,Users.name.contains('Bot'),Message.conversation_id == conversation.id).order_by(Message.id.desc()).first()
@@ -453,7 +456,7 @@ def response_engine(session,user_id,user_message,looped):
 
 
 
-def dialog_flow_engine(user_id,user_message):
+def dialog_flow_engine(user_id,datetime_info,user_message):
     """
         Dialog flow engine can stack many responses from response engine.
         It pushes to telegram what needs to be pushed, and ignores what can be passed ? <START>, <CONVERSATION_END> these are useful for managing the overall
@@ -480,7 +483,7 @@ def dialog_flow_engine(user_id,user_message):
         while command["skip"]==True: # loop and does not send the message until skip == False
 
 
-            command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,user_message,looped)
+            command,response_list,image,bot_name,keyboard_object,user_message  = response_engine(session,user_id,datetime_info,user_message,looped)
             looped = True #if we enter in this loop again, we will know that we have been there already
             if image is not None:
                 response_dict['img']= image
