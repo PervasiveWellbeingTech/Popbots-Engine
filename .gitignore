@@ -10,3 +10,4 @@ concurrency_test_results.txt
 ConversationLogs2
 ConversationLogs
 rasa_data/
+qualtrics_survey/
