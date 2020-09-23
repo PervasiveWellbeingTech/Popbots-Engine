@@ -1,4 +1,4 @@
-__pycache__/
+__pycache__
 credentials/
 logs/
 .bash_profile
@@ -11,3 +11,4 @@ ConversationLogs2
 ConversationLogs
 rasa_data/
 qualtrics_survey/
+.vscode
