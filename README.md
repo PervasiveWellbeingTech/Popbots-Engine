@@ -40,6 +40,10 @@ In deployment we will use PM2 as a process manager, for logs and also restarting
 
 - For installation (see instructions here : https://blog.pm2.io/2018-09-19/Manage-Python-Processes/)
 
+To launch the program via pm2
+> pm2 start telegram_socket.py -interpreter ../popbots__venv/bin/python --name popbots_telegram_socket
+
+
 # 2. Code documentation
 
 ## 2.1. Project structure 
@@ -61,6 +65,37 @@ The database design is centered on the user, users can be Humans or Bot. This de
 Users if they are human have some more properties references in the table human_users
 
 To make authoring the bots scripts convienient, each bot has a 0-N index. This arbitraly given numbers are limiting the use of normal key-pair relationships since these requires unique ids. This explains why there is no relationships between next_message_finders and content_finders
+
+
+### **Table related to bot content:** 
+
+next_message_finders: This is just a one to many table, where the message index and next message index for each bot is contained. Since we wanted to have a simple index 0-N for each bot. The user_id (bot_id) is the main differentiator here.  
+
+
+content_finders: All the content (text) needs to be organize and indexed. This is what contents_finders is about. Each message in a bot contains multiple intent,selector, triggers 
+
+
+
+bot_contents: 
+
+content:
+
+
+### **Table related to managing and storing conversations:**
+
+conversations:
+
+messages:
+
+contents:
+
+
+
+### ******
+
+
+
+
 
 
 

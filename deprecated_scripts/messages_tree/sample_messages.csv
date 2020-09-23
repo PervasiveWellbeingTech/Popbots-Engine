@@ -1,9 +1,0 @@
-content,keyboard_content,message_index,variant,bot_id,next_message_index,next_bot_id,next_content_type,next_content_variant
-"Message 1-1 next 2",,1,1,2,2,2,text,
-"Message 1-51 next 2",,1,51,2,2,2,text,
-"Message 2-1 next 3",,2,1,2,3,2,text,
-"Message 2-51 next 3",,2,51,2,3,2,text,
-"Message 3-1 next 4",,3,1,2,4,2,text,yes_no_dont_know
-"Message 3-51 next 4",,3,51,2,4,2,text,yes_no_dont_know
-"Message 4-1 next 5",,4,1,2,5,2,text,	
-"Message 4-51 next 5",,4,51,2,5,2,text,
