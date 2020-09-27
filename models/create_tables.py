@@ -57,6 +57,7 @@ def create_tables():
             language_type_id INTEGER NOT NULL,
             language_id INTEGER NOT NULL,
             experiment_group VARCHAR(255) NULL,
+            timezone varchar null,
             FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
             FOREIGN KEY (language_type_id) REFERENCES language_types (id),
             FOREIGN KEY (language_id) REFERENCES languages (id))
@@ -68,6 +69,8 @@ def create_tables():
             stressor text,
             datetime timestamp not NULL default CURRENT_TIMESTAMP,
             closed BOOLEAN,
+            timeout_threshold int Null,
+            conversational_state varchar NULL,
             FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade
             )
         """,
@@ -77,6 +80,7 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             stressor_text text NULL,
             conversation_id int not NULL,
+            stress_level text NULL,
             
             category0 text NULL,
             category1 text NULL,
@@ -153,6 +157,7 @@ def create_tables():
             receiver_id INTEGER NOT NULL,
             content_id INTEGER NOT NULL,
             conversation_id INTEGER NOT NULL,
+            answering_time INTEGER NULL,
             tag VARCHAR,
             datetime timestamp not NULL default CURRENT_TIMESTAMP,
             FOREIGN KEY (sender_id) REFERENCES users (id),
@@ -174,7 +179,7 @@ def create_tables():
         """,
         
         """
-        CREATE TABLE selectors (
+        CREATE TABLE context (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL)
         """,
@@ -182,12 +187,12 @@ def create_tables():
         
        
         """
-        CREATE TABLE selector_finders (
+        CREATE TABLE context_finders (
             id SERIAL PRIMARY KEY,
             content_finders_id INTEGER NOT NULL,
-            selector_id INTEGER NOT NULL,
+            context_id INTEGER NOT NULL,
             FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
-            FOREIGN KEY (selector_id) REFERENCES selectors (id) on delete cascade)
+            FOREIGN KEY (context_id) REFERENCES context (id) on delete cascade)
         """,
         """
         CREATE TABLE intent_finders (

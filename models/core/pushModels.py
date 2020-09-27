@@ -41,17 +41,17 @@ class LanguageTypes(Base):
 
 
 
-class Selectors(Base):
-    __tablename__='selectors'
+class Context(Base):
+    __tablename__='context'
     id = Column(Integer,primary_key=True)
     name = Column(String)
 
 
-class SelectorFinders(Base):
-    __tablename__='selector_finders'
+class ContextFinders(Base):
+    __tablename__='context_finders'
     id = Column(Integer,primary_key=True)
     content_finders_id =  Column(Integer, ForeignKey('content_finders.id', ondelete='CASCADE'))
-    selector_id = Column(Integer, ForeignKey('selectors.id'))
+    context_id = Column(Integer, ForeignKey('context.id'))
 
 class Intents(Base):
     __tablename__='intents'
@@ -85,25 +85,25 @@ class ContentFinders(Base):
     id = Column(Integer,primary_key=True)
     user_id = Column(Integer,ForeignKey(Users.id))
     message_index = Column(Integer)
-    selectorFinders = relationship(SelectorFinders,cascade='all,delete',passive_deletes=True)
+    context_Finders = relationship(ContextFinders,cascade='all,delete',passive_deletes=True)
     intentFinders = relationship(IntentFinders,cascade='all,delete',passive_deletes=True)
 
 
 
 
-def push_selector_list(session,selectors,content_finder_id):
+def push_context_list(session,context_list,content_finder_id):
 
     try:
 
-        for sel in selectors:
-            selector = session.query(Selectors).filter_by(name=sel).first()
+        for context_string in context_list:
+            context = session.query(Context).filter_by(name=context_string).first()
 
-            if selector is None:
-                selector = Selectors(name=sel)
-                session.add(selector)
+            if context is None:
+                context = Context(name=context_string)
+                session.add(context)
                 session.commit()
 
-            manytomany = SelectorFinders(content_finders_id=content_finder_id,selector_id = selector.id)
+            manytomany = ContextFinders(content_finders_id=content_finder_id,context_id = context.id)
             session.add(manytomany)
         
         session.commit()
@@ -113,16 +113,16 @@ def push_selector_list(session,selectors,content_finder_id):
 
 def push_intent_list(session,intents,content_finder_id,synonyms_regexes):
 
-    synonyms_regexes['incoming_branch_option'] = synonyms_regexes['incoming_branch_option'].str.lower()
+    synonyms_regexes['intent'] = synonyms_regexes['intent'].str.lower()
 
     try:
 
         for fea in intents:
 
             
-            row = synonyms_regexes.loc[synonyms_regexes['incoming_branch_option'] ==fea,:] 
+            row = synonyms_regexes.loc[synonyms_regexes['intent'] ==fea,:] 
             if all(list(row.all().isnull().values)):
-                raise Exception(f"No synonyms nor regex has been found for incoming_branching_options {fea}")
+                raise Exception(f"No synonyms nor regex has been found for intents {fea}")
             else:
 
              
@@ -137,7 +137,7 @@ def push_intent_list(session,intents,content_finder_id,synonyms_regexes):
                     synonyms = str(row.synonyms.values).strip("][").strip("'")
 
                 if synonyms is None and regex is None and fea != 'none':
-                    raise Exception(f"Synonyms and regex together are none for incoming_branching_options(ICO) {fea} this is not allowed, the synonym should at least contain (if applies) the name of the ICO itself")
+                    raise Exception(f"Synonyms and regex together are none for intent {fea} this is not allowed, the synonym should at least contain (if applies) the name of the intent itself")
                 
                 intent = session.query(Intents).filter_by(name=fea).first()
 
@@ -183,9 +183,6 @@ def push_trigger_list(session,triggers,content_finder_id):
         print(''.join(tb.stack.format()))
 
 
-
-if __name__ == "__main__":
-    push_intent_list(intents=["no!","yes!","proper!"],content_finder_id=2)
 
 
 

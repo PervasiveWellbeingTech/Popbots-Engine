@@ -180,9 +180,10 @@ class TelegramBot():
                 queue_size = len(message_queue)
                 
                 while message_queue:
+                    sleep(0.1) # without this it may call the telegram api too much
                     if queue_size < len(message_queue):
                         break
-                    self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
+                    #self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
                     delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
                     if delta.seconds > QUEUE_TIME_THRESHOLD and not self.is_replying[message.chat_id] == True :
                         final_message = ""

@@ -136,7 +136,7 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
     bot_tag = None
     image = None
     command = {"skip":False,"stack":True}
-    onboarding_module = "OnboardingGroup Module"
+    onboarding_module = "Onboarding Module"
     hi_compatible_list = ["Farewell Module", "Greeting Module"]
 
     
@@ -216,15 +216,13 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
 
         
         session.commit()
-        onboarding_module = "Onboarding"+user.experiment_group+" Module"
 
         
-        
-        bot_id = get_user_id_from_name(onboarding_module)
+        bot_id = get_user_id_from_name("Onboarding Module")
 
         latest_bot_index = 0
         latest_bot_message = None
-        conversation.conversational_state = onboarding_module
+        conversation.conversational_state = "Onboarding Module"
 
     #handling Hi the user want to force restart a conversation
     elif re.match(r'Hi',user_message) and (conversation.conversational_state in hi_compatible_list): 
@@ -280,10 +278,10 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
 
     
     # create a dict of variables to be used to do the next message selection process
-    selector_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
+    context_kwargs = {"user_response":user_message,"stressor":stressor,"user":user} 
 
     #fetching the bot text response, the keyboards and eventual triggers
-    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,latest_bot_index=latest_bot_index,selector_kwargs=selector_kwargs)
+    bot_text,current_index,keyboard,triggers = get_bot_response(session,bot_user=bot_user,latest_bot_index=latest_bot_index,context_kwargs=context_kwargs)
     
     log('DEBUG',f'Bot text would be: {bot_text}, with triggers: {triggers}')
 

@@ -40,22 +40,22 @@ def fetch_synonyms_regex(intent_name):
     return synonyms,regex
 
 
-def fetch_selectors_name(message_index):
+def fetch_context_name(message_index):
     """
-    Query the SQL database and return the intents/selector list associated with a particular message content index
+    Query the SQL database and return the context list associated with a particular message content index
 
     Parameters:
         msg_index (string) -- index of the particular message 
         bot_id (int) -- id of the current bot
 
     Returns:
-        selectors (list/dict) --  
+        context_list (list/dict) --  
     """
-    #we need to actualize the selectors to the lastest state
-    selectors = connection_wrapper(select_from_join,True,"selector_finders","ALL selectors.name",
-        (("selectors","selector_finders.selector_id","selectors.id"),),
-        (("selector_finders.content_finders_id",message_index),))
-    return selectors
+    #we need to actualize the context to the lastest state
+    context_list = connection_wrapper(select_from_join,True,"context_finders","ALL context.name",
+        (("context","context_finders.context_id","context.id"),),
+        (("context_finders.content_finders_id",message_index),))
+    return context_list
 
 def fetch_triggers_name(message_index,outbound):
     """
@@ -75,7 +75,7 @@ def fetch_triggers_name(message_index,outbound):
     return triggers
 
 def fetch_intent_name(message_index):
-    #we need to actualize the selectors to the lastest state
+    #we need to actualize the context to the lastest state
     intents = connection_wrapper(select_from_join,True,"intent_finders","ALL intents.name",
         (("intents","intent_finders.intent_id","intents.id"),),
         (("intent_finders.content_finders_id",message_index),))

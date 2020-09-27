@@ -25,9 +25,9 @@ from exceptions.nopossibleanswer import NoPossibleAnswer
 from exceptions.authoringerror import AuthoringError,NoMatchingSelectorPattern
 from models.database_operations import connection_wrapper,insert_into,select_from_join,select_from,custom_sql
 from models.conversation import Conversation,Message,Content,ContentFinders,MessageContent
-from models.message import fetch_intent_name,fetch_keyboard,fetch_next_contents,fetch_next_indexes,fetch_selectors_name,fetch_synonyms_regex,fetch_triggers_name
+from models.message import fetch_intent_name,fetch_keyboard,fetch_next_contents,fetch_next_indexes,fetch_context_name,fetch_synonyms_regex,fetch_triggers_name
 
-from controllers.custom_intent_branching import * # all the custom intent/branching selector options these are performed with "eval"
+from controllers.custom_intent_branching import * # all the custom intent/branching context options these are performed with "eval"
 from controllers.rasa_nlu import check_existence, load_all_models, return_rasa_prediction
 
 
@@ -83,43 +83,43 @@ def return_intent(input_string,condition):
 
     return intent
 
-def intent_selector_split(selector,selector_kwargs):
+def intents_extractor_from_context(context,context_kwargs):
     """
     
-    Take an input selector and parse it and 
+    Take an input context and parse it and 
 
     Parameters:
         input_str (string) -- input string by the user
-        selector (string) -- an individual selector that will be parsed base on documentation rules see section selector.
+        context (string) -- an individual context that will be parsed base on documentation rules see section context.
 
     Returns:
-        seletor (string) -- parsed selector 
+        context (string) -- parsed context 
         (boolean) -- if keyword is found.
     """
 
-    log("DEBUG",f"Analysed selector is {selector}")
+    log("DEBUG",f"Analysed context is {context}")
 
-    all_intent_from_selector = []
+    all_intent_from_context = []
     intent = None
 
-    if "/" in selector: # this is for the selectors where we need to check if the sentence is containing the word or the concept applies eg:negation
+    if "/" in context: # this is for the next_intents where we need to check if the sentence is containing the word or the concept applies eg:negation
         # these condition are formatted as ?keyword,alternative
         alternative = "fallback"
 
-        intents = selector.split("/")
-        all_intent_from_selector = intents.copy()
-        all_intent_from_selector.append(alternative)
+        intents = context.split("/")
+        all_intent_from_context = intents.copy()
+        all_intent_from_context.append(alternative)
 
         rasa_model = check_existence(intents)   
         if rasa_model: # a rasa model exists to do the splitting
             
-            intent = return_rasa_prediction(rasa_model[0],selector_kwargs['user_response'])
+            intent = return_rasa_prediction(rasa_model[0],context_kwargs['user_response'])
         else:
-            all_selectors = []
+            all_contexts = []
             for fea in intents:
-                all_selectors.append(return_intent(selector_kwargs['user_response'],fea))
+                all_contexts.append(return_intent(context_kwargs['user_response'],fea))
             
-            intent_set = set([x for x in all_selectors if x]) # take elements which as not "None" make a set to keep unique
+            intent_set = set([x for x in all_contexts if x]) # take elements which as not "None" make a set to keep unique
             
             intent_no_systematic = list(intent_set - set(["else","other"]))
 
@@ -133,27 +133,27 @@ def intent_selector_split(selector,selector_kwargs):
             else:
                 intent=alternative
 
-    elif "@" in selector:
+    elif "@" in context:
 
-        selector = selector.replace("@","")
-        intent,temp_all_intents = eval(selector)
-        all_intent_from_selector = all_intent_from_selector + temp_all_intents
+        context = context.replace("@","")
+        intent,temp_all_intents = eval(context)
+        all_intent_from_context = all_intent_from_context + temp_all_intents
 
-    elif "none" in selector:
+    elif "none" in context:
         intent = "none"
-        all_intent_from_selector.append(intent)
+        all_intent_from_context.append(intent)
     
     else:
         log('ERROR','SELECTOR does not match any pattern error will be raised')
         raise BaseException
     
-    return intent,all_intent_from_selector
+    return intent,all_intent_from_context
 
 
 
 
 
-def selectors_to_intents(selectors,selector_kwargs):
+def process_contexts(context_list,context_kwargs):
 
     """
 
@@ -166,43 +166,43 @@ def selectors_to_intents(selectors,selector_kwargs):
 
     possible_intents = []
 
-    for selector in selectors:
-        intent,all_intent_from_selector = intent_selector_split(selector,selector_kwargs)
+    for context in context_list:
+        intent,all_intent_from_context = intents_extractor_from_context(context,context_kwargs)
         
         if intent is not None: intents.append(intent)
        
         else:
             log('ERROR','No intent has been extracted, the error should have happened before')
 
-        possible_intents += all_intent_from_selector 
+        possible_intents += all_intent_from_context 
 
     
 
     return intents,possible_intents
 
-def find_index_in_intent_list(intents,selectors):
+def find_index_in_intent_list(intents,contexts):
     """
     """
 
     possible_indexes = set()
     for index,intent in enumerate(intents):
-        for selector in selectors:
-            if set(intent)==set(selector):
+        for context in contexts:
+            if set(intent)==set(context):
                 possible_indexes.add(index)
     return list(possible_indexes)
 
 
 @timed 
-def get_bot_response(session,bot_user,latest_bot_index,selector_kwargs):
+def get_bot_response(session,bot_user,latest_bot_index,context_kwargs):
     
     """
         Function which perform the next message retrieval based on the bot_id, the previous message index, all possible intent provided at that index. 
 
         The process is as follow: 
 
-            1. Fetching the outbound_intents (selectors) at index x
+            1. Fetching the context at index x - 1 (since the context come from the previous message index)
             2. Fetching the possible next messages at index x with their linked intent
-            3. Processing the user's message to extract the relevant intent from the possible intent list
+            3. Processing the user's message to extract the relevant intent from the content (possible intent list)
             4. Among the possible next messages, pick the one which match the relevant intent
 
         In some case the number of fetched answer might be greater than one. In that case, a !ramdom trigger must be set at the previous message index. 
@@ -215,12 +215,12 @@ def get_bot_response(session,bot_user,latest_bot_index,selector_kwargs):
     bot_id = bot_user.id
     content_finders = session.query(ContentFinders).filter_by(user_id=bot_id,message_index = latest_bot_index).first()
 
-    selectors = [selector["name"] for selector in fetch_selectors_name(content_finders.id)] # fetching the selectors from the previous message
+    context_list = [context["name"] for context in fetch_context_name(content_finders.id)] # fetching the next_intents from the previous message
     
     triggers = [trigger["name"] for trigger in fetch_triggers_name(message_index=content_finders.id,outbound=True)] # these are the outbound trigger from the previous message
     
-    try:selected_intent,all_intent_from_selector= selectors_to_intents(selectors=selectors,selector_kwargs=selector_kwargs)
-    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,latest_bot_index,"bad braching_options (selector) pattern ") from e
+    try:selected_intent,all_intent_from_context= process_contexts(context_list=context_list,context_kwargs=context_kwargs)
+    except NoMatchingSelectorPattern as e:raise AuthoringError(bot_user.name,latest_bot_index,"bad braching_options (context) pattern ") from e
 
     
     if "fallback" in selected_intent:
@@ -247,24 +247,19 @@ def get_bot_response(session,bot_user,latest_bot_index,selector_kwargs):
         
 
         log('DEBUG',f'Possible intents are: {possible_intents}')
-        log('DEBUG',f'All possible intent from selectors are {all_intent_from_selector}')
-        log('DEBUG',f'Selectors are {selectors}')
+        log('DEBUG',f'All possible intent from contexts are {all_intent_from_context}')
+        log('DEBUG',f'Contexts are {context_list}')
         log("DEBUG",f'Selected intents and triggers are : {selected_intent}, {triggers}')
 
         
-        possible_answers_index = find_index_in_intent_list(intents=possible_intents,selectors=selected_intent) #4 matching the content index with the correct intent
+        possible_answers_index = find_index_in_intent_list(intents=possible_intents,contexts=selected_intent) #4 matching the content index with the correct intent
         log('DEBUG',f'Possible indexes are { possible_answers_index}')
         
         possible_answers = [next_contents[index] for index in possible_answers_index] #4.1 getting the actual content from the selected index, it might still be longer than 2 if we need to random between two messages
         
         
-        if not bool(set(all_intent_from_selector).intersection(possible_intents)):
-            raise AuthoringError(bot_user.name,latest_bot_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(all_intent_from_selector))} , but incoming_branch_option given at next index is/are: {' and '.join(possible_intents)}")
-
-        #if not bool(set(selected_intent).intersection(possible_intents)):#selected_intent not in possible_intents:len(set(possible_intents) - set(selected_intent)) > 1:
-        #    raise BadKeywordInputError(possible_intents)
-        
-        # user error or script 
+        if not bool(set(all_intent_from_context).intersection(possible_intents)):
+            raise AuthoringError(bot_user.name,latest_bot_index,f"branching_options to incoming_branch_option mismatch. Possible incoming_branch_option from branching_options is/are: {' and '.join(set(all_intent_from_context))} , but incoming_branch_option given at next index is/are: {' and '.join(possible_intents)}")
 
         elif len(possible_answers) < 1:
             raise NoPossibleAnswer(bot_id,next_indexes)
@@ -273,7 +268,7 @@ def get_bot_response(session,bot_user,latest_bot_index,selector_kwargs):
         log('DEBUG',f'Possible answers are : {possible_answers}')
 
         if 'random!' not in triggers and len(possible_answers)>1:
-            raise AuthoringError(bot_user.name,latest_bot_index,"Multiple responses and random is not in the previous branching options (selector)")
+            raise AuthoringError(bot_user.name,latest_bot_index,"Multiple responses and random is not in the previous branching options (context)")
             
         if len(possible_answers)>0:
             final_answers = possible_answers[random.randint(0,len(possible_answers)-1)]
@@ -283,7 +278,7 @@ def get_bot_response(session,bot_user,latest_bot_index,selector_kwargs):
             raise NoPossibleAnswer(bot_id,next_indexes)
         
         message_local_trigger = [trigger['name'] for trigger in fetch_triggers_name(message_index=final_answers['id'],outbound=False)] 
-        triggers += message_local_trigger # concatening triggers coming from the previous message selector and the new message "triggers". 
+        triggers += message_local_trigger # concatening triggers coming from the previous message context and the new message "triggers". 
 
     return final_answers['text'],final_answers['next_indexes'],final_answers['name'],triggers
 

@@ -4,23 +4,21 @@ import re
 
 from models.user import Users
 from models.core.config import config_string
-from models.core.live_google_sheet import fetch_csv
 from models.conversation import ContentFinderJoin,Content,BotContents,NextMessageFinders
 from models.core.pushModels import push_intent_list,push_context_list,push_trigger_list,Keyboards,Language,LanguageTypes,ContextFinders,IntentFinders,ContentFinders
 from controllers.rasa_nlu import train_rasa_model, check_existence
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from pandas import read_excel
 
 
 engine = create_engine(config_string())
 Session = sessionmaker(bind=engine)
 session = Session()
 
-SPREADSHEET_ID = "16cEzXWqKpxb7jaf2pPQ9xCejlrI3ULxXNCKjoiC-ZvQ"
 RANGE_NAME = "Users"
-
+SPREADSHEET_NAME = './bot_sample_data/scripts.xlsx'
 normal = False 
 
 def push_element(Element,name):
@@ -59,17 +57,18 @@ def rasa_process(context_list,intents_synonyms_regexes):
                 if not check_existence(intents):
                     train_rasa_model(model_name,tuple(intent_synonym_list))
 
-
-
+def fetch_csv(spreadsheet_name,tab_name):
+    return read_excel(spreadsheet_name, sheet_name=tab_name,dtype=str)
 
 
 try:
-    user_table = fetch_csv(SPREADSHEET_ID,RANGE_NAME)
+    user_table = fetch_csv(SPREADSHEET_NAME,RANGE_NAME)
+    print(user_table.head(10))
     active_bots = [user['name'] for index,user in user_table[(user_table['active'] == '1') & (user_table['updated'] == '1')].iterrows() ]
     #must_delete_bots = [user['name'] for index,user in user_table[(user_table['delete'] == '1') & (user_table['updated'] == '1')].iterrows() ]
 
     print(f'Actives Bot are: {active_bots}')
-    intents_synonyms_regexes = fetch_csv(SPREADSHEET_ID,'branching_synonyms_regexes')
+    intents_synonyms_regexes = fetch_csv(SPREADSHEET_NAME,'branching_synonyms_regexes')
 
     for bot in active_bots:
 
@@ -91,7 +90,7 @@ try:
             session.commit()
             print(f'Deleted all contents for bot {user.name}')
         
-        bot_scripts = fetch_csv(SPREADSHEET_ID,bot)
+        bot_scripts = fetch_csv(SPREADSHEET_NAME,bot)
         
         for index,script in bot_scripts.iterrows():
 
@@ -177,10 +176,6 @@ try:
             
         
         print(f"Added all new contents for bot {user.name}")
-
-      
-
-
 
 
 except (BaseException, psycopg2.DatabaseError) as error:
