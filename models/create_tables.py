@@ -211,6 +211,21 @@ def create_tables():
             FOREIGN KEY (content_finders_id) REFERENCES content_finders (id) on delete cascade,
             FOREIGN KEY (trigger_id) REFERENCES triggers (id) on delete cascade)
         """,
+        """
+        CREATE TABLE reminders (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            content_id INTEGER not null,
+            creation_date timestamp not null default CURRENT_TIMESTAMP,
+            reminder_time timestamp not null, 
+            reminder_type varchar null,
+            executed boolean null,
+            expired boolean null,
+            
+            FOREIGN KEY (user_id) REFERENCES users (id) on delete cascade,
+            FOREIGN KEY (content_id) REFERENCES contents (id) on delete cascade
+        );
+        """, 
 
         """
             INSERT INTO "public"."user_categories" ("id", "name") VALUES ('1', 'Human');
