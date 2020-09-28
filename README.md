@@ -16,17 +16,47 @@
     
     2. Source the newly created env variables 
         > source ~/.bash_profile 
+ 
 
-## 1.2 Deploying the Postgres Database on your local machine (not mandatory)
+    Here is the list of all the required environment variables
+    ```bash
 
-- Install Postgres on your machine
+    export TELEGRAM_BOT_TOKEN="" #telegram_bot_token optained via telegram bot father https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token 
+    export SLACK_API_TOKEN="" # not mandatory for telegram but for slack yes ! you need to create an a new slack app https://api.slack.com/apps?new_app=1
+    export POPBOTS_POSTGRES_HOST="localhost" # where the database is hosted, localhost, or on an amazon rds instance
+    export POPBOTS_DB_NAME="" #  name of popbots database
+    export POPBOTS_DB_USERNAME="" #name of the db OWNER or with read/write access
+    export POPBOTS_POSTGRES_PASSWORD="" #password of the db owner
+    export SLACK_API_DEBUG_TOKEN="" # not mandatory, this is for the slack_logging_socket.py code, it is a slack app to pickup the platform errors. 
+
+    ```
+## 1.2 Deploying the Postgres Database
+
+- Install Postgres on your machine or on create a AWS RDS Postgres instance
 - Create a Database user and password 
 - Create a database with a corresponding name and password
 - Edit the .ini file (in models/core/database.ini) and complete all fiels accordingly (if you are working on your local machine, host will be localhost) 
 - Create the tables with the file models/core/create_tables.py
 - I recommend using DBEAVER to view and monitor database (https://dbeaver.io/download/)
 
-# 1.3 Running the code/telegram/slack sockets
+## 1.3 Populating the Popbots Database with the bots scripts
+This can be achieve via
+
+- Navigate to /opt/Popbots directory
+    > cd /opt/Popbots/
+
+- Activate the popbots virtual environment
+    > source ../popbots_venv/bin/activate
+
+- Finally, run the populate_database_local.py script
+    > python populate_database_local.py
+
+
+
+You will see terminal logs to indicate if the operation was successfull. 
+
+
+## 1.4 Running the code/telegram/slack sockets
 
 If you are just testing you can just run the python or telegram script like so:
 - Activate the venv by doing: 
@@ -72,7 +102,7 @@ To make authoring the bots scripts convienient, each bot has a 0-N index. This a
 next_message_finders: This is just a one to many table, where the message index and next message index for each bot is contained. Since we wanted to have a simple index 0-N for each bot. The user_id (bot_id) is the main differentiator here.  
 
 
-content_finders: All the content (text) needs to be organize and indexed. This is what contents_finders is about. Each message in a bot contains multiple intent,selector, triggers 
+content_finders: All the content (text) needs to be organize and indexed. This is what contents_finders is about. Each message in a bot contains multiple intent,context, triggers 
 
 
 
@@ -101,10 +131,10 @@ contents:
 
 ## 2.2. Functionnality descriptions
 
-### 2.2.1. Intent/Selector process 
+### 2.2.1. Intent/Context process 
 
-Intents and outbound_intents (selectors) solves a major problem when trying to build a chatbot with user's freedom in the response and branching tree. 
-Most system (DialogFlow, Rasabots etc) rely only "on one to many index tables" and intent for each of the next index. Our system also use those, but there is an additional layer of verification. outbound_intents (selectors) are given to prevent error while authoring.
+Intents and contexts  solves a major problem when trying to build a chatbot with user's freedom in the response and branching tree. 
+Most system (DialogFlow, Rasabots etc) rely only "on one to many index tables" and intent for each of the next index. Our system also use those, but there is an additional layer of verification. contexts are given to prevent error while authoring.
 
 A typical bot script may look like this :
 
@@ -118,10 +148,10 @@ else: user say no --> Sorry to hear that, I am here to help.
 In this given scenario, the bot script table look like this:
 
 
-|index|bot_message|intent|selector|
+|index|bot_message|intent|context|
 |---|---|---|---|
-|0|Hi {user.name}, are you happy ?|none|yes?no|
-|1|Good, it is nice to feel happy.|yes|none|
+|0|Hi {user.name}, are you happy ?|none|yes/no|
+|1|Good, it is nice to be happy.|yes|none|
 |2|Sorry to hear that, I am here to help|no|none|
 
 To this table we need a one to many correspondance table
@@ -133,26 +163,27 @@ To this table we need a one to many correspondance table
 
 Here for message index (1) there is two next possible indexes (2,3).
 
-Given the selector of yes?no for message (1) we will parse the user message and look for a positive or negative answer we will extract one intent (Extracted Intent)
+Given the context of yes?no for message (1) we will parse the user message and look for a positive or negative answer we will extract one intent (Extracted Intent)
 
 Base on the **Extracted intent** we will select the good response between (2,3)
 
 ![Selector Feature Schematics](./documentation/images/selector_feature_process.png)
 
 
-### 2.2.2. outbound_intents (Selector)
+### 2.2.2. Context
 
-outbound_intents define at index x what are the expected intents at indexes x+1
-Reminder: We introduce the concept of outbound_intents to make sure that inputting as been correctly done. 
+context define at index x what are the expected intents at indexes x+1
+Reminder: We introduce the concept of context to make sure that inputting as been correctly done. 
 
-Typical outbound_intents are as follow:
+Typical contexts are as follow:
 
-* outbound_intent follow a rigorous pattern: condition1/condition2. For 3 branches it follows the pattern condition1/condition2?condition3.  For x conditions condition1/condition2/condition3/…/conditionX 
-* By engineering design there is no deadlock right now, meaning there is always an alternative given by the intent 'alternative'. 
+* context follow a rigorous pattern: condition1/condition2. For 3 branches it follows the pattern condition1/condition2/condition3.  For x conditions condition1/condition2/condition3/…/conditionX 
 
-The develloper can create special outbound_intents in order to perform a custom selection process. 
+* By design there is no deadlock right now, meaning there is always , if none of the above intent are selected an alternative given by the intent 'alternative' . 
 
-These are outbound_intents with the "@" tag in the beggining. 
+The developer can create special contexts in order to perform a custom intent selection process. 
+
+These are contexts with the "@" tag in the beggining. 
 
 Example:
 
@@ -166,7 +197,7 @@ def min_word(input_string,word_len,condition,alternative):
     else:
         return alternative,[condition,alternative]
 ```
-This function can be called via a outbound_intent named @min_word(input_string,4,"yes","no"), this call for instance will return yes if the word count is greater than 4 or no reversely
+This function can be called via a intent selection function named @min_word(input_string,4,"yes","no"), this call for instance will return yes if the word count is greater than 4 or no reversely
 
 
 **/!\ Caution:** If 
@@ -191,7 +222,7 @@ Rules:
 
 - A bot conversation should always start with <START> flag and Finish with <CONVERSATION_END>
 - The START flag must always be at index 0
-- All the columns must be filled ( no NA is accepted) 
+- All the columns must be filled for each row ( no NA is accepted) 
 - No content must be added outside of the given columns ( such as comments). - - Comments are ok but using the google sheet "Comments"
 
 Line Breaks:
