@@ -18,7 +18,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 RANGE_NAME = "Users"
-SPREADSHEET_NAME = './bot_sample_data/scripts.xlsx'
+SPREADSHEET_NAME = './bot_sample_data/bot_script_excel.xlsx'
 normal = False 
 
 def push_element(Element,name):
