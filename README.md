@@ -1,6 +1,6 @@
 # UNIVERSAL Chatbot Backend 
 
-Description: 
+## Description: 
 
 This is a chatbot backend designed to work with telegram pooling as well as slack pooling. It is based on the https://github.com/python-telegram-bot/python-telegram-bot. This code support multithreading, each user gets it's own thread. The data is store in a Postgres Database. As a botscript Backend we've used an connected Google sheet which has it's own inputing rules, alternatively it could also use a simple Excel. This backend limitation made the code a little weird from time to time: we use strings to trigger function (see triggers), we use <TAG> to perform some actions. 
 Ideally this project can be pushed further by creating a FlaskAPI connected to the main controller, right now the main controller `controllers.main.dialog_flow_engine` is already independent from the `telegram_socket` pooling code. This `dialog_flow_engine` might be considered as the a /respond route, but right now there is no routes/call needed other than this one needed. The telegram app already manage storing the messages on the users-end    
@@ -110,43 +110,61 @@ Popbots API is structured as follow (see image below). As much as possible it fo
 
 The database design is centered on the user, users can be Humans or Bot. This design may allow in the future direct conversation with human if needed. 
 
-Users if they are human have some more properties references in the table human_users
-
-
 
 To make authoring the bots scripts convienient, each bot has a 0-N index. This arbitraly given numbers are limiting the use of normal key-pair relationships since these requires unique ids. This explains why there is no relationships between next_message_finders and content_finders
 
+### **Table related to users:**
 
-### **Table related to bot content:** 
+users: host the user_id and name, category is the type of user in the table user_category (1: humans , 2: bots)
 
-next_message_finders: This is just a one to many table, where the message index and next message index for each bot is contained. Since we wanted to have a simple index 0-N for each bot. The user_id (bot_id) is the main differentiator here.  
+human_users: host informations about the human and experiment related variables experiment groups etc 
 
+languages: language of the user
 
-content_finders: All the content (text) needs to be organize and indexed. This is what contents_finders is about. Each message in a bot contains multiple intent,context, triggers 
-
-
-
-bot_contents: 
-
-content:
+languages_types: designed because there was an formal and informal language type
 
 
 ### **Table related to managing and storing conversations:**
 
-conversations: 
+**conversations**: Table hosting conversation, the conversation granularity in our case is set at the "Stressor" level, one conversation must have one stressor. Conversations start with Hi and finish by giving a feedback about the conversation. 
 
-messages:
+**messages**: Messages are hosted in a conversation and have a sender and receiver id (messages objects are the same for bots or persons), they have a content (the text) , the "tag" variable is here to tag user's conversation say tag='stressor' means that at that particular message the user gave a stressor. We also store "answering time" which is an int which store the person or the bot took to answer. 
 
-contents:
+**contents**: simple table containing a text
+
+**stressor**: the stressor object represents the conversation stressor and this host probabilities of the categories of that stressor.
+
+### **Table related to bot content:** 
+
+**next_message_finders**: This is just a one to many table, where the message index and next message index for each bot is contained. Since we wanted to have a simple index 0-N for each bot. The user_id (bot_id) is the main differentiator here, otherwise we would have say index 0 for multiple bots.  
 
 
+**content_finders**: All the content (text) needs to be organize and indexed. This is what contents_finders is about. Each message in a bot contains multiple intent,context, triggers at the same message index
+Each content_finders may have multiple bot_contents, this table was setup to support different language at any index. 
+
+**bot_contents**: host the content (text ) of the bot, there might be different bot_contents because there might be different languages or language type (formal, informal)
+
+**contents**: simple table hosting the content text
+
+**Trigger**: Triggers are element which perform/trigger a certain action in the code 
+Notables triggers are:
+- !random > this perform a random selection between multiple bot message if there is.
+- tag: > this tags a message ex: tag:stressor
+- !skip_response > this skips users response at index n to retrieve the next bot message at n+1 > this allow back to back messages
+- ~Farewell Module > this coupled with a <SWITCH> in text perform a switch between modules
+- !stressor > calls a stressor function which calls the stressor classifier
+- @ > ex: @conversation.timeout_threshold=180 set the conversation timeout to 180 seconds
+- #user.name > declare that what the user said at that index is the name for example
+
+This is a flexible param which must be refactored when leaving the proof-of-concept codebase
+
+**Intent**
+This is pretty standart concept, each message at an index n has an intent ( see the Intent pragraph below)  
+
+**Context** 
+Context was name selector before, it in the pool of defined intent as well as the method to process the user's message to get the next intent
 
 ### ******
-
-
-
-
-
 
 
 ## 2.2. Functionnality descriptions
@@ -192,7 +210,7 @@ Base on the **Extracted intent** we will select the good response between (2,3)
 
 ### 2.2.2. Context
 
-Context define at index n what are the expected intents at indexes n+1
+Context define at index n what are the expected intents at indexes n+1 as well as the selection process needed to extract the intent from the user's . It can also be the process to use to select the next content/context
 Reminder: We introduce the concept of context to make sure that inputting as been correctly done. 
 
 Typical contexts are as follow:
@@ -220,10 +238,7 @@ def min_word(input_string,word_len,condition,alternative):
 This function can be called via a intent selection function named @min_word(input_string,4,"yes","no"), this call for instance will return yes if the word count is greater than 4 or no reversely
 
 
-**/!\ Caution:** If 
-
-
-
+**/!\ Caution:** If no the intents extracted from the context does not match the intent you can find at the next indexes, it will pop-up an authoring error
 
 
 ## 2.3 Bot Authoring/inputting Process
@@ -236,20 +251,35 @@ Here is a diagram of what the overall Authoring Process looks like.
 
 /!\ This must be done with rigor! Not following the naming pattern, leaving an empty cell, etc will break the bot and might break the python code as well. 
 
-Filling content
+Here is an Example of the google sheet of the Farewell module
 
-Rules: 
+![Authoring Script](./documentation/images/example_bot_script.png)
+
+
+# Filling content
+
+## Rules: 
 
 - A bot conversation should always start with <START> flag and Finish with <CONVERSATION_END>
-- The START flag must always be at index 0
+- The <START> flag must always be in the text at index 0
 - All the columns must be filled for each row ( no NA is accepted) 
 - No content must be added outside of the given columns ( such as comments). - - Comments are ok but using the google sheet "Comments"
 
-Line Breaks:
 
-If you want the message to be split in multiple messages on Telegram or Slack. You can create multiple indexes(message 1, 2, 3). If you have simple back to back messages can include "\n"  in the message where the line break needs to happen in the text. 
+## Filling Context/Intents
 
-Dynamic Variables:
+* All intent must be filled in the intents columns, within a single message they are separated with | say yes|none >> this happens when two branch leads to a single message
+
+* Context are also separated with |, but the intents within the each context are separated with / . Example: yes/no|none but this is almost never used. Usually there is one context : yes/no
+
+
+## Back to back messages vs Line Breaks:
+
+If you want the message to be split in multiple messages on Telegram or Slack. You can create multiple indexes(message 1, 2, 3). If you have simple back to back messages can include "\nm"  in the message where the line break needs to happen in the text. 
+you just 
+If you want to return to the line though, you need to add \n
+
+## Dynamic Variables:
 
 Dynamic variables can be added to the text wrapped in curly brackets {} (ex: Hi {user.name}). 
 
@@ -263,15 +293,30 @@ the development team.
 |stressor.probability0|
 
 
-Images:
+## Images:
 
 Images can be also added directly in that file. By including in the bot text the name of the image file wrapped with the wrapper $img$ (ex: $img$IMAGE_NAME$img$ )
 
 **/!\ Caution:** images format needs to be png (ex: IMAGE_NAME.png). Furthermore, this image needs to be uploaded to the server. There is no automatic way to do this for the moment, you must inform the platform administrator. 
 
+## Filling Keyboard 
+
+The default keyboard is "default". A different keyboard is inputted as follows: Button1| Button2| Button3 (example: Help| No Help|Neutral)
+
+/!\ Caution: Buttons entities are separated with a comma (e.g. Help|No Help| Neutral or Likely, Unlikely) if you have a >>> ' <<<  as in I'm you must include a >>> \ <<< as in I\'m 
 
 
-### Pushing the bots to the database
+## Pushing the bots to the database, pulling from 
+
+
+### 1. Locally: 
+
+Run the populate_database_local.py script
+    > python populate_database_local.py
+Errors will be printed here, and if there is try to identify them and correct them
+
+### 2. On an Ec2 remote server, provided the code is stored in /opt/Popbots
+
 
 A python script needs to be run on the server in order to populate the popbots database.  
 
@@ -287,7 +332,7 @@ To do this:
 
 5. Ssh into the remote server
 
-> ssh -i "[AWS_CREDENTIALS].pem" [USER_NAME]@ec2-3-21-127-11.us-east-2.compute.amazonaws.com
+> ssh -i "[AWS_CREDENTIALS].pem" [USER_NAME]@[EC2_ADDRESS]
 
 6. Navigate to /opt/Popbots directory
 
