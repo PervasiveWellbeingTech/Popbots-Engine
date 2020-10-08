@@ -51,9 +51,19 @@ This can be achieve via
 - Finally, run the populate_database_local.py script
     > python populate_database_local.py
 
-
-
+This will pull the data from a folder "./bot_sample_data/script.xlsx" this is an excel file containing all the bot scripts. 
 You will see terminal logs to indicate if the operation was successfull. 
+
+NOTE : This excel can be hosted in the google drive sheet to improve collaboration. To do this:
+
+1. Follow this medium tutorial to create a service account from which you can get credential. 
+https://medium.com/@denisluiz/python-with-google-sheets-service-account-step-by-step-8f74c26ed28e 
+
+Optain the service_credentials.json file an put it a directory at root called credentials/
+
+2. Create a google spreadsheet in google sheet and get the spreadsheet_id from the URL and add it in the `populate_database_live.py` script at the `SPREADSHEET_ID = "your id"`
+
+3. Copy all the scripts found in the script.xlsx with the proper tab names inside your google sheet. 
 
 
 ## 1.4 Running the code/telegram/slack sockets
@@ -78,12 +88,15 @@ To launch the program via pm2
 
 ## 2.1. Project structure 
 
+This project works best with the stress classifier flask api https://github.com/PervasiveWellbeingTech/Popbots-Flask-API-Stressor-Classifier 
+
+
 ### 2.1.1. (REST API)
 
 Popbots API is structured as follow (see image below). As much as possible it follow the REST API guidelines (here routers are controllers) 
 ![Schema Project Structure](./documentation/images/PopbotsAPI_structure.png)
 
-### 2.1.2. Database Structure (as of 03/22/2020)
+### 2.1.2. Database Structure (as of Sept 2020)
 
 
 ### ER (Entity Relation) Diagram
@@ -93,6 +106,8 @@ Popbots API is structured as follow (see image below). As much as possible it fo
 The database design is centered on the user, users can be Humans or Bot. This design may allow in the future direct conversation with human if needed. 
 
 Users if they are human have some more properties references in the table human_users
+
+
 
 To make authoring the bots scripts convienient, each bot has a 0-N index. This arbitraly given numbers are limiting the use of normal key-pair relationships since these requires unique ids. This explains why there is no relationships between next_message_finders and content_finders
 
@@ -113,7 +128,7 @@ content:
 
 ### **Table related to managing and storing conversations:**
 
-conversations:
+conversations: 
 
 messages:
 
@@ -163,7 +178,7 @@ To this table we need a one to many correspondance table
 
 Here for message index (1) there is two next possible indexes (2,3).
 
-Given the context of yes?no for message (1) we will parse the user message and look for a positive or negative answer we will extract one intent (Extracted Intent)
+Given the context of yes/no for message (1) we will parse the user message and look for a positive or negative intent in the answer and will extract one intent (Extracted Intent)
 
 Base on the **Extracted intent** we will select the good response between (2,3)
 
@@ -172,7 +187,7 @@ Base on the **Extracted intent** we will select the good response between (2,3)
 
 ### 2.2.2. Context
 
-context define at index x what are the expected intents at indexes x+1
+Context define at index n what are the expected intents at indexes n+1
 Reminder: We introduce the concept of context to make sure that inputting as been correctly done. 
 
 Typical contexts are as follow:
