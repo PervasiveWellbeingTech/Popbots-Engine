@@ -168,6 +168,7 @@ class TelegramBot():
                         message_queue = self.message_queues[message.chat_id]
                     queue_size = len(message_queue)
                     
+                    #we implemented a queue because people would send message in a row
                     while message_queue:
                         sleep(0.1) # without this it may call the telegram api too much
                         if queue_size < len(message_queue):
