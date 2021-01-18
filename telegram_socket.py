@@ -137,47 +137,51 @@ class TelegramBot():
 
             try:
                 
-                
-                message = update.message
+                if update.message is not None: # message was None sometime maybe due to https://github.com/python-telegram-bot/python-telegram-bot/issues/469
 
-                incoming_delta = datetime.datetime.utcnow() - message.date
+                    message = update.message
 
-                datetime_info = {"incoming_delta":incoming_delta,"sent_datetime":message.date}
-
-                log('DEBUG',f"Message received and was sent at {message.date}, delay to receive is {incoming_delta.seconds} ")
-                log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
-                
-                if message.chat_id not in self.is_replying:
-                    self.is_replying[message.chat_id] = False
                     
 
+                    incoming_delta = datetime.datetime.utcnow() - message.date
 
-                
-                if message.chat_id in self.message_queues:
-                    message_queue = self.message_queues[message.chat_id]
+                    datetime_info = {"incoming_delta":incoming_delta,"sent_datetime":message.date}
 
-                    if not self.is_replying[message.chat_id] == True: 
-                        message_queue.append({'text':message.text,'date':datetime.datetime.utcnow()}) 
-                    else:
-                        log('INFO',f"We just completely ignored user's message {message.text}")
-                else :
-                    self.message_queues[message.chat_id] = [{'text':message.text,'date':datetime.datetime.utcnow()}]
-                    message_queue = self.message_queues[message.chat_id]
-                queue_size = len(message_queue)
-                
-                while message_queue:
-                    sleep(0.1) # without this it may call the telegram api too much
-                    if queue_size < len(message_queue):
-                        break
-                    #self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
-                    delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
-                    if delta.seconds > QUEUE_TIME_THRESHOLD and not self.is_replying[message.chat_id] == True :
-                        final_message = ""
-                        final_message = " ".join([element['text'] for element in message_queue])
-                        self.is_replying[message.chat_id] = True
-                        self.process_message(message.chat_id,datetime_info, final_message)
-                        message_queue.clear()
+                    log('DEBUG',f"Message received and was sent at {message.date}, delay to receive is {incoming_delta.seconds} ")
+                    log('TIME TOOK',f'Time delta for incoming telegram_message in file telegram_socket.py is {incoming_delta.seconds} s')
+                    
+                    if message.chat_id not in self.is_replying:
+                        self.is_replying[message.chat_id] = False
                         
+
+
+                    
+                    if message.chat_id in self.message_queues:
+                        message_queue = self.message_queues[message.chat_id]
+
+                        if not self.is_replying[message.chat_id] == True: 
+                            message_queue.append({'text':message.text,'date':datetime.datetime.utcnow()}) 
+                        else:
+                            log('INFO',f"We just completely ignored user's message {message.text}")
+                    else :
+                        self.message_queues[message.chat_id] = [{'text':message.text,'date':datetime.datetime.utcnow()}]
+                        message_queue = self.message_queues[message.chat_id]
+                    queue_size = len(message_queue)
+                    
+                    while message_queue:
+                        sleep(0.1) # without this it may call the telegram api too much
+                        if queue_size < len(message_queue):
+                            break
+                        #self.bot.sendChatAction(chat_id=message.chat_id, action = telegram.ChatAction.TYPING)
+                        delta = datetime.datetime.utcnow() - message_queue[-1]['date'] # calculating UTC time delta
+                        if delta.seconds > QUEUE_TIME_THRESHOLD and not self.is_replying[message.chat_id] == True :
+                            final_message = ""
+                            final_message = " ".join([element['text'] for element in message_queue])
+                            self.is_replying[message.chat_id] = True
+                            self.process_message(message.chat_id,datetime_info, final_message)
+                            message_queue.clear()
+                else:
+                    log('DEBUG',f"Update.message is None, here is a dump of update:  {update} ")        
             
             except (BaseException,Exception) as error:
                 log('ERROR',''.join(traceback.TracebackException.from_exception(error).stack.format()))
