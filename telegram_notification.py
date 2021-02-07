@@ -68,7 +68,7 @@ def send_reminder_message(reminder,session):
 
     new_conversation = create_conversation(session,reminder.user_id)
 
-    push_message(session,"".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,tag = "reminder")
+    push_message(session,"".join(response_list),reminder.user_id,index=None,receiver_id=reminder.user_id,sender_id=bot_id,conversation_id = new_conversation.id,datetime=datetime.datetime.now(),answering_time=None, tag = "reminder")
 
     new_conversation.closed = True
     session.commit()
@@ -121,7 +121,7 @@ while True:
                 evening_in_utc,evening_out_utc = evening_in.astimezone(utc),evening_out.astimezone(utc)
 
                 
-                if user.user_id in current_user_id: #limiting this to the user list Right now
+                if user.user_id in current_user_id and user.desactivated ==False: #limiting this to the user list Right now
                     
                     todays_reminder = session.query(Reminders).filter(and_(Reminders.user_id==user.user_id,Reminders.reminder_time.between(today,tomorrow))).all()
                     
@@ -207,11 +207,17 @@ while True:
                                             log('INFO',f"Unknown type reminder has been set, type: {reminder.reminder_type} , this reminder will be set as expired")
                                             reminder.expired = True
                                             session.commit()
-                                    
+            except telegram.error.Unauthorized as error:
+
+                user.desactivated =True
+                session.commit()
+
+                log('INFO',f"User id: {user.id} wish to block the bot, further communications won't be engaged" )
+
             except BaseException as error:
                 error_traceback = error.__traceback__
                 log('ERROR', str(error) + str(''.join(traceback.format_tb(error_traceback))))
-
+            
                     #log('DEBUG', f"Todays reminders are {}")
 
     except BaseException as error:

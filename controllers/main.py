@@ -118,6 +118,7 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
     
     #initializes some variables
     latest_bot_index = None
+    latest_bot_message= None
     bot_id = None
     tag = None
     bot_tag = None
@@ -155,6 +156,7 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
         if (datetime.now() - conversation.datetime).seconds > conversation_timeout : #Time out We should create an error that is send the user ? 
             conversation.closed = True
             session.commit()
+            log('DEBUG',f"The conversation has timed out {conversation.id}") 
             conversation = create_conversation(session,user_id)
             CONVERSATION_INIT = True
 
@@ -162,6 +164,8 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
             latest_bot_index = 0
             latest_bot_message = None
             conversation.conversational_state = "Greeting Module"
+
+            
 
     else: 
         log('DEBUG',f"Warning the conversation id is none and the message is {user_message}")
@@ -211,8 +215,8 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
         latest_bot_message = None
         conversation.conversational_state = "Onboarding Module"
 
-    #handling Hi the user want to force restart a conversation
-    elif re.match(r'Hi',user_message) and (conversation.conversational_state in hi_compatible_list): 
+    #handling Hi the user want to  restart/start a conversation but he needs to be in a proper conversational state, not right in the middle of a conversations.
+    elif re.fullmatch(r'Hi',user_message) and (conversation.conversational_state in hi_compatible_list): 
 
         if conversation and not CONVERSATION_INIT: # closing the previous conversation
             conversation.closed = True
