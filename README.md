@@ -2,9 +2,12 @@
 
 ## Description: 
 
-This is a chatbot backend designed to work with telegram pooling as well as slack pooling. It is based on the https://github.com/python-telegram-bot/python-telegram-bot. This code support multithreading, each user gets it's own thread. The data is store in a Postgres Database. As a botscript Backend we've used an connected Google sheet which has it's own inputing rules, alternatively it could also use a simple Excel. This backend limitation made the code a little weird from time to time: we use strings to trigger function (see triggers), we use < TAG >  to perform some actions. 
+This is a chatbot backend designed to work with telegram pooling as well as slack pooling. It is based on the https://github.com/python-telegram-bot/python-telegram-bot. This code support multithreading, each user gets it's own thread. The data is store in a Postgres Database. As a botscript Backend we've used an connected Google sheet which has it's own inputing rules, alternatively it could also use a simple Excel. This backend limitation made the code a little weird from time to time: we use strings to trigger function (see triggers), we use < TAG >  to perform some actions...  
 Ideally this project can be pushed further by creating a FlaskAPI connected to the main controller, right now the main controller `controllers.main.dialog_flow_engine` is already independent from the `telegram_socket` pooling code. This `dialog_flow_engine` might be considered as the a /respond route, but right now there is no routes/call needed other than this one. The telegram app already manage storing the messages on the users-end. 
-Note : the downfall with Rasa open intent detection tools is that you need a lot of conversational data to make it work, for mental health application such as ours it wasn't a good fit. Cold starting with a scripted approach like this looked more promising (end 2019)   
+
+(See limitations and future improvement at the end of this document) 
+
+Note : the downfall with open intent detection tools (RASA, DialogFlow, etc..) is that you need a lot of conversational data to make it work, for mental health application such as ours it wasn't a good fit. Cold starting with a scripted approach like this looked more promising (end 2019)   
 
 # 1. To deploy:
 
@@ -399,4 +402,13 @@ To do this:
 You will see terminal logs to indicate if the operation was successfull. 
 
 
+# 3. Limitations and future improvements
+
+## 3.1. Limitations
+
+This code is a prototype (MVP) and is not intended for large scale production setup. It was designed to fullfill research questions of a 100-250 participants study. The main code was develloped in around 2.5 months and several late breaking new features addition.
+
+Some test was conducted to evaluate the average response time on load. With 10 Users querying the system simultaneously on a Amazon Ec2 c5 large server
+Average time to receive response to "Hi": 0.5594477415084839
+Average time to receive response in conversation: 1.1736544132232667
 
