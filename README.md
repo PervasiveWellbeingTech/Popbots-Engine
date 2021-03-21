@@ -406,9 +406,30 @@ You will see terminal logs to indicate if the operation was successfull.
 
 ## 3.1. Limitations
 
+A. Scale:
+
 This code is a prototype (MVP) and is not intended for large scale production setup. It was designed to fullfill research questions of a 100-250 participants study. The main code was develloped in around 2.5 months and several late breaking new features addition.
 
 Some test was conducted to evaluate the average response time on load. With 10 Users querying the system simultaneously on a Amazon Ec2 c5 large server
 Average time to receive response to "Hi": 0.5594477415084839
 Average time to receive response in conversation: 1.1736544132232667
+
+Another concern with the code is that right now it is using the telegram getUpdate method to get updates , this requires pooling to contact the server and might not be as scalable as using the setWebhook method. For greater production use,setwebhook would be more appropriated. See https://stackoverflow.com/questions/40033150/telegram-bot-getupdates-vs-setwebhook
+
+- The database architecture right now is not optimise to display bot to human conversations live. Conversation display is right now handled by the Telegram API. The database is only meant to store the data for later analysis. If I where to display conversations ( say we had to build an APP , I would use a not SQL database which would scale greater for messaging) 
+Issue with the database right now is that it used to store conversational state as well as logged conversation and bot scripts. For production use case, would be wiser to make the architecture clearer and split those. 
+
+
+
+## 3.2. Future Improvement
+
+# 4. Getting Started with the code. 
+
+
+Here is the overall code process ( at a Macro Function level ). This enables you to understand which functions are triggered after which. 
+
+
+The code follows a semi-MVC ( Model view controller ) since we don't have any view, it's a MC stucture. You will notice that files names match between model and controllers (eg. in controllers.main many functions that query the database are hosted in the  models.main file).
+
+
 
