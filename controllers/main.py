@@ -186,7 +186,7 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
             session.commit()
             conversation = create_conversation(session,user_id)
 
-        if re.findall(r'\d+',user_message):
+        if re.findall(r'\d+',user_message): #trying to find subject id inside the start command
             user.subject_id = re.findall(r'\d+',user_message)[0]
             session.commit()
 
@@ -460,11 +460,11 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
 
 def dialog_flow_engine(user_id,datetime_info,user_message):
     """
-        Dialog flow engine can stack many responses from response engine.
+        Dialog flow engine can stack many outbound responses from response engine.
         It pushes to telegram what needs to be pushed, and ignores what can be passed ? <START>, <CONVERSATION_END> these are useful for managing the overall
         but the user does not need to see them. 
 
-        Also receive , and process any error fom the system. therefore we see the try/except
+        Also receive , and process any error fom the system. therefore here we see the try/except 
 
     """
 

@@ -129,6 +129,11 @@ class TelegramBot():
             """
             Wrapper function to call the message handler
 
+            This function also act as an incoming message queue, for every user , if user sends several in a row, 
+            it will be stored and considered as one message. 
+            > This is to fix a bug where people would often send two, three messages to answer to only one message
+
+
             This function will also catch and print out errors in the console
             
             """
