@@ -15,8 +15,9 @@ Note : the downfall with open intent detection tools (RASA, DialogFlow, etc..) i
 - Create a python3.7 venv (see online tutorials) recommended name popbots_venv
 - Activate the venv by doing: 
     > source "venv_name"/bin/activate
-- install all the required packages by navigating into the popbots folder and running 
+- install all the required packages by navigating into the popbots folder and running ( do not update packages, especially rasa or tensorflow, updates removes some features and will require code changes)
     > pip3 install -r requirements.txt
+
 
 - Several environment variables are mandatory in order for the code to communicate with slack, telegram and the Postgres database (Contact the Administrator to obtain a file with all the neccessary env variables). Once you have the file:
 

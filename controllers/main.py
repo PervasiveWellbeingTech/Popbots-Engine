@@ -191,7 +191,7 @@ def response_engine(session,user_id,datetime_info,user_message,looped):
             session.commit()
 
 
-
+        # logic to include participant in a particular group, can be used for anything really
         if "moderator" in user_message:
             log("INFO","User has been rolled in Moderator Group")
             user.experiment_group = "Moderator"

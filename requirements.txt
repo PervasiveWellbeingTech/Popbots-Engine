@@ -115,7 +115,6 @@ Sanic-Cors==0.10.0.post3
 sanic-jwt==1.4.1
 Sanic-Plugins-Framework==0.9.3
 scikit-learn==0.22.2.post1
-scipy==1.5.2
 six==1.14.0
 sklearn-crfsuite==0.3.6
 slack-client==0.3.0
