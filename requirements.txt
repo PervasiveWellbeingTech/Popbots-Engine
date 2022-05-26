@@ -137,7 +137,7 @@ tornado==6.0.4
 tqdm==4.45.0
 twilio==6.26.3
 tzlocal==2.1
-ujson==2.0.3
+ujson==5.2.0
 uritemplate==3.0.1
 urllib3==1.25.8
 uvloop==0.14.0
